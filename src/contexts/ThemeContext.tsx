@@ -7,7 +7,9 @@ type ThemeContextProps = {
 export function ThemeContext({ children }: ThemeContextProps) {
   return (
     <>
-      <div>{children}</div>
+      <div className='relative text-center text-white bg-amber-950 w-full h-full min-h-screen'>
+        {children}
+      </div>
     </>
   );
 }

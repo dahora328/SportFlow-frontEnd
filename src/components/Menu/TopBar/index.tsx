@@ -1,4 +1,4 @@
-import { Menu, X, User, LogOut, Sun, Moon } from 'lucide-react';
+import { Menu, X, User, LogOut, Sun, Moon, Edit } from 'lucide-react';
 import { useState } from 'react';
 
 export function TopBar() {
@@ -11,7 +11,7 @@ export function TopBar() {
   };
 
   return (
-    <nav className='bg-gray-900 text-white px-6 py-4 shadow-md'>
+    <nav className='bg-red-950 text-white px-6 py-4 shadow-md'>
       <div className='flex items-center justify-between'>
         {/* Logo */}
         <h1 className='text-xl font-bold text-yellow-400'>MeuSite</h1>
@@ -46,13 +46,13 @@ export function TopBar() {
           </button>
 
           {perfilOpen && (
-            <ul className='absolute right-0 mt-2 w-40 bg-gray-800 rounded-lg shadow-lg py-2'>
-              <li className='px-4 py-2 hover:bg-gray-700 cursor-pointer'>
-                Editar Perfil
+            <ul className='absolute right-0 mt-2 w-40 bg-red-950 rounded-lg shadow-lg py-2'>
+              <li className='px-4 py-2 hover:bg-white cursor-pointer flex items-center gap-2 hover:text-red-950'>
+                <Edit size={16} /> Editar Perfil
               </li>
               <li
                 onClick={toggleTheme}
-                className='px-4 py-2 hover:bg-gray-700 cursor-pointer flex items-center gap-2'
+                className='px-4 py-2 hover:bg-white cursor-pointer flex items-center gap-2 hover:text-red-950'
               >
                 {theme === 'light' ? (
                   <>
@@ -64,7 +64,7 @@ export function TopBar() {
                   </>
                 )}
               </li>
-              <li className='px-4 py-2 hover:bg-gray-700 cursor-pointer flex items-center gap-2 text-red-400'>
+              <li className='px-4 py-2 hover:bg-white cursor-pointer flex items-center gap-2 text-red-300 hover:text-red-950'>
                 <LogOut size={16} /> Sair
               </li>
             </ul>
@@ -99,8 +99,8 @@ export function TopBar() {
 
             {perfilOpen && (
               <ul className='mt-2 w-full max-w-[200px] py-2 text-center'>
-                <li className='px-4 py-2 hover:bg-gray-700 cursor-pointer'>
-                  Editar Perfil
+                <li className=' px-4 py-2 hover:bg-gray-700 cursor-pointer flex items-center justify-center gap-2'>
+                  <Edit size={16} /> Editar Perfil
                 </li>
                 <li
                   onClick={toggleTheme}

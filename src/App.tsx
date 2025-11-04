@@ -1,10 +1,10 @@
-import { SideBar } from './components/Menu/SideBar';
+import { TopBar } from './components/Menu/TopBar';
 import './styles/App.css';
 
 function App() {
   return (
     <>
-      <SideBar />
+      <TopBar />
       <div>Olá mundo!</div>
     </>
   );

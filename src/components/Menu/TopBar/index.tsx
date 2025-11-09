@@ -1,5 +1,6 @@
 import { Menu, X, User, LogOut, Edit } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export function TopBar() {
   const [open, setOpen] = useState(false);
@@ -23,8 +24,12 @@ export function TopBar() {
         {/* Menu desktop centralizado */}
         <div className='hidden md:flex flex-1 items-center justify-center'>
           <ul className='flex gap-8 font-medium'>
-            <li className='hover:text-yellow-400 cursor-pointer'>Home</li>
-            <li className='hover:text-yellow-400 cursor-pointer'>Atletas</li>
+            <li className='hover:text-yellow-400 cursor-pointer'>
+              <Link to='/'>Home</Link>
+            </li>
+            <li className='hover:text-yellow-400 cursor-pointer'>
+              <Link to='/athletes'>Atletas</Link>
+            </li>
             <li className='hover:text-yellow-400 cursor-pointer'>Relatórios</li>
             <li className='hover:text-yellow-400 cursor-pointer'>Contato</li>
           </ul>
@@ -57,10 +62,10 @@ export function TopBar() {
       {open && (
         <ul className='md:hidden mt-4 flex flex-col gap-4 font-medium'>
           <li className='hover:text-yellow-400 cursor-pointer text-center'>
-            Home
+            <Link to='/'>Home</Link>
           </li>
           <li className='hover:text-yellow-400 cursor-pointer text-center'>
-            Atletas
+            <Link to='/athletes'>Atletas</Link>
           </li>
           <li className='hover:text-yellow-400 cursor-pointer text-center'>
             Relatórios

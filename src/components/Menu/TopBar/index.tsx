@@ -1,20 +1,15 @@
-import { Menu, X, User, LogOut, Sun, Moon, Edit } from 'lucide-react';
+import { Menu, X, User, LogOut, Edit } from 'lucide-react';
 import { useState } from 'react';
 
 export function TopBar() {
   const [open, setOpen] = useState(false);
   const [perfilOpen, setPerfilOpen] = useState(false);
-  const theme = 'light';
-
-  const toggleTheme = () => {
-    // alternar tema
-  };
 
   return (
     <nav className='bg-red-950 text-white px-6 py-4 shadow-md'>
       <div className='flex items-center justify-between'>
         {/* Logo */}
-        <h1 className='text-xl font-bold text-yellow-400'>MeuSite</h1>
+        <h1 className='text-xl font-bold text-yellow-400'>LOGO</h1>
 
         {/* Menu mobile */}
         <button
@@ -29,8 +24,8 @@ export function TopBar() {
         <div className='hidden md:flex flex-1 items-center justify-center'>
           <ul className='flex gap-8 font-medium'>
             <li className='hover:text-yellow-400 cursor-pointer'>Home</li>
-            <li className='hover:text-yellow-400 cursor-pointer'>Sobre</li>
-            <li className='hover:text-yellow-400 cursor-pointer'>Serviços</li>
+            <li className='hover:text-yellow-400 cursor-pointer'>Atletas</li>
+            <li className='hover:text-yellow-400 cursor-pointer'>Relatórios</li>
             <li className='hover:text-yellow-400 cursor-pointer'>Contato</li>
           </ul>
         </div>
@@ -50,20 +45,6 @@ export function TopBar() {
               <li className='px-4 py-2 hover:bg-white cursor-pointer flex items-center gap-2 hover:text-red-950'>
                 <Edit size={16} /> Editar Perfil
               </li>
-              <li
-                onClick={toggleTheme}
-                className='px-4 py-2 hover:bg-white cursor-pointer flex items-center gap-2 hover:text-red-950'
-              >
-                {theme === 'light' ? (
-                  <>
-                    <Moon size={16} /> Modo Escuro
-                  </>
-                ) : (
-                  <>
-                    <Sun size={16} /> Modo Claro
-                  </>
-                )}
-              </li>
               <li className='px-4 py-2 hover:bg-white cursor-pointer flex items-center gap-2 text-red-300 hover:text-red-950'>
                 <LogOut size={16} /> Sair
               </li>
@@ -79,10 +60,10 @@ export function TopBar() {
             Home
           </li>
           <li className='hover:text-yellow-400 cursor-pointer text-center'>
-            Sobre
+            Atletas
           </li>
           <li className='hover:text-yellow-400 cursor-pointer text-center'>
-            Serviços
+            Relatórios
           </li>
           <li className='hover:text-yellow-400 cursor-pointer text-center'>
             Contato
@@ -101,20 +82,6 @@ export function TopBar() {
               <ul className='mt-2 w-full max-w-[200px] py-2 text-center'>
                 <li className=' px-4 py-2 hover:bg-gray-700 cursor-pointer flex items-center justify-center gap-2'>
                   <Edit size={16} /> Editar Perfil
-                </li>
-                <li
-                  onClick={toggleTheme}
-                  className='px-4 py-2 hover:bg-gray-700 cursor-pointer flex items-center justify-center gap-2'
-                >
-                  {theme === 'light' ? (
-                    <>
-                      <Moon size={16} /> Modo Escuro
-                    </>
-                  ) : (
-                    <>
-                      <Sun size={16} /> Modo Claro
-                    </>
-                  )}
                 </li>
                 <li className='px-4 py-2 hover:bg-gray-700 cursor-pointer flex items-center justify-center gap-2 text-red-400'>
                   <LogOut size={16} /> Sair

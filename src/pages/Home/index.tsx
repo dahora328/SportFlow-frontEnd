@@ -1,4 +1,13 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+
+function Th({ children }: { children: React.ReactNode }) {
+  return (
+    <th className='px-4 py-2 text-center font-medium text-gray-600'>
+      {children}
+    </th>
+  );
+}
 export function Home() {
   return (
     <div className='p-6 space-y-6'>
@@ -12,13 +21,14 @@ export function Home() {
               className='w-64 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500'
             />
           </div>
-          <div className='flex gap-2'>
-            <a
-              href='#'
-              className='rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700'
+          <div className='flex gap-2 justify-center'>
+            <Link
+              to='/athletes'
+              className='rounded-md border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50'
             >
               + Cadastrar atleta
-            </a>
+            </Link>
+
             <button className='rounded-md border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50'>
               Importar CSV
             </button>
@@ -48,13 +58,5 @@ export function Home() {
         </div>
       </section>
     </div>
-  );
-}
-
-function Th({ children }: { children: React.ReactNode }) {
-  return (
-    <th className='px-4 py-2 text-left font-medium text-gray-600'>
-      {children}
-    </th>
   );
 }

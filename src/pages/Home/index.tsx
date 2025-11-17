@@ -12,7 +12,7 @@ export function Home() {
   return (
     <div className='p-6 space-y-6'>
       <header className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-        <h1 className='text-2xl font-semibold'>Associação</h1>
+        <h1 className='text-2xl font-semibold'>Time Flow</h1> {/* Nome do time pegar do banco de dados da tabela times ou empresa*/}
         <div className='flex flex-col gap-3 sm:flex-row'>
           <div className='relative'>
             <input

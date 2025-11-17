@@ -3,6 +3,7 @@ import { TopBar } from './components/Menu/TopBar';
 import './styles/App.css';
 import { Athletes } from './pages/Athletes';
 import { Home } from './pages/Home';
+import { User } from './pages/User';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <Router>
         <TopBar />
         <Routes>
+          <Route path='/user' element={<User />} />
           <Route path='/' element={<Home />} />
           <Route path='/athletes' element={<Athletes />} />
         </Routes>

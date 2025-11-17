@@ -48,7 +48,7 @@ export function TopBar() {
           {perfilOpen && (
             <ul className='absolute right-0 mt-2 w-40 bg-red-950 rounded-lg shadow-lg py-2'>
               <li className='px-4 py-2 hover:bg-white cursor-pointer flex items-center gap-2 hover:text-red-950'>
-                <Edit size={16} /> Editar Perfil
+                <Edit size={16} /> <Link to='/user'>Editar Perfil</Link>
               </li>
               <li className='px-4 py-2 hover:bg-white cursor-pointer flex items-center gap-2 text-red-300 hover:text-red-950'>
                 <LogOut size={16} /> Sair
@@ -86,7 +86,7 @@ export function TopBar() {
             {perfilOpen && (
               <ul className='mt-2 w-full max-w-[200px] py-2 text-center'>
                 <li className=' px-4 py-2 hover:bg-gray-700 cursor-pointer flex items-center justify-center gap-2'>
-                  <Edit size={16} /> Editar Perfil
+                  <Edit size={16} /> <Link to='/user'>Editar Perfil</Link>
                 </li>
                 <li className='px-4 py-2 hover:bg-gray-700 cursor-pointer flex items-center justify-center gap-2 text-red-400'>
                   <LogOut size={16} /> Sair

@@ -30,7 +30,9 @@ export function TopBar() {
             <li className='hover:text-yellow-400 cursor-pointer'>
               <Link to='/athletes'>Atletas</Link>
             </li>
-            <li className='hover:text-yellow-400 cursor-pointer'>Relatórios</li>
+            <li className='hover:text-yellow-400 cursor-pointer'>
+              <Link to='/reports'>Relatórios</Link>
+            </li>
             <li className='hover:text-yellow-400 cursor-pointer'>Contato</li>
           </ul>
         </div>
@@ -68,7 +70,7 @@ export function TopBar() {
             <Link to='/athletes'>Atletas</Link>
           </li>
           <li className='hover:text-yellow-400 cursor-pointer text-center'>
-            Relatórios
+            <Link to='/reports'>Relatórios</Link>
           </li>
           <li className='hover:text-yellow-400 cursor-pointer text-center'>
             Contato

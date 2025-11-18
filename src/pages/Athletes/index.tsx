@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { createAthlete, type AthleteData } from '../../service/athletesService';
 
 export function Athletes() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<AthleteData>({
     full_name: '',
     birth_date: '',
     marital_status: '',
@@ -28,23 +29,22 @@ export function Athletes() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    try {
+      const result = await createAthlete(formData);
+      console.log('Salvo com sucesso:', result);
+      alert('Atleta cadastrado!');
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Erro ao cadastrar atleta:', error);
+      alert('Erro ao salvar!');
+    }
     console.log('Dados do atleta:', formData);
 
     console.log('📌 JSON enviado para API:');
     console.log(JSON.stringify(formData, null, 2));
-
-    alert('Atleta cadastrado com sucesso!');
-
-    // Aqui depois você pode trocar por:
-    //
-    // await fetch("URL_DA_API", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(formData)
-    // });
-  };
+  }
 
   return (
     <div className='min-h-screen bg-gray-100 text-gray-800 flex flex-col items-center p-6'>

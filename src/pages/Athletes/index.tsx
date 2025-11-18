@@ -31,7 +31,19 @@ export function Athletes() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Dados do atleta:', formData);
+
+    console.log('📌 JSON enviado para API:');
+    console.log(JSON.stringify(formData, null, 2));
+
     alert('Atleta cadastrado com sucesso!');
+
+    // Aqui depois você pode trocar por:
+    //
+    // await fetch("URL_DA_API", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify(formData)
+    // });
   };
 
   return (
@@ -272,7 +284,12 @@ export function Athletes() {
 
         {/* Botão de envio */}
         <div className='mt-6 text-center p-2 space-x-4 grid grid-cols-2 md:grid-cols-2'>
-          <Link to='/' className='bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition'>Voltar</Link>
+          <Link
+            to='/'
+            className='bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition'
+          >
+            Voltar
+          </Link>
           <button
             type='submit'
             className='bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition'

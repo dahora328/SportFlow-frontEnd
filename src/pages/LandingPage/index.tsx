@@ -1,20 +1,31 @@
-import { LogIn } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { LoginModal } from '../../components/Modal/LoginModal';
+import { useState } from 'react';
 
 export function LandingPage() {
+  const [open, setOpen] = useState(false);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleLogin = (data: any) => {
+    console.log('Enviando para a API:', data);
+    alert('Login enviado! Veja no console.');
+    setOpen(false);
+  };
   return (
-    <nav className='bg-red-950 text-white px-6 py-4 shadow-md'>
-      <div className='flex items-center justify-between'>
-        {/* Logo */}
-        <h1 className='text-xl font-bold text-yellow-400'>LOGO</h1>
-        {/* Perfil alinhado à direita */}
-        <div>
-          <button className='flex items-center gap-2 hover:text-yellow-400 cursor-pointer'>
-            <LogIn size={18} />
-            <Link to='/login'>Login</Link>
-          </button>
-        </div>
+    <>
+      <div className='h-screen flex items-center justify-center'>
+        <button
+          onClick={() => setOpen(true)}
+          className='px-6 py-3 bg-yellow-400 rounded-lg font-bold hover:bg-yellow-500'
+        >
+          Abrir Login
+        </button>
+
+        <LoginModal
+          open={open}
+          onClose={() => setOpen(false)}
+          onSubmit={handleLogin}
+        />
       </div>
-    </nav>
+    </>
   );
 }

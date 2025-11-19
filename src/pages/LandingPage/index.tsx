@@ -1,15 +1,56 @@
 import { LoginModal } from '../../components/Modal/LoginModal';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../../service/userService';
 
 export function LandingPage() {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleLogin = (data: any) => {
-    console.log('Enviando para a API:', data);
-    alert('Login enviado! Veja no console.');
-    setOpen(false);
+  const handleLogin = async (data: { email: string; password: string }) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await loginUser(data);
+
+      // Salvar token no localStorage se existir
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+      }
+
+      // Salvar dados do usuário se existirem
+      if (response.user) {
+        localStorage.setItem('user', JSON.stringify(response.user));
+      }
+
+      console.log('Login realizado com sucesso:', response);
+      setOpen(false);
+
+      // Redirecionar para a página home após login bem-sucedido
+      navigate('/home');
+    } catch (err: unknown) {
+      console.error('Erro no login:', err);
+
+      // Tratar erro da API
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as {
+          response?: { data?: { message?: string } };
+        };
+        const errorMessage =
+          axiosError.response?.data?.message ||
+          'Erro ao fazer login. Tente novamente.';
+        setError(errorMessage);
+      } else {
+        setError('Erro ao fazer login. Verifique suas credenciais.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
     <>
       <div className='h-screen flex items-center justify-center'>
@@ -22,8 +63,13 @@ export function LandingPage() {
 
         <LoginModal
           open={open}
-          onClose={() => setOpen(false)}
+          onClose={() => {
+            setOpen(false);
+            setError(null);
+          }}
           onSubmit={handleLogin}
+          loading={loading}
+          error={error}
         />
       </div>
     </>

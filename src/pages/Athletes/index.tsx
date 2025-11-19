@@ -20,6 +20,7 @@ export function Athletes() {
     email: '',
     mother_name: '',
     father_name: '',
+    owner_id: 1,
   });
 
   const handleChange = (
@@ -35,7 +36,7 @@ export function Athletes() {
       const result = await createAthlete(formData);
       console.log('Salvo com sucesso:', result);
       alert('Atleta cadastrado!');
-      window.location.href = '/';
+      window.location.href = '/home';
     } catch (error) {
       console.error('Erro ao cadastrar atleta:', error);
       alert('Erro ao salvar!');

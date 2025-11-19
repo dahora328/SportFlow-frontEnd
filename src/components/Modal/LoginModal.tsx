@@ -1,3 +1,4 @@
+import { Eye, EyeClosed } from 'lucide-react';
 import { useState } from 'react';
 
 interface LoginModalProps {
@@ -73,7 +74,7 @@ export function LoginModal({
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={loading}
               >
-                {showPassword ? 'Ocultar' : 'Ver'}
+                {showPassword ? <EyeClosed /> : <Eye />}
               </button>
             </div>
           </div>

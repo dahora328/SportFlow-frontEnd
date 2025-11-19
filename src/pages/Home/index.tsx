@@ -1,5 +1,7 @@
-import React from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getAthletes, type AthleteData } from '../../service/athletesService';
 
 function Th({ children }: { children: React.ReactNode }) {
   return (
@@ -8,11 +10,27 @@ function Th({ children }: { children: React.ReactNode }) {
     </th>
   );
 }
+
 export function Home() {
+  const [athletes, setAthletes] = useState<AthleteData[]>([]);
+
+  useEffect(() => {
+    async function loadAthletes() {
+      try {
+        const data = await getAthletes();
+        setAthletes(data);
+      } catch (error) {
+        console.error('Erro ao carregar atletas:', error);
+      }
+    }
+
+    loadAthletes();
+  }, []);
   return (
     <div className='p-6 space-y-6'>
       <header className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-        <h1 className='text-2xl font-semibold'>Time Flow</h1> {/* Nome do time pegar do banco de dados da tabela times ou empresa*/}
+        <h1 className='text-2xl font-semibold'>Time Flow</h1>
+        {/* Nome do time pegar do banco de dados da tabela times ou empresa*/}
         <div className='flex flex-col gap-3 sm:flex-row'>
           <div className='relative'>
             <input
@@ -53,7 +71,16 @@ export function Home() {
                 <Th>Atualizado em</Th>
               </tr>
             </thead>
-            <tbody className='divide-y divide-gray-100'></tbody>
+            <tbody className='divide-y divide-gray-100'>
+              {athletes.map((athlete: any) => (
+                <tr key={athlete.id}>
+                  <td className='px-4 py-3'>{athlete.full_name}</td>
+                  <td className='px-4 py-3'>{athlete.birth_date}</td>
+                  <td className='px-4 py-3'>{athlete.document}</td>
+                  <td className='px-4 py-3'>{athlete.updated_at}</td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
       </section>

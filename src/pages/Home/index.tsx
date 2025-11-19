@@ -2,12 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAthletes, type AthleteData } from '../../service/athletesService';
+import { formatDate, formatCPF } from '../../utils/util';
+import { Edit, Trash } from 'lucide-react';
 
 function Th({ children }: { children: React.ReactNode }) {
   return (
-    <th className='px-4 py-2 text-center font-medium text-gray-600'>
-      {children}
-    </th>
+    <th className='px-4 py-2 text-center font-medium text-white'>{children}</th>
   );
 }
 
@@ -55,29 +55,49 @@ export function Home() {
       </header>
 
       <section className='rounded-lg border border-gray-200 bg-white'>
-        <div className='flex items-center justify-between border-b border-gray-200 px-4 py-3'>
-          <h2 className='text-sm font-semibold'>Recentes</h2>
-          <a href='#' className='text-sm text-blue-600 hover:underline'>
-            Ver todos
-          </a>
+        <div className='flex border-b border-gray-200 px-4 py-3 justify-center items-center'>
+          <h2 className='text-x1 font-semibold'>Atletas cadastrados</h2>
         </div>
         <div className='overflow-x-auto'>
           <table className='min-w-full divide-y divide-gray-200 text-sm'>
-            <thead className='bg-gray-50'>
+            <thead className='bg-gray-700'>
               <tr>
                 <Th>Nome</Th>
-                <Th>Esporte</Th>
-                <Th>Status</Th>
+                <Th>Data Nascimento</Th>
+                <Th>CPF</Th>
                 <Th>Atualizado em</Th>
+                <Th>Ações</Th>
               </tr>
             </thead>
             <tbody className='divide-y divide-gray-100'>
               {athletes.map((athlete: any) => (
-                <tr key={athlete.id}>
+                <tr key={athlete.id} className='hover:bg-gray-200'>
                   <td className='px-4 py-3'>{athlete.full_name}</td>
-                  <td className='px-4 py-3'>{athlete.birth_date}</td>
-                  <td className='px-4 py-3'>{athlete.document}</td>
-                  <td className='px-4 py-3'>{athlete.updated_at}</td>
+                  <td className='px-4 py-3'>
+                    {formatDate(athlete.birth_date)}
+                  </td>
+                  <td className='px-4 py-3'>{formatCPF(athlete.document)}</td>
+                  <td className='px-4 py-3'>
+                    {formatDate(athlete.updated_at)}
+                  </td>
+                  <td className='px-4 py-3 flex gap-4 items-center justify-center'>
+                    <Link
+                      to={`/athletes/${athlete.id}`}
+                      className='cursor-pointer text-blue-500 hover:text-blue-700'
+                      title='Editar Atleta'
+                    >
+                      <Edit
+                        size={16}
+                        className='cursor-pointer text-gray-700 hover:text-gray-900'
+                      />
+                    </Link>
+                    <Link to={'#'}>
+                      <Trash
+                        size={16}
+                        className='cursor-pointer text-red-500 hover:text-red-700'
+                      />
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

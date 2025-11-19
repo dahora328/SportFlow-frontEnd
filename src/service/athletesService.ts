@@ -17,11 +17,13 @@ export interface AthleteData {
   email: string;
   mother_name: string;
   father_name: string;
+  owner_id: number;
 }
 
 export async function createAthlete(data: AthleteData) {
   try {
-    const response = await api.post('/athlete', data);
+    const response = await api.post('/athletes', data);
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error('Erro ao criar atleta:', error);
@@ -31,7 +33,7 @@ export async function createAthlete(data: AthleteData) {
 
 export async function getAthletes() {
   try {
-    const response = await api.get('/athlete');
+    const response = await api.get('/athletes');
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar atletas:', error);
@@ -41,7 +43,7 @@ export async function getAthletes() {
 
 export async function getAthleteById(id: number) {
   try {
-    const response = await api.get(`/athlete/${id}`);
+    const response = await api.get(`/athletes/${id}`);
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar atleta por ID:', error);
@@ -51,7 +53,7 @@ export async function getAthleteById(id: number) {
 
 export async function updateAthlete(id: number, data: AthleteData) {
   try {
-    const response = await api.put(`/athlete/${id}`, data);
+    const response = await api.put(`/athletes/${id}`, data);
     return response.data;
   } catch (error) {
     console.error('Erro ao atualizar atleta:', error);
@@ -61,7 +63,7 @@ export async function updateAthlete(id: number, data: AthleteData) {
 
 export async function deleteAthlete(id: number) {
   try {
-    const response = await api.delete(`/athlete/${id}`);
+    const response = await api.delete(`/athletes/${id}`);
     return response.data;
   } catch (error) {
     console.error('Erro ao deletar atleta:', error);

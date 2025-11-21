@@ -47,6 +47,8 @@ export function Athletes() {
     console.log(JSON.stringify(formData, null, 2));
   }
 
+  
+
   return (
     <div className='min-h-screen bg-gray-100 text-gray-800 flex flex-col items-center p-6'>
       <h1 className='text-2xl font-bold mb-6'>Cadastro de Atleta</h1>

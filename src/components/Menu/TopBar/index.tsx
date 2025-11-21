@@ -1,10 +1,12 @@
 import { Menu, X, User, LogOut, Edit } from 'lucide-react';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../../../contexts/AuthContext';
 
 export function TopBar() {
   const [open, setOpen] = useState(false);
   const [perfilOpen, setPerfilOpen] = useState(false);
+  const { logout } = useContext(AuthContext);
 
   return (
     <nav className='bg-red-950 text-white px-6 py-4 shadow-md'>
@@ -53,7 +55,10 @@ export function TopBar() {
                 <Edit size={16} /> <Link to='/user'>Editar Perfil</Link>
               </li>
               <li className='px-4 py-2 hover:bg-white cursor-pointer flex items-center gap-2 text-red-300 hover:text-red-950'>
-                <LogOut size={16} /> <Link to='/'>Sair</Link>
+                <LogOut size={16} />{' '}
+                <Link to='/' onClick={logout}>
+                  Sair
+                </Link>
               </li>
             </ul>
           )}
@@ -91,7 +96,10 @@ export function TopBar() {
                   <Edit size={16} /> <Link to='/user'>Editar Perfil</Link>
                 </li>
                 <li className='px-4 py-2 hover:bg-gray-700 cursor-pointer flex items-center justify-center gap-2 text-red-400'>
-                  <LogOut size={16} /> <Link to='/'>Sair</Link>
+                  <LogOut size={16} />{' '}
+                  <Link to='/' onClick={logout}>
+                    Sair
+                  </Link>
                 </li>
               </ul>
             )}

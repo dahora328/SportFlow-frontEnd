@@ -32,6 +32,7 @@ function AppContent() {
           <Route path='/login' element={<Login />} />
           <Route path='/home' element={<Home />} />
           <Route path='/athletes' element={<Athletes />} />
+          <Route path='/athletes/:id' element={<Athletes />} />
         </Routes>
       </AuthProvider>
     </>

@@ -17,7 +17,6 @@ function Th({ children }: { children: React.ReactNode }) {
 
 export function Home() {
   const [athletes, setAthletes] = useState<AthleteData[]>([]);
-  const athleteId = 3;
 
   useEffect(() => {
     async function loadAthletes() {
@@ -32,8 +31,7 @@ export function Home() {
     loadAthletes();
   }, []);
 
-  async function handleClick(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleLoadAthleteData(athleteId: number) {
     try {
       const result = await getAthleteById(athleteId);
       console.log('Dados do atleta:', result);
@@ -99,7 +97,10 @@ export function Home() {
                   </td>
                   <td className='px-4 py-3 flex gap-4 items-center justify-center'>
                     <Link
-                      onClick={handleClick}
+                      key={athlete.id}
+                      onClick={() => {
+                        handleLoadAthleteData(athlete.id);
+                      }}
                       to={`/athletes/${athlete.id}`}
                       className='cursor-pointer text-blue-500 hover:text-blue-700'
                       title='Editar Atleta'

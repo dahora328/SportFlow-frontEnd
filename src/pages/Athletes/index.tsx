@@ -47,8 +47,6 @@ export function Athletes() {
     console.log(JSON.stringify(formData, null, 2));
   }
 
-  
-
   return (
     <div className='min-h-screen bg-gray-100 text-gray-800 flex flex-col items-center p-6'>
       <h1 className='text-2xl font-bold mb-6'>Cadastro de Atleta</h1>
@@ -101,10 +99,10 @@ export function Athletes() {
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
             >
               <option value=''>Selecione</option>
-              <option value='single'>Solteiro(a)</option>
-              <option value='married'>Casado(a)</option>
-              <option value='divorced'>Divorciado(a)</option>
-              <option value='widowed'>Viúvo(a)</option>
+              <option value='solteiro'>Solteiro(a)</option>
+              <option value='casado'>Casado(a)</option>
+              <option value='divorciado'>Divorciado(a)</option>
+              <option value='viuvo'>Viúvo(a)</option>
             </select>
           </div>
 
@@ -118,9 +116,9 @@ export function Athletes() {
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
             >
               <option value=''>Selecione</option>
-              <option value='male'>Masculino</option>
-              <option value='female'>Feminino</option>
-              <option value='other'>Outro</option>
+              <option value='masculino'>Masculino</option>
+              <option value='feminino'>Feminino</option>
+              <option value='outro'>Outro</option>
             </select>
           </div>
 
@@ -133,6 +131,7 @@ export function Athletes() {
               type='text'
               name='document'
               value={formData.document}
+              maxLength={11}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
               placeholder='Digite o número do documento'
@@ -147,10 +146,11 @@ export function Athletes() {
             <input
               type='text'
               name='mobile_phone'
+              maxLength={11}
               value={formData.mobile_phone}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
-              placeholder='(DDD) 99999-9999'
+              placeholder='(DD) 99999-9999'
             />
           </div>
 
@@ -163,9 +163,10 @@ export function Athletes() {
               type='text'
               name='secondary_phone'
               value={formData.secondary_phone}
+              maxLength={11}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
-              placeholder='(DDD) 99999-9999'
+              placeholder='(DD) 99999-9999'
             />
           </div>
 
@@ -227,6 +228,7 @@ export function Athletes() {
               name='zip_code'
               value={formData.zip_code}
               onChange={handleChange}
+              maxLength={8}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
               placeholder='00000-000'
             />

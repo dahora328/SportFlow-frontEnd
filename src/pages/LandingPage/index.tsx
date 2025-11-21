@@ -1,13 +1,15 @@
 import { LoginModal } from '../../components/Modal/LoginModal';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../../service/userService';
+import { AuthContext } from '../../contexts/AuthContext';
 
 export function LandingPage() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   const handleLogin = async (data: { email: string; password: string }) => {
     setLoading(true);
@@ -16,14 +18,12 @@ export function LandingPage() {
     try {
       const response = await loginUser(data);
 
+      const token = response.token;
+
       // Salvar token no localStorage se existir
       if (response.token) {
-        localStorage.setItem('token', response.token);
-      }
+        login(token);
 
-      // Salvar dados do usuário se existirem
-      if (response.user) {
-        localStorage.setItem('user', JSON.stringify(response.user));
       }
 
       console.log('Login realizado com sucesso:', response);

@@ -12,6 +12,7 @@ import { Reports } from './pages/Reports';
 import { LandingPage } from './pages/LandingPage';
 import { Home } from './pages/Home';
 import { Login } from './pages/User/Login';
+import { AuthProvider } from './contexts/AuthContext';
 
 function AppContent() {
   const location = useLocation();
@@ -20,17 +21,19 @@ function AppContent() {
 
   return (
     <>
-      {!hideTopBar && <TopBar />}
-      <Routes>
-        {/* Páginas iniciais */}
-        <Route path='/' element={<LandingPage />} />
-        <Route path='/user' element={<User />} />
-        {/* Páginas principais */}
-        <Route path='/reports' element={<Reports />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/home' element={<Home />} />
-        <Route path='/athletes' element={<Athletes />} />
-      </Routes>
+      <AuthProvider>
+        {!hideTopBar && <TopBar />}
+        <Routes>
+          {/* Páginas iniciais */}
+          <Route path='/' element={<LandingPage />} />
+          <Route path='/user' element={<User />} />
+          {/* Páginas principais */}
+          <Route path='/reports' element={<Reports />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/home' element={<Home />} />
+          <Route path='/athletes' element={<Athletes />} />
+        </Routes>
+      </AuthProvider>
     </>
   );
 }

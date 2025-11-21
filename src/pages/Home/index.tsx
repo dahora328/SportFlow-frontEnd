@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getAthletes, type AthleteData } from '../../service/athletesService';
+import {
+  getAthleteById,
+  getAthletes,
+  type AthleteData,
+} from '../../service/athletesService';
 import { formatDate, formatCPF } from '../../utils/util';
 import { Edit, Trash } from 'lucide-react';
 
@@ -13,6 +17,7 @@ function Th({ children }: { children: React.ReactNode }) {
 
 export function Home() {
   const [athletes, setAthletes] = useState<AthleteData[]>([]);
+  const athleteId = 3;
 
   useEffect(() => {
     async function loadAthletes() {
@@ -26,6 +31,18 @@ export function Home() {
 
     loadAthletes();
   }, []);
+
+  async function handleClick(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      const result = await getAthleteById(athleteId);
+      console.log('Dados do atleta:', result);
+      //window.location.href = '/home';
+    } catch (error) {
+      console.error('Erro ao cadastrar atleta:', error);
+      alert('Erro ao salvar!');
+    }
+  }
   return (
     <div className='p-6 space-y-6'>
       <header className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
@@ -82,6 +99,7 @@ export function Home() {
                   </td>
                   <td className='px-4 py-3 flex gap-4 items-center justify-center'>
                     <Link
+                      onClick={handleClick}
                       to={`/athletes/${athlete.id}`}
                       className='cursor-pointer text-blue-500 hover:text-blue-700'
                       title='Editar Atleta'
@@ -91,7 +109,7 @@ export function Home() {
                         className='cursor-pointer text-gray-700 hover:text-gray-900'
                       />
                     </Link>
-                    <Link to={'#'}>
+                    <Link to={`/athletes/${athlete.id}`} title='Deletar Atleta'>
                       <Trash
                         size={16}
                         className='cursor-pointer text-red-500 hover:text-red-700'

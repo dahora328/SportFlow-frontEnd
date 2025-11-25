@@ -1,36 +1,71 @@
-# Changelog — SportFlow FrontEnd
+# Histórico de Versões
 
-Histórico de mudanças do front-end do SportFlow. Repositório:
-https://github.com/dahora328/SportFlow-frontEnd [attached_file:1]
+## Índice
+- [21/11/2025](#21112025)
+- [19/11/2025](#19112025)
+- [18/11/2025](#18112025)
+- [17/11/2025](#17112025)
+- [10/11/2025](#10112025)
+- [09/11/2025](#09112025)
+- [04/11/2025](#04112025)
 
-## [Unreleased]
+## [21/11/2025]
+- Adicionada rota de comentário no atleta
+- Função e rota para recuperar atleta por ID
+- Alterada requisição de salvar nos campos gênero e estado civil
+- Função de obter por ID para editar atletas
+- Contexto de logout
+- Adicionada autenticação no projeto com token JWT
 
-- TODO: Liste aqui novas mudanças que ainda não foram lançadas.
+## [19/11/2025]
+- Adicionadas funções utilitárias e ícones de lixeira e edição na tabela
+- Adicionado ícone de logout
+- Serviços de usuário
+- Adicionadas funções utilitárias ao projeto
+- Adicionada função para recuperar todos os atletas
+- Modificado ícone no campo de senha
+- Adicionado `owner_id` na requisição de criação para todos os atletas
+- Corrigido nome da rota de Atletas
+- Funcionalidade: adicionado modal de login na janela principal
+- Funcionalidade: redirecionamento de rota para a home
+- Funcionalidade: modal de login
+- Funcionalidade: função de criar e logar usuário
+- Funcionalidade: adicionado interceptors para token JWT
 
-## 2025-11-10
+## [18/11/2025]
+- Funcionalidade: adicionado Login
+- Funcionalidade: adicionado serviços nas rotas com Axios
+- Funcionalidade: adicionada landing page nas rotas
+- Funcionalidade: adicionado login nas rotas
+- Funcionalidade: teste de JSON na requisição do front-end
+- Funcionalidade: editar Usuário
+- Funcionalidade: adicionada rota de relatório
+- Adicionado Axios ao projeto
 
-### Added
+## [17/11/2025]
+- Funcionalidade: botão para voltar à página inicial
+- Funcionalidade: adicionado link para a página de usuário
+- Funcionalidade: adicionada rota de usuário
 
-- TODO: Funcionalidades novas.
+## [10/11/2025]
+- Funcionalidade: Readme
+- Funcionalidade: layout nas páginas de Atletas e Home
+- Funcionalidade: página Home
+- Adicionado o logo da equipe
+- Funcionalidade: Readme com resumo do aplicativo
+- Funcionalidade: changelog nas modificações do aplicativo
 
-### Changed
+## [09/11/2025]
+- Implementado formulário de registro de atletas
+- Adicionado Link e Roteador na Barra Superior (TopBar)
+- Modificada descrição no menu
+- Adicionada página de Atletas
+- Adicionado React DOM ao projeto
 
-- TODO: Ajustes e melhorias.
-
-### Fixed
-
-- TODO: Correções de bugs.
-
-## 2025-11-09
-
-### Added
-
-- TODO: Ex.: Tela de cadastro de atletas.
-
-### Changed
-
-- TODO: Ex.: Refatoração de componentes.
-
-### Fixed
-
-- TODO: Ex.: Correção de validação no formulário.
+## [04/11/2025]
+- Corrigida cor do menu e layout
+- Adicionado Menu na Barra Superior (TopBar), removido Menu Lateral (SideBar)
+- Adicionado lucide-react
+- Criados componentes iniciais
+- Commit inicial
+```

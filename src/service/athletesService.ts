@@ -1,6 +1,7 @@
 import api from './api';
 
 export interface AthleteData {
+  id?: number;
   full_name: string;
   birth_date: string;
   marital_status: string;

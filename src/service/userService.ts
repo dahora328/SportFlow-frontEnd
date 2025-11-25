@@ -41,6 +41,19 @@ export async function loginUser(data: LoginData): Promise<LoginResponse> {
   }
 }
 
+export function getUserIdFromToken(): number | null {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.userId || payload.sub;
+  } catch (error) {
+    console.error('Erro ao decodificar token:', error);
+    return null;
+  }
+}
+
 export async function getUserById(id: number) {
   try {
     const response = await api.get(`/user/${id}`);

@@ -5,7 +5,10 @@ import {
   updateAthlete,
   getAthleteById,
   type AthleteData,
+  
 } from '../../service/athletesService';
+import { formatDocument, formatPhone, formatZipCode } from '../../utils/util';
+import { getUserIdFromToken } from '../../service/userService';
 
 export function Athletes() {
   const { id } = useParams(); // Para edição via URL /athletes/:id
@@ -31,7 +34,7 @@ export function Athletes() {
     email: '',
     mother_name: '',
     father_name: '',
-    owner_id: 1,
+    owner_id: getUserIdFromToken() || 0,
   });
 
   useEffect(() => {
@@ -255,7 +258,7 @@ export function Athletes() {
             <input
               type='text'
               name='document'
-              value={formData.document}
+              value={formatDocument(formData.document)}
               maxLength={11}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
@@ -272,7 +275,7 @@ export function Athletes() {
               type='text'
               name='mobile_phone'
               maxLength={11}
-              value={formData.mobile_phone}
+              value={formatPhone(formData.mobile_phone)}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
               placeholder='(DD) 99999-9999'
@@ -287,7 +290,7 @@ export function Athletes() {
             <input
               type='text'
               name='secondary_phone'
-              value={formData.secondary_phone}
+              value={formatPhone(formData.secondary_phone)}
               maxLength={11}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
@@ -351,7 +354,7 @@ export function Athletes() {
             <input
               type='text'
               name='zip_code'
-              value={formData.zip_code}
+              value={formatZipCode(formData.zip_code)}
               onChange={handleChange}
               maxLength={8}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'

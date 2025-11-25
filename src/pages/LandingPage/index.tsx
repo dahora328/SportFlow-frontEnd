@@ -1,7 +1,7 @@
 import { LoginModal } from '../../components/Modal/LoginModal';
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../../service/userService';
+import { loginUser } from '../../services/userService';
 import { AuthContext } from '../../contexts/AuthContext';
 
 export function LandingPage() {
@@ -23,7 +23,6 @@ export function LandingPage() {
       // Salvar token no localStorage se existir
       if (response.token) {
         login(token);
-
       }
 
       console.log('Login realizado com sucesso:', response);

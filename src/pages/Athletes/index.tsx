@@ -5,10 +5,9 @@ import {
   updateAthlete,
   getAthleteById,
   type AthleteData,
-  
-} from '../../service/athletesService';
+} from '../../services/athletesService';
 import { formatDocument, formatPhone, formatZipCode } from '../../utils/util';
-import { getUserIdFromToken } from '../../service/userService';
+import { getUserIdFromToken } from '../../services/userService';
 
 export function Athletes() {
   const { id } = useParams(); // Para edição via URL /athletes/:id

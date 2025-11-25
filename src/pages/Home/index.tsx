@@ -6,7 +6,7 @@ import {
   getAthleteById,
   getAthletes,
   type AthleteData,
-} from '../../service/athletesService';
+} from '../../services/athletesService';
 import { formatDate, formatCPF } from '../../utils/util';
 import { Edit, Trash } from 'lucide-react';
 

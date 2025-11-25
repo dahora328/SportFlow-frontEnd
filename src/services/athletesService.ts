@@ -52,6 +52,17 @@ export async function getAthleteById(id: number) {
   }
 }
 
+// implementar busca por nome na api ainda
+export async function getAthletesByName(name: string) {
+  try {
+    const response = await api.get(`/athletes?name=${name}`);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar atletas por nome:', error);
+    throw error;
+  }
+}
+
 export async function updateAthlete(id: number, data: AthleteData) {
   try {
     const response = await api.put(`/athletes/${id}`, data);

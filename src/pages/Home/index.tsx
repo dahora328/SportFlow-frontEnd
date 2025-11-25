@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  deleteAthlete,
   getAthleteById,
   getAthletes,
   type AthleteData,
@@ -37,10 +38,24 @@ export function Home() {
       console.log('Dados do atleta:', result);
       //window.location.href = '/home';
     } catch (error) {
-      console.error('Erro ao cadastrar atleta:', error);
-      alert('Erro ao salvar!');
+      console.error('Erro ao recuperar atleta:', error);
+      alert('Erro ao recuperar atleta!');
     }
   }
+
+  async function handleDeteleAthlete(athleteId: number) {
+    try {
+      const result = await deleteAthlete(athleteId);
+      setAthletes(prevAthletes =>
+        prevAthletes.filter(athlete => athlete.id !== athleteId),
+      );
+      console.log('Atleta deletado com sucesso:', result);
+    } catch (error) {
+      console.error('Erro ao tentar deletar atleta:', error);
+      alert('Erro ao deletar atleta!');
+    }
+  }
+
   return (
     <div className='p-6 space-y-6'>
       <header className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
@@ -93,7 +108,7 @@ export function Home() {
                   </td>
                   <td className='px-4 py-3'>{formatCPF(athlete.document)}</td>
                   <td className='px-4 py-3'>
-                    {formatDate(athlete.updated_at)}
+                    {formatDate(athlete.updated_at?.split('T')[0] || '')}
                   </td>
                   <td className='px-4 py-3 flex gap-4 items-center justify-center'>
                     <Link
@@ -101,8 +116,7 @@ export function Home() {
                       onClick={() => {
                         handleLoadAthleteData(athlete.id);
                       }}
-                      to='/athletes'
-                      state={{ athleteToEdit: athlete }}
+                      to={`/athletes/${athlete.id}`}
                       className='cursor-pointer text-blue-500 hover:text-blue-700'
                       title='Editar Atleta'
                     >
@@ -111,12 +125,17 @@ export function Home() {
                         className='cursor-pointer text-gray-700 hover:text-gray-900'
                       />
                     </Link>
-                    <Link to={`/athletes/${athlete.id}`} title='Deletar Atleta'>
+                    <button
+                      onClick={() => {
+                        handleDeteleAthlete(athlete.id);
+                      }}
+                      title='Deletar Atleta'
+                    >
                       <Trash
                         size={16}
                         className='cursor-pointer text-red-500 hover:text-red-700'
                       />
-                    </Link>
+                    </button>
                   </td>
                 </tr>
               ))}

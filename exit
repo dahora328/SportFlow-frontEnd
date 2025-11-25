@@ -1,3 +1,54 @@
+2025-11-25 -- Add file with commit in repository
+2025-11-25 -- Feat modify form create to create and edit
+2025-11-25 -- Feat add id in interface athletes
+2025-11-21 -- Add comment route in athlete
+2025-11-21 -- function and route recover athlete by ID
+2025-11-21 -- change salve request in fields gender and marital_status
+2025-11-21 -- function getbyid to edit athletes
+2025-11-21 -- context logout
+2025-11-21 -- Add auth in project to token JWT
+2025-11-19 -- add functions util and icons trash and edit in table
+2025-11-19 -- Add icon logout
+2025-11-19 -- Services user
+2025-11-19 -- Add functions utils in project
+2025-11-19 -- Add function recover all athletes
+2025-11-19 -- modify icon in field password
+2025-11-19 -- Add owner_id in  create request athletes allex
+2025-11-19 -- Correct name route Athletes
+2025-11-19 -- Feat add modal login in principal window
+2025-11-19 -- Feat redirect route to home
+2025-11-19 -- Feat modal login
+2025-11-19 -- Feat funciton create and login user
+2025-11-19 -- Feat add interceptors to token JWT
+2025-11-18 -- Feat add Login
+2025-11-18 -- Feat add services in routes with axios
+2025-11-18 -- Feat add landing page in routes
+2025-11-18 -- Feat add login in routes
+2025-11-18 -- Feat test json in request front end
+2025-11-18 -- Feat edit User
+2025-11-18 -- Feat add route report
+2025-11-18 -- Add axios in project
+2025-11-17 -- Feat button go back to page home
+2025-11-17 -- Feat add link page user
+2025-11-17 -- Feat add route user
+2025-11-10 -- Feat Readme
+2025-11-10 -- Feat layout in page Athletes and Home
+2025-11-10 -- Feat page Home
+2025-11-10 -- Add logo the team
+2025-11-10 -- Feat Readme to app summary
+2025-11-10 -- Feat changelog in modify in app
+2025-11-09 -- Implements form register athletes
+2025-11-09 -- Add Link and Router in TopBar
+2025-11-09 -- Modify description in menu
+2025-11-09 -- Add page Atthletes
+2025-11-09 -- Add React dom in project
+2025-11-04 -- Correct color menu and layout
+2025-11-04 -- Add Menu TopBar, delete Menu SideBar
+2025-11-04 -- Add lucide-react
+2025-11-04 -- Create components initiais
+2025-11-04 -- Initial commit2025-11-25 -- Add file with commit in repository
+2025-11-25 -- Feat modify form create to create and edit
+2025-11-25 -- Feat add id in interface athletes
 2025-11-21 -- Add comment route in athlete
 2025-11-21 -- function and route recover athlete by ID
 2025-11-21 -- change salve request in fields gender and marital_status

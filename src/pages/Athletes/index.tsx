@@ -1,8 +1,19 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { createAthlete, type AthleteData } from '../../service/athletesService';
+import { useState, useEffect } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
+import {
+  createAthlete,
+  updateAthlete,
+  getAthleteById,
+  type AthleteData,
+} from '../../service/athletesService';
 
 export function Athletes() {
+  const { id } = useParams(); // Para edição via URL /athletes/:id
+  const location = useLocation();
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState<AthleteData>({
     full_name: '',
     birth_date: '',
@@ -23,6 +34,67 @@ export function Athletes() {
     owner_id: 1,
   });
 
+  useEffect(() => {
+    // Verifica se veio um atleta para editar via state (navegação)
+    const athleteFromState = location.state?.athleteToEdit;
+
+    // Verifica se tem ID na URL
+    if (id || athleteFromState) {
+      setIsEditing(true);
+      loadAthleteData(id || athleteFromState?.id);
+    } else {
+      // Modo cadastro - reseta o formulário
+      setIsEditing(false);
+      setFormData({
+        full_name: '',
+        birth_date: '',
+        marital_status: '',
+        gender: '',
+        document: '',
+        address: '',
+        number: '',
+        neighborhood: '',
+        zip_code: '',
+        state: '',
+        city: '',
+        mobile_phone: '',
+        secondary_phone: '',
+        email: '',
+        mother_name: '',
+        father_name: '',
+        owner_id: 1,
+      });
+    }
+  }, [id, location.state]);
+
+  // Função para carregar dados do atleta
+  async function loadAthleteData(athleteId: number) {
+    try {
+      setLoading(true);
+      const athleteData = await getAthleteById(athleteId);
+
+      setFormData({
+        ...athleteData,
+        // Garante que campos opcionais tenham valor padrão se forem null/undefined
+        mobile_phone: athleteData.mobile_phone || '',
+        secondary_phone: athleteData.secondary_phone || '',
+        email: athleteData.email || '',
+        number: athleteData.number || '',
+        neighborhood: athleteData.neighborhood || '',
+        zip_code: athleteData.zip_code || '',
+        state: athleteData.state || '',
+        city: athleteData.city || '',
+        mother_name: athleteData.mother_name || '',
+        father_name: athleteData.father_name || '',
+      });
+    } catch (error) {
+      console.error('Erro ao carregar atleta:', error);
+      alert('Erro ao carregar dados do atleta!');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -32,24 +104,77 @@ export function Athletes() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setLoading(true);
+
     try {
-      const result = await createAthlete(formData);
-      console.log('Salvo com sucesso:', result);
-      alert('Atleta cadastrado!');
+      let result;
+
+      if (isEditing) {
+        const athleteId = id || location.state?.athleteToEdit?.id;
+        result = await updateAthlete(athleteId, formData);
+        console.log('Atualizado com sucesso:', result);
+        alert('Atleta atualizado com sucesso!');
+      } else {
+        result = await createAthlete(formData);
+        console.log('Cadastrado com sucesso:', result);
+        alert('Atleta cadastrado com sucesso!');
+      }
+
       window.location.href = '/home';
     } catch (error) {
-      console.error('Erro ao cadastrar atleta:', error);
-      alert('Erro ao salvar!');
+      console.error(
+        `Erro ao ${isEditing ? 'atualizar' : 'cadastrar'} atleta:`,
+        error,
+      );
+      alert(`Erro ao ${isEditing ? 'atualizar' : 'salvar'} atleta!`);
+    } finally {
+      setLoading(false);
     }
-    console.log('Dados do atleta:', formData);
+  }
 
-    console.log('📌 JSON enviado para API:');
-    console.log(JSON.stringify(formData, null, 2));
+  function handleCancel() {
+    if (isEditing) {
+      window.location.href = '/home';
+    } else {
+      setFormData({
+        full_name: '',
+        birth_date: '',
+        marital_status: '',
+        gender: '',
+        document: '',
+        address: '',
+        number: '',
+        neighborhood: '',
+        zip_code: '',
+        state: '',
+        city: '',
+        mobile_phone: '',
+        secondary_phone: '',
+        email: '',
+        mother_name: '',
+        father_name: '',
+        owner_id: 1,
+      });
+    }
+  }
+
+  // Loading durante carregamento de dados
+  if (loading && isEditing) {
+    return (
+      <div className='min-h-screen bg-gray-100 flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
+          <p>Carregando dados do atleta...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className='min-h-screen bg-gray-100 text-gray-800 flex flex-col items-center p-6'>
-      <h1 className='text-2xl font-bold mb-6'>Cadastro de Atleta</h1>
+      <h1 className='text-2xl font-bold mb-6'>
+        {isEditing ? 'Editar Atleta' : 'Cadastro de Atleta'}
+      </h1>
 
       <form
         onSubmit={handleSubmit}
@@ -287,19 +412,24 @@ export function Athletes() {
           </div>
         </div>
 
-        {/* Botão de envio */}
         <div className='mt-6 text-center p-2 space-x-4 grid grid-cols-2 md:grid-cols-2'>
-          <Link
-            to='/'
-            className='bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition'
+          <button
+            type='button'
+            onClick={handleCancel}
+            className='bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-500 transition'
           >
-            Voltar
-          </Link>
+            {isEditing ? 'Cancelar' : 'Limpar'}
+          </button>
           <button
             type='submit'
-            className='bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition'
+            disabled={loading}
+            className='bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            Salvar Atleta
+            {loading
+              ? 'Salvando...'
+              : isEditing
+              ? 'Atualizar Atleta'
+              : 'Salvar Atleta'}
           </button>
         </div>
       </form>

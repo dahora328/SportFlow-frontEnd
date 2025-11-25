@@ -101,7 +101,8 @@ export function Home() {
                       onClick={() => {
                         handleLoadAthleteData(athlete.id);
                       }}
-                      to={`/athletes/${athlete.id}`}
+                      to='/athletes'
+                      state={{ athleteToEdit: athlete }}
                       className='cursor-pointer text-blue-500 hover:text-blue-700'
                       title='Editar Atleta'
                     >

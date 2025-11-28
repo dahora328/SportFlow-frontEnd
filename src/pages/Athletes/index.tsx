@@ -8,8 +8,11 @@ import {
 } from '../../services/athletesService';
 import { formatDocument, formatPhone, formatZipCode } from '../../utils/util';
 import { getUserIdFromToken } from '../../services/userService';
+import { useModal } from '../../hooks/useModal';
+import { Modal } from '../../components/Modal/AlertModal';
 
 export function Athletes() {
+  const modal = useModal();
   const { id } = useParams(); // Para edição via URL /athletes/:id
   const location = useLocation();
 
@@ -119,10 +122,11 @@ export function Athletes() {
       } else {
         result = await createAthlete(formData);
         console.log('Cadastrado com sucesso:', result);
-        alert('Atleta cadastrado com sucesso!');
+        //alert('Atleta cadastrado com sucesso!');
+        modal.open();
       }
 
-      window.location.href = '/home';
+      //window.location.href = '/home';
     } catch (error) {
       console.error(
         `Erro ao ${isEditing ? 'atualizar' : 'cadastrar'} atleta:`,
@@ -433,6 +437,13 @@ export function Athletes() {
               ? 'Atualizar Atleta'
               : 'Salvar Atleta'}
           </button>
+          <Modal
+            isOpen={modal.isOpen}
+            onClose={modal.close}
+            title='Sucesso!'
+            message='Dados salvos com sucesso.'
+            type='success'
+          />
         </div>
       </form>
     </div>

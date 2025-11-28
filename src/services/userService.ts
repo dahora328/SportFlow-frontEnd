@@ -12,7 +12,8 @@ export interface LoginData {
 }
 
 export interface LoginResponse {
-  token?: string;
+  access_token?: string;
+  refresh_token?: string;
   user?: {
     id: string;
     name: string;
@@ -37,6 +38,16 @@ export async function loginUser(data: LoginData): Promise<LoginResponse> {
     return response.data;
   } catch (error) {
     console.error('Erro ao fazer login:', error);
+    throw error;
+  }
+}
+
+export async function refresh(data: LoginData): Promise<LoginResponse> {
+  try {
+    const response = await api.post('/refresh', data);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao atualizar token:', error);
     throw error;
   }
 }

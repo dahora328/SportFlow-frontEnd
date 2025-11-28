@@ -18,22 +18,22 @@ export function LandingPage() {
     try {
       const response = await loginUser(data);
 
-      const token = response.token;
+      const access = response.access_token;
+      const refresh = response.refresh_token;
 
-      // Salvar token no localStorage se existir
-      if (response.token) {
-        login(token);
+      if (access && refresh) {
+        login(access, refresh);
+      } else {
+        throw new Error('Tokens não recebidos do servidor');
       }
 
       console.log('Login realizado com sucesso:', response);
       setOpen(false);
 
-      // Redirecionar para a página home após login bem-sucedido
       navigate('/home');
     } catch (err: unknown) {
       console.error('Erro no login:', err);
 
-      // Tratar erro da API
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as {
           response?: { data?: { message?: string } };

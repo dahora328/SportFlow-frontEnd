@@ -106,7 +106,7 @@ export function User() {
         {/* Botão de envio */}
         <div className='mt-6 text-center p-2 space-x-4 grid grid-cols-2 md:grid-cols-2'>
           <Link
-            to='/'
+            to='/home'
             className='bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition'
           >
             Voltar

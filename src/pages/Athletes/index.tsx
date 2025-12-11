@@ -7,7 +7,6 @@ import {
   type AthleteData,
 } from '../../services/athletesService';
 import { formatDocument, formatPhone, formatZipCode } from '../../utils/util';
-import { getUserIdFromToken } from '../../services/userService';
 import { useModal } from '../../hooks/useModal';
 import { Modal } from '../../components/Modal/AlertModal';
 
@@ -36,7 +35,7 @@ export function Athletes() {
     email: '',
     mother_name: '',
     father_name: '',
-    owner_id: getUserIdFromToken() || 0,
+    owner_id: localStorage.getItem('user_id')?.toString() as unknown as number,
   });
 
   useEffect(() => {
@@ -67,7 +66,9 @@ export function Athletes() {
         email: '',
         mother_name: '',
         father_name: '',
-        owner_id: 1,
+        owner_id: localStorage
+          .getItem('user_id')
+          ?.toString() as unknown as number,
       });
     }
   }, [id, location.state]);
@@ -159,7 +160,9 @@ export function Athletes() {
         email: '',
         mother_name: '',
         father_name: '',
-        owner_id: 1,
+        owner_id: localStorage
+          .getItem('user_id')
+          ?.toString() as unknown as number,
       });
     }
   }

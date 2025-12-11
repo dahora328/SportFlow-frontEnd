@@ -26,10 +26,10 @@ function AppContent() {
         <Routes>
           {/* Páginas iniciais */}
           <Route path='/' element={<LandingPage />} />
+          <Route path='/login' element={<Login />} />
           <Route path='/user' element={<User />} />
           {/* Páginas principais */}
           <Route path='/reports' element={<Reports />} />
-          <Route path='/login' element={<Login />} />
           <Route path='/home' element={<Home />} />
           {/* Rotas de atletas */}
           <Route path='/athletes' element={<Athletes />} />

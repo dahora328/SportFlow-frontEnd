@@ -11,7 +11,7 @@ import { User } from './pages/User';
 import { Reports } from './pages/Reports';
 import { LandingPage } from './pages/LandingPage';
 import { Home } from './pages/Home';
-import { Login } from './pages/User/Login';
+import { Login } from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
 
 function AppContent() {

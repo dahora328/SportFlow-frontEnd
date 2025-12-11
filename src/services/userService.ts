@@ -14,6 +14,7 @@ export interface LoginData {
 export interface LoginResponse {
   access_token?: string;
   refresh_token?: string;
+  user_id: number;
   user?: {
     id: string;
     name: string;

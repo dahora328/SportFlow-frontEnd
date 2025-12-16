@@ -9,6 +9,8 @@ import {
 } from '../../services/athletesService';
 import { formatDate, formatCPF } from '../../utils/util';
 import { Edit, Trash } from 'lucide-react';
+import { useModal } from '../../hooks/useModal';
+import { ModalBase } from '../../components/Modal/ModalBase';
 
 function Th({ children }: { children: React.ReactNode }) {
   return (
@@ -18,6 +20,8 @@ function Th({ children }: { children: React.ReactNode }) {
 
 export function Home() {
   const [athletes, setAthletes] = useState<AthleteData[]>([]);
+
+  const modal = useModal();
 
   useEffect(() => {
     async function loadAthletes() {
@@ -35,6 +39,7 @@ export function Home() {
   async function handleLoadAthleteData(athleteId: number) {
     try {
       const result = await getAthleteById(athleteId);
+
       console.log('Dados do atleta:', result);
       //window.location.href = '/home';
     } catch (error) {
@@ -44,16 +49,27 @@ export function Home() {
   }
 
   async function handleDeteleAthlete(athleteId: number) {
-    try {
-      const result = await deleteAthlete(athleteId);
-      setAthletes(prevAthletes =>
-        prevAthletes.filter(athlete => athlete.id !== athleteId),
-      );
-      console.log('Atleta deletado com sucesso:', result);
-    } catch (error) {
-      console.error('Erro ao tentar deletar atleta:', error);
-      alert('Erro ao deletar atleta!');
-    }
+    modal.openConfirm(
+      'Excluir Atleta',
+      'Deseja realmente excluir este atleta? Esta ação não pode ser desfeita.',
+      async () => {
+        try {
+          await deleteAthlete(athleteId);
+          setAthletes(prevAthletes =>
+            prevAthletes.filter(athlete => athlete.id !== athleteId),
+          );
+          modal.openSuccess('Sucesso', 'O atleta foi excluído corretamente.');
+        } catch (error) {
+          console.error('Erro ao deletar:', error);
+          modal.openError(
+            'Erro' + error,
+            'Não foi possível excluir o atleta. Tente novamente.',
+          );
+        }
+      },
+      'Excluir',
+      'Cancelar',
+    );
   }
 
   return (
@@ -117,7 +133,7 @@ export function Home() {
                         handleLoadAthleteData(athlete.id);
                       }}
                       to={`/athletes/${athlete.id}`}
-                      className='cursor-pointer text-blue-500 hover:text-blue-700'
+                      className='cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors'
                       title='Editar Atleta'
                     >
                       <Edit
@@ -126,16 +142,31 @@ export function Home() {
                       />
                     </Link>
                     <button
-                      onClick={() => {
+                      type='button'
+                      onClick={e => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         handleDeteleAthlete(athlete.id);
                       }}
                       title='Deletar Atleta'
+                      className='cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors'
                     >
                       <Trash
                         size={16}
-                        className='cursor-pointer text-red-500 hover:text-red-700'
+                        className='text-red-500 hover:text-red-700'
                       />
                     </button>
+                    <ModalBase
+                      isOpen={modal.isOpen}
+                      title={modal.config.title}
+                      description={modal.config.description}
+                      variant={modal.config.variant}
+                      confirmText={modal.config.confirmText}
+                      cancelText={modal.config.cancelText}
+                      hideCancel={modal.config.hideCancel}
+                      onConfirm={modal.config.onConfirm}
+                      onClose={modal.closeModal}
+                    />
                   </td>
                 </tr>
               ))}

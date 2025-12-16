@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import {
@@ -7,16 +8,18 @@ import {
   type AthleteData,
 } from '../../services/athletesService';
 import { formatDocument, formatPhone, formatZipCode } from '../../utils/util';
+import { ModalBase } from '../../components/Modal/ModalBase';
 import { useModal } from '../../hooks/useModal';
-import { Modal } from '../../components/Modal/AlertModal';
 
 export function Athletes() {
-  const modal = useModal();
   const { id } = useParams(); // Para edição via URL /athletes/:id
   const location = useLocation();
+  const [initialData, setInitialData] = useState<AthleteData | null>(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const modal = useModal();
 
   const [formData, setFormData] = useState<AthleteData>({
     full_name: '',
@@ -93,6 +96,8 @@ export function Athletes() {
         mother_name: athleteData.mother_name || '',
         father_name: athleteData.father_name || '',
       });
+
+      setInitialData(formData);
     } catch (error) {
       console.error('Erro ao carregar atleta:', error);
       alert('Erro ao carregar dados do atleta!');
@@ -117,23 +122,39 @@ export function Athletes() {
 
       if (isEditing) {
         const athleteId = id || location.state?.athleteToEdit?.id;
+        const dataToUpdate = { ...formData }; //cria uma cópia dos dados do formulário
         result = await updateAthlete(athleteId, formData);
+        if (initialData) {
+          if (dataToUpdate.document === initialData.document) {
+            delete (dataToUpdate as any).document;
+            console.log('Documento não alterado, removendo do update');
+          }
+          if (dataToUpdate.email === initialData.email) {
+            delete (dataToUpdate as any).email;
+          }
+        }
         console.log('Atualizado com sucesso:', result);
-        alert('Atleta atualizado com sucesso!');
+        modal.openSuccess('Atleta atualizado com sucesso!');
       } else {
         result = await createAthlete(formData);
         console.log('Cadastrado com sucesso:', result);
-        //alert('Atleta cadastrado com sucesso!');
-        modal.open();
+        modal.openSuccess('Atleta cadastrado com sucesso!');
+        window.location.href = '/home';
       }
 
       //window.location.href = '/home';
     } catch (error) {
-      console.error(
-        `Erro ao ${isEditing ? 'atualizar' : 'cadastrar'} atleta:`,
-        error,
+      // console.error(
+      //   `Erro ao ${isEditing ? 'atualizar' : 'cadastrar'} atleta:`,
+      //   error,
+      // );
+      modal.openError(
+        'Erro' + error,
+        'Não foi possível ' +
+          (isEditing ? 'atualizar' : 'salvar') +
+          ' o atleta. Tente novamente.',
       );
-      alert(`Erro ao ${isEditing ? 'atualizar' : 'salvar'} atleta!`);
+      //alert(`Erro ao ${isEditing ? 'atualizar' : 'salvar'} atleta!`);
     } finally {
       setLoading(false);
     }
@@ -440,12 +461,16 @@ export function Athletes() {
               ? 'Atualizar Atleta'
               : 'Salvar Atleta'}
           </button>
-          <Modal
+          <ModalBase
             isOpen={modal.isOpen}
-            onClose={modal.close}
-            title='Sucesso!'
-            message='Dados salvos com sucesso.'
-            type='success'
+            title={modal.config.title}
+            description={modal.config.description}
+            variant={modal.config.variant}
+            confirmText={modal.config.confirmText}
+            cancelText={modal.config.cancelText}
+            hideCancel={modal.config.hideCancel}
+            onConfirm={modal.config.onConfirm}
+            onClose={modal.closeModal}
           />
         </div>
       </form>

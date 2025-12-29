@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import {
@@ -14,7 +13,6 @@ import { useModal } from '../../hooks/useModal';
 export function Athletes() {
   const { id } = useParams(); // Para edição via URL /athletes/:id
   const location = useLocation();
-  const [initialData, setInitialData] = useState<AthleteData | null>(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -96,8 +94,6 @@ export function Athletes() {
         mother_name: athleteData.mother_name || '',
         father_name: athleteData.father_name || '',
       });
-
-      setInitialData(formData);
     } catch (error) {
       console.error('Erro ao carregar atleta:', error);
       alert('Erro ao carregar dados do atleta!');
@@ -122,17 +118,8 @@ export function Athletes() {
 
       if (isEditing) {
         const athleteId = id || location.state?.athleteToEdit?.id;
-        const dataToUpdate = { ...formData }; //cria uma cópia dos dados do formulário
+
         result = await updateAthlete(athleteId, formData);
-        if (initialData) {
-          if (dataToUpdate.document === initialData.document) {
-            delete (dataToUpdate as any).document;
-            console.log('Documento não alterado, removendo do update');
-          }
-          if (dataToUpdate.email === initialData.email) {
-            delete (dataToUpdate as any).email;
-          }
-        }
         console.log('Atualizado com sucesso:', result);
         modal.openSuccess('Atleta atualizado com sucesso!');
       } else {
@@ -141,20 +128,13 @@ export function Athletes() {
         modal.openSuccess('Atleta cadastrado com sucesso!');
         window.location.href = '/home';
       }
-
-      //window.location.href = '/home';
     } catch (error) {
-      // console.error(
-      //   `Erro ao ${isEditing ? 'atualizar' : 'cadastrar'} atleta:`,
-      //   error,
-      // );
       modal.openError(
         'Erro' + error,
         'Não foi possível ' +
           (isEditing ? 'atualizar' : 'salvar') +
           ' o atleta. Tente novamente.',
       );
-      //alert(`Erro ao ${isEditing ? 'atualizar' : 'salvar'} atleta!`);
     } finally {
       setLoading(false);
     }
@@ -302,7 +282,7 @@ export function Athletes() {
               type='text'
               name='mobile_phone'
               maxLength={11}
-              value={formatPhone(formData.mobile_phone)}
+              value={formData.mobile_phone}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
               placeholder='(DD) 99999-9999'

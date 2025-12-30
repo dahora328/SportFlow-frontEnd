@@ -2,6 +2,11 @@
 
 ## Índice
 
+- [30/12/2025](#30122025)
+- [29/12/2025](#29122025)
+- [16/11/2025](#16112025)
+- [11/12/2025](#11122025)
+- [28/11/2025](#28112025)
 - [25/11/2025](#25112025)
 - [21/11/2025](#21112025)
 - [19/11/2025](#19112025)
@@ -11,6 +16,39 @@
 - [09/11/2025](#09112025)
 - [04/11/2025](#04112025)
 
+## [30/12/2025]
+
+- Criação do tela inicial do sistema. (Em desenvolvimento)
+
+## [29/12/2025]
+
+- Melhorar o menu, parte do perfil pois estava clicando e ficava sempre aberto,
+  agora quando passa o mouse ele abre e fecha quando sai
+- Remove comandos não utilizados
+
+## [16/11/2025]
+
+- Mudança para componente modal genérico.
+- Usar o hook modal.
+- Aplicando o modal genérico no sistema.
+- Delete o modal alerta antigo.
+
+## [11/12/2025]
+
+- Mudança da rota login para rota correta /login pois antes estava na
+  landingpage.
+- Adicionado no contexto Autenticação.
+- Pegar o id do usuário que está logado na sesão do sistema.
+- Página em branco.
+- Adicionado headrs content-type e accept.
+- Adicionado idi do usuário na interface LoginResponse.
+- Adicionado componente ProtectedRoute.
+
+## [28/11/2025]
+
+- Foi implementando o refresh do token automaticamente no front end.
+- Adicionado modal para teste. Não foi utilizado ainda.
+
 ## [25/11/2025]
 
 - Modificado a tela de atletas pois estava apenas para cadastro, agora fica.
@@ -18,8 +56,10 @@
 - Adicionado o campo ID para conseguir fazer a busca do atleta selecionado.
 - Criação do histórico de mudanças do sistema.
 - Função para recuperar o usuário acrescentada no services do usuário.
-- Recuperar o usuário que está logado, para gravar no atleta pois estava de forma estática
-- Implementação de mais funções utils (Formatar celular, CEP e Documento(CPF e CNPJ)).
+- Recuperar o usuário que está logado, para gravar no atleta pois estava de
+  forma estática
+- Implementação de mais funções utils (Formatar celular, CEP e Documento(CPF e
+  CNPJ)).
 - Implementação de deletar atleta.
 
 ## [21/11/2025]

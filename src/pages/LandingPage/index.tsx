@@ -1,4 +1,5 @@
-import { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useContext, useState } from 'react';
 import {
   Trophy,
   Users,
@@ -8,28 +9,62 @@ import {
   ArrowRight,
   LogIn,
 } from 'lucide-react';
-// Importe aqui o SEU modal de Login que você já tem pronto
-// Ex: import { LoginModal } from '../components/LoginModal';
+
+import { AuthContext } from '../../contexts/AuthContext';
+import { LoginModal } from '../../components/Modal/LoginModal';
+import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../../services/userService';
 
 export function LandingPage() {
-  // Estado para controlar se o modal de login/cadastro está aberto
-  // Se você usa um contexto global (useModal), substitua isso pela chamada do contexto
+  const navigate = useNavigate();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const { login } = useContext(AuthContext);
+  const [error, setError] = useState<string | null>(null);
+  const openLogin = () => setIsLoginModalOpen(true);
+  const closeLogin = () => setIsLoginModalOpen(false);
+  const [loading, setLoading] = useState(false);
 
-  // Estado para saber qual aba abrir no modal (Login ou Cadastro)
-  const [initialAuthMode, setInitialAuthMode] = useState<'login' | 'register'>(
-    'login',
-  );
+  async function handleLoginSubmit(data: { email: string; password: string }) {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await loginUser(data);
+      const access = response.access_token;
+      const refresh = response.refresh_token;
+      const user_id = response.user_id;
 
-  const openLogin = () => {
-    setInitialAuthMode('login');
-    setIsLoginModalOpen(true);
-  };
+      if (access && refresh) {
+        login(access, refresh);
+      } else {
+        throw new Error('Tokens não recebidos do servidor');
+      }
 
-  const openRegister = () => {
-    setInitialAuthMode('register');
-    setIsLoginModalOpen(true);
-  };
+      console.log('Login realizado com sucesso:', response);
+
+      localStorage.setItem('user_id', user_id.toString());
+
+      setIsLoginModalOpen(false);
+
+      navigate('/home');
+    } catch (error: any) {
+      console.error('Erro no login:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as {
+          response?: { data?: { message?: string } };
+        };
+        const errorMessage =
+          axiosError.response?.data?.message ||
+          'Erro ao fazer login. Tente novamente.';
+        setError(errorMessage);
+      } else {
+        setError('Erro ao fazer login. Verifique suas credenciais.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (!open) return null;
 
   return (
     <div className='min-h-screen bg-gray-50 flex flex-col lg:flex-row'>
@@ -106,14 +141,20 @@ export function LandingPage() {
             {/* Botão de Login */}
             <button
               onClick={openLogin}
-              className='w-full flex items-center justify-center gap-3 bg-white text-gray-700 font-bold py-4 px-6 rounded-xl border-2 border-gray-200 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm hover:shadow-md group'
+              className='w-full flex items-center justify-center gap-3 bg-white text-gray-700 font-bold py-4 px-6 rounded-xl border-2 border-gray-200 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm hover:shadow-md'
             >
-              <LogIn
-                size={20}
-                className='text-gray-400 group-hover:text-blue-600 transition-colors'
-              />
+              <LogIn size={20} />
               <span>Já tenho uma conta</span>
             </button>
+
+            {/* Modal plugado aqui */}
+            <LoginModal
+              open={isLoginModalOpen}
+              onClose={closeLogin}
+              onSubmit={handleLoginSubmit}
+              loading={loading}
+              error={error}
+            />
 
             {/* Divisor "ou" */}
             <div className='relative flex py-2 items-center'>
@@ -126,7 +167,7 @@ export function LandingPage() {
 
             {/* Botão de Cadastro (Destaque) */}
             <button
-              onClick={openRegister}
+              onClick={openLogin}
               className='w-full flex items-center justify-center gap-3 bg-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]'
             >
               <span>Criar minha conta grátis</span>
@@ -147,21 +188,6 @@ export function LandingPage() {
           </p>
         </div>
       </div>
-
-      {/* 
-          AQUI ENTRA O SEU MODAL 
-          Renderize o componente do seu modal aqui, controlando a visibilidade com 'isLoginModalOpen'.
-          Passe a prop 'initialMode' (ou similar) para ele saber se abre em login ou cadastro.
-      */}
-
-      {/* Exemplo de uso (descomente e ajuste para o nome do seu componente): */}
-      {/* 
-      <LoginModal 
-        isOpen={isLoginModalOpen} 
-        onClose={() => setIsLoginModalOpen(false)} 
-        initialTab={initialAuthMode} 
-      /> 
-      */}
     </div>
   );
 }

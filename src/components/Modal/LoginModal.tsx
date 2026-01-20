@@ -28,89 +28,117 @@ export function LoginModal({
   };
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50'>
-      <div className='bg-white rounded-lg shadow-lg p-6 w-96 animate-fadeIn'>
-        <h2 className='text-xl font-bold mb-4 text-center'>Login</h2>
+    <div
+      className='
+        fixed inset-0 z-50 
+        pointer-events-none   /* não bloqueia cliques no fundo */
+      '
+    >
+      <div
+        className='
+          flex justify-center mt-8 sm:mt-12
+          pointer-events-auto   /* só o card recebe clique */
+        '
+      >
+        <div
+          className='
+            w-full max-w-md mx-4
+            bg-white rounded-2xl shadow-2xl border border-gray-100
+            p-6 sm:p-8
+            animate-slideDown
+          '
+        >
+          {/* Cabeçalho */}
+          <div className='flex justify-between items-center mb-4'>
+            <h2 className='text-lg font-semibold text-gray-800'>
+              Entrar no SportFlow
+            </h2>
+            <button
+              onClick={onClose}
+              className='text-gray-400 hover:text-gray-600 text-xl leading-none'
+              type='button'
+            >
+              ✕
+            </button>
+          </div>
 
-        <form onSubmit={handleSubmit} className='space-y-4'>
           {/* Mensagem de erro */}
           {error && (
-            <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-sm'>
+            <div className='mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2'>
               {error}
             </div>
           )}
 
-          {/* E-mail */}
-          <div>
-            <label className='block text-sm mb-1 font-medium'>E-mail</label>
-            <input
-              type='email'
-              className='w-full border rounded-lg px-3 py-2'
-              placeholder='Digite seu e-mail'
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              disabled={loading}
-            />
-          </div>
-
-          {/* Senha */}
-          <div>
-            <label className='block text-sm mb-1 font-medium'>Senha</label>
-            <div className='flex items-center border rounded-lg px-2'>
+          {/* Formulário */}
+          <form onSubmit={handleSubmit} className='space-y-4'>
+            <div>
+              <label className='block text-xs font-semibold text-gray-700 uppercase mb-1'>
+                E-mail
+              </label>
               <input
-                type={showPassword ? 'text' : 'password'}
-                className='w-full py-2 outline-none'
-                placeholder='Digite sua senha'
-                value={password}
-                onChange={e => setPassword(e.target.value)}
+                type='email'
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className='w-full px-3 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none'
                 required
-                disabled={loading}
               />
-
-              <button
-                type='button'
-                className='text-sm text-blue-600'
-                onClick={() => setShowPassword(!showPassword)}
-                disabled={loading}
-              >
-                {showPassword ? <EyeClosed /> : <Eye />}
-              </button>
             </div>
-          </div>
 
-          {/* Esqueci a senha */}
-          <div className='text-right'>
-            <button
-              type='button'
-              className='text-sm text-blue-600 hover:underline'
-              disabled={loading}
-            >
-              Esqueci minha senha
-            </button>
-          </div>
-
-          {/* Botões */}
-          <div className='flex justify-between mt-4'>
-            <button
-              type='button'
-              onClick={onClose}
-              className='px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed'
-              disabled={loading}
-            >
-              Fechar
-            </button>
+            <div>
+              <label className='block text-xs font-semibold text-gray-700 uppercase mb-1'>
+                Senha
+              </label>
+              <div className='relative'>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className='w-full px-3 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none pr-10'
+                  required
+                />
+                <button
+                  type='button'
+                  onClick={() => setShowPassword(v => !v)}
+                  className='absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-gray-600'
+                >
+                  {showPassword ? <EyeClosed size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
 
             <button
               type='submit'
-              className='px-4 py-2 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed'
               disabled={loading}
+              className='
+                w-full bg-blue-600 text-white font-semibold py-2.5 rounded-md
+                hover:bg-blue-700 transition-colors
+                disabled:opacity-60
+              '
             >
               {loading ? 'Entrando...' : 'Entrar'}
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
+
+      {/* animação CSS */}
+      <style>
+        {`
+          @keyframes slideDown {
+            0% {
+              opacity: 0;
+              transform: translateY(-20px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .animate-slideDown {
+            animation: slideDown 0.3s ease-out;
+          }
+        `}
+      </style>
     </div>
   );
 }

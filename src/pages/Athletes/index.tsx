@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import {
   createAthlete,
   updateAthlete,
@@ -18,6 +18,7 @@ export function Athletes() {
   const [loading, setLoading] = useState(false);
 
   const modal = useModal();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState<AthleteData>({
     full_name: '',
@@ -121,12 +122,20 @@ export function Athletes() {
 
         result = await updateAthlete(athleteId, formData);
         console.log('Atualizado com sucesso:', result);
-        modal.openSuccess('Atleta atualizado com sucesso!');
+        modal.openSuccess(
+          'Atleta atualizado!',
+          'Os dados foram atualizados com sucesso.',
+          () => navigate('/home'), // só navega quando clicar em "Fechar"
+        );
       } else {
         result = await createAthlete(formData);
         console.log('Cadastrado com sucesso:', result);
-        modal.openSuccess('Atleta cadastrado com sucesso!');
-        window.location.href = '/home';
+        modal.openSuccess(
+          'Atleta cadastrado!',
+          'O atleta foi cadastrado com sucesso.',
+          () => navigate('/home'), // idem aqui
+        );
+        // window.location.href = '/home';
       }
     } catch (error) {
       modal.openError(
@@ -438,8 +447,8 @@ export function Athletes() {
             {loading
               ? 'Salvando...'
               : isEditing
-              ? 'Atualizar Atleta'
-              : 'Salvar Atleta'}
+                ? 'Atualizar Atleta'
+                : 'Salvar Atleta'}
           </button>
           <ModalBase
             isOpen={modal.isOpen}
@@ -451,7 +460,6 @@ export function Athletes() {
             hideCancel={modal.config.hideCancel}
             onConfirm={modal.config.onConfirm}
             onClose={modal.closeModal}
-            link={modal.config.link}
           />
         </div>
       </form>

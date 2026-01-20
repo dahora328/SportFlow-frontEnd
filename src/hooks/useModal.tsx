@@ -1,4 +1,3 @@
-// hooks/useModal.ts
 import { useState } from 'react';
 
 type ModalVariant = 'success' | 'error' | 'confirm' | 'info';
@@ -11,7 +10,6 @@ type ModalConfig = {
   cancelText?: string;
   hideCancel?: boolean;
   onConfirm?: () => void;
-  link?: string;
 };
 
 export const useModal = () => {
@@ -32,18 +30,24 @@ export const useModal = () => {
 
   const closeModal = () => {
     setIsOpen(false);
-    window.location.href = '/home';
   };
 
-  // atalhos úteis
-  const openSuccess = (title: string, description?: string) =>
+  // Sucesso com callback opcional
+  const openSuccess = (
+    title: string,
+    description?: string,
+    onConfirm?: () => void,
+  ) =>
     openModal({
       title,
       description,
       variant: 'success',
       hideCancel: true,
       confirmText: 'Fechar',
-      onConfirm: closeModal,
+      onConfirm: () => {
+        if (onConfirm) onConfirm();
+        closeModal();
+      },
     });
 
   const openError = (title: string, description?: string) =>

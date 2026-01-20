@@ -14,6 +14,7 @@ type ModalBaseProps = {
   loading?: boolean;
   onConfirm?: () => void;
   onClose: () => void;
+  link?: string;
 };
 
 const variantStyles: Record<ModalVariant, string> = {

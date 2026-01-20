@@ -11,6 +11,7 @@ type ModalConfig = {
   cancelText?: string;
   hideCancel?: boolean;
   onConfirm?: () => void;
+  link?: string;
 };
 
 export const useModal = () => {
@@ -31,6 +32,7 @@ export const useModal = () => {
 
   const closeModal = () => {
     setIsOpen(false);
+    window.location.href = '/home';
   };
 
   // atalhos úteis

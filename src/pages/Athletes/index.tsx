@@ -451,6 +451,7 @@ export function Athletes() {
             hideCancel={modal.config.hideCancel}
             onConfirm={modal.config.onConfirm}
             onClose={modal.closeModal}
+            link={modal.config.link}
           />
         </div>
       </form>

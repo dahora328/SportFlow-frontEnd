@@ -167,7 +167,7 @@ export function LandingPage() {
 
             {/* Botão de Cadastro (Destaque) */}
             <button
-              onClick={openLogin}
+              onClick={() => navigate('/register')}
               className='w-full flex items-center justify-center gap-3 bg-blue-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]'
             >
               <span>Criar minha conta grátis</span>

@@ -13,17 +13,21 @@ import { LandingPage } from './pages/LandingPage';
 import { Home } from './pages/Home';
 // import { Login } from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
+import { Register } from './pages/User/Register';
 
 function AppContent() {
   const location = useLocation();
   const hideTopBar =
-    location.pathname === '/' || location.pathname === '/login';
+    location.pathname === '/' ||
+    location.pathname === '/login' ||
+    location.pathname === '/register';
 
   return (
     <>
       <AuthProvider>
         {!hideTopBar && <TopBar />}
         <Routes>
+          <Route path='/register' element={<Register />} />
           {/* Páginas iniciais */}
           <Route path='/' element={<LandingPage />} />
           {/* <Route path='/login' element={<Login />} /> */}

@@ -113,7 +113,7 @@ export function LandingPage() {
               {[1, 2, 3, 4].map(i => (
                 <div
                   key={i}
-                  className='w-8 h-8 rounded-full bg-gray-300 border-2 border-blue-600 flex items-center justify-center text-xs text-gray-600 font-bold bg-white'
+                  className='w-8 h-8 rounded-full bg-gray-300 border-2 border-blue-600 flex items-center justify-center text-xs text-gray-600 font-bold'
                 >
                   {String.fromCharCode(64 + i)}
                 </div>
@@ -158,11 +158,11 @@ export function LandingPage() {
 
             {/* Divisor "ou" */}
             <div className='relative flex py-2 items-center'>
-              <div className='flex-grow border-t border-gray-300'></div>
-              <span className='flex-shrink-0 mx-4 text-gray-400 text-sm'>
+              <div className='border-t border-gray-300'></div>
+              <span className='mx-4 text-gray-400 text-sm'>
                 ou comece agora
               </span>
-              <div className='flex-grow border-t border-gray-300'></div>
+              <div className='border-t border-gray-300'></div>
             </div>
 
             {/* Botão de Cadastro (Destaque) */}
@@ -196,7 +196,7 @@ export function LandingPage() {
 function FeatureItem({ text }: { icon: any; text: string }) {
   return (
     <div className='flex items-center gap-3'>
-      <div className='flex-shrink-0 w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center'>
+      <div className='w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center'>
         <CheckCircle2 size={14} className='text-blue-200' />
       </div>
       <span className='font-medium text-blue-50'>{text}</span>

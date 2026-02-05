@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserPlus, Mail, Lock } from 'lucide-react';
-// import { registerUser } from '../../services/authService'; // ajuste para sua API
+import { createUser } from '../../../services/userService';
 
 export function Register() {
   const [name, setName] = useState('');
@@ -19,13 +19,11 @@ export function Register() {
     setError(null);
 
     try {
-      // Chamar sua API de registro aqui
-      // await registerUser({ name, email, password });
-      // Exemplo: se sucesso, redirecionar para login ou home
-      alert('Usuário cadastrado com sucesso! Faça login.');
-      navigate('/'); // ou /login
+      await createUser({ name, email, password });
+      alert('Usuário cadastrado com sucesso! Faça login.'); //usar modal para da alerta que conseguiu cadastrar
+      navigate('/');
     } catch (err: any) {
-      console.error(err);
+      console.error(err); //usar o modal para mostrar o erro
       const msg =
         err?.response?.data?.message ||
         'Não foi possível realizar o cadastro. Tente novamente.';

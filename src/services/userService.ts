@@ -25,7 +25,7 @@ export interface LoginResponse {
 
 export async function createUser(data: UserData) {
   try {
-    const response = await api.post('/user', data);
+    const response = await api.post('/register', data);
     return response.data;
   } catch (error) {
     console.error('Erro ao criar usuário:', error);

@@ -5,6 +5,7 @@ import {
   deleteAthlete,
   getAthleteById,
   getAthletes,
+  getAthletesByName,
   type AthleteData,
 } from '../../services/athletesService';
 import { formatDate, formatCPF } from '../../utils/util';
@@ -20,6 +21,7 @@ function Th({ children }: { children: React.ReactNode }) {
 
 export function Home() {
   const [athletes, setAthletes] = useState<AthleteData[]>([]);
+  const [serachAthlete, setSearchAthlete] = useState('');
 
   const modal = useModal();
 
@@ -35,6 +37,24 @@ export function Home() {
 
     loadAthletes();
   }, []);
+
+  async function loadAthletes() {
+    try {
+      const data = await getAthletes();
+      setAthletes(data);
+    } catch (error) {
+      console.error('Erro ao carregar atletas', error);
+    }
+  }
+
+  async function handleSearchAthletes(name: string) {
+    try {
+      const data = await getAthletesByName(name);
+      setAthletes(data);
+    } catch (error) {
+      console.error('Erro ao buscar atletas por nome: ', error);
+    }
+  }
 
   async function handleLoadAthleteData(athleteId: number) {
     try {
@@ -83,6 +103,16 @@ export function Home() {
               type='search'
               placeholder='Buscar atleta...'
               className='w-64 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500'
+              value={serachAthlete}
+              onChange={e => {
+                const value = e.target.value;
+                setSearchAthlete(value);
+                if (value.trim().length === 0) {
+                  loadAthletes();
+                } else {
+                  handleSearchAthletes(value);
+                }
+              }}
             />
           </div>
           <div className='flex gap-2 justify-center'>

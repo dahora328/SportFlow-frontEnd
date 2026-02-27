@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserPlus, Mail, Lock } from 'lucide-react';
 import { createUser } from '../../../services/userService';
+import { ModalBase } from '../../../components/Modal/ModalBase';
+import { useModal } from '../../../hooks/useModal';
 
 export function Register() {
   const [name, setName] = useState('');
@@ -12,6 +14,7 @@ export function Register() {
   const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
+  const modal = useModal();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -20,10 +23,27 @@ export function Register() {
 
     try {
       await createUser({ name, email, password });
+      modal.openModal({
+        title: 'Sucesso!',
+        description: 'Usuário cadastrado com sucesso! Faça login.',
+        variant: 'success',
+        confirmText: 'Fazer login',
+        hideCancel: true,
+        onConfirm: () => navigate('/'),
+      });
       alert('Usuário cadastrado com sucesso! Faça login.'); //usar modal para da alerta que conseguiu cadastrar
-      navigate('/');
+      //navigate('/');
     } catch (err: any) {
       console.error(err); //usar o modal para mostrar o erro
+
+      modal.openModal({
+        title: 'Erro',
+        description: err?.response?.data?.message || 'Não foi possível realizar o cadastro. Tente novamente.',
+        variant: 'error',
+        confirmText: 'Fechar',
+        hideCancel: true,
+        onConfirm: () => modal.closeModal(),
+      })
       const msg =
         err?.response?.data?.message ||
         'Não foi possível realizar o cadastro. Tente novamente.';
@@ -125,6 +145,17 @@ export function Register() {
           >
             {loading ? 'Criando conta...' : 'Criar conta'}
           </button>
+          <ModalBase
+            isOpen={modal.isOpen}
+            title={modal.config.title}
+            description={modal.config.description}
+            variant={modal.config.variant}
+            confirmText={modal.config.confirmText}
+            cancelText={modal.config.cancelText}
+            hideCancel={modal.config.hideCancel}
+            onConfirm={modal.config.onConfirm}
+            onClose={modal.closeModal}
+          />
         </form>
 
         <p className='mt-6 text-center text-xs text-gray-500'>

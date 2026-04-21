@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from './api';
 
 export interface AthleteData {
@@ -21,6 +22,13 @@ export interface AthleteData {
   owner_id: number;
 }
 
+type GetAthletesResponse = {
+  athletes: AthleteData[];
+  meta: any;
+  links: any;
+  success: boolean;
+};
+
 export async function createAthlete(data: AthleteData) {
   try {
     const response = await api.post('/athletes', data);
@@ -32,13 +40,27 @@ export async function createAthlete(data: AthleteData) {
   }
 }
 
-export async function getAthletes() {
+export async function getAthletes(params = {}): Promise<GetAthletesResponse> {
   try {
-    const response = await api.get('/athletes');
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao buscar atletas:', error);
-    throw error;
+    const response = await api.get('/athletes', { params });
+
+    return {
+      athletes: response.data.data,
+      meta: response.data.meta,
+      links: response.data.links,
+      success: response.data.success,
+    };
+  } catch (error: any) {
+    console.error(
+      'Erro ao buscar atletas:',
+      error.response?.data || error.message,
+    );
+
+    throw {
+      message: error.response?.data?.message || 'Erro ao buscar atletas',
+      status: error.response?.status,
+      errors: error.response?.data?.errors || null,
+    };
   }
 }
 

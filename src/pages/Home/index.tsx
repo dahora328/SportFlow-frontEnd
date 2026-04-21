@@ -25,27 +25,18 @@ export function Home() {
 
   const modal = useModal();
 
-  useEffect(() => {
-    async function loadAthletes() {
-      try {
-        const data = await getAthletes();
-        setAthletes(data);
-      } catch (error) {
-        console.error('Erro ao carregar atletas:', error);
-      }
-    }
-
-    loadAthletes();
-  }, []);
-
   async function loadAthletes() {
     try {
       const data = await getAthletes();
-      setAthletes(data);
+      setAthletes(data.athletes);
     } catch (error) {
       console.error('Erro ao carregar atletas', error);
     }
   }
+
+  useEffect(() => {
+    loadAthletes();
+  }, []);
 
   async function handleSearchAthletes(name: string) {
     try {

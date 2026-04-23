@@ -1,13 +1,10 @@
 //função para formatar data
-export function formatDate(date: string): string {
-  const [year, month, day] = date.split('-').map(Number);
+export function formatDate(dateString: string) {
+  const date = new Date(dateString);
 
-  const d = new Date(Date.UTC(year, month - 1, day));
+  if (isNaN(date.getTime())) return '-';
 
-  const dayStr = String(d.getUTCDate()).padStart(2, '0');
-  const monthStr = String(d.getUTCMonth() + 1).padStart(2, '0');
-
-  return `${dayStr}/${monthStr}/${year}`;
+  return date.toLocaleDateString('pt-BR');
 }
 
 export function formatCPF(cpf: string): string {

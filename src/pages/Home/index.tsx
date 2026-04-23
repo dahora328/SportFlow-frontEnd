@@ -41,7 +41,7 @@ export function Home() {
   async function handleSearchAthletes(name: string) {
     try {
       const data = await getAthletesByName(name);
-      setAthletes(data);
+      setAthletes(data.athletes);
     } catch (error) {
       console.error('Erro ao buscar atletas por nome: ', error);
     }
@@ -137,7 +137,9 @@ export function Home() {
               </tr>
             </thead>
             <tbody className='divide-y divide-gray-100'>
+              
               {athletes.map((athlete: any) => (
+                console.log(athlete),
                 <tr key={athlete.id} className='hover:bg-gray-200'>
                   <td className='px-4 py-3'>{athlete.full_name}</td>
                   <td className='px-4 py-3'>
@@ -145,7 +147,7 @@ export function Home() {
                   </td>
                   <td className='px-4 py-3'>{formatCPF(athlete.document)}</td>
                   <td className='px-4 py-3'>
-                    {formatDate(athlete.updated_at?.split('T')[0] || '')}
+                    {athlete.updated_at ? formatDate(athlete.updated_at) : '-'}
                   </td>
                   <td className='px-4 py-3 flex gap-4 items-center justify-center'>
                     <Link

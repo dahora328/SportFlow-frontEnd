@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import {
   createAthlete,
@@ -6,16 +6,23 @@ import {
   getAthleteById,
   type AthleteData,
 } from '../../services/athletesService';
+import api from '../../services/api';
 import { formatDocument, formatPhone, formatZipCode } from '../../utils/util';
 import { ModalBase } from '../../components/Modal/ModalBase';
 import { useModal } from '../../hooks/useModal';
 
 export function Athletes() {
+  const PHOTO_RATIO = 3 / 4;
+  const PHOTO_RATIO_TOLERANCE = 0.02;
+
   const { id } = useParams(); // Para edição via URL /athletes/:id
   const location = useLocation();
 
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedPhotoName, setSelectedPhotoName] = useState('');
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState('');
+  const lastObjectUrlRef = useRef<string | null>(null);
 
   const modal = useModal();
   const navigate = useNavigate();
@@ -38,7 +45,87 @@ export function Athletes() {
     mother_name: '',
     father_name: '',
     owner_id: localStorage.getItem('user_id')?.toString() as unknown as number,
+    photo_path: '',
   });
+
+  useEffect(() => {
+    return () => {
+      if (lastObjectUrlRef.current) {
+        URL.revokeObjectURL(lastObjectUrlRef.current);
+      }
+    };
+  }, []);
+
+  const normalizeImageUrl = useCallback((imagePath: string) => {
+    if (/^https?:\/\//i.test(imagePath)) {
+      return imagePath;
+    }
+
+    const apiBaseUrl = api.defaults.baseURL || window.location.origin;
+    const apiOrigin = apiBaseUrl.replace(/\/api\/?$/, '/');
+    const normalizedPath = imagePath.startsWith('/')
+      ? imagePath.slice(1)
+      : imagePath;
+
+    return new URL(normalizedPath, apiOrigin).toString();
+  }, []);
+
+  const updatePhotoPreview = useCallback(
+    (nextUrl: string, isObjectUrl = false) => {
+      if (lastObjectUrlRef.current) {
+        URL.revokeObjectURL(lastObjectUrlRef.current);
+        lastObjectUrlRef.current = null;
+      }
+
+      if (isObjectUrl) {
+        lastObjectUrlRef.current = nextUrl;
+      }
+
+      setPhotoPreviewUrl(nextUrl);
+    },
+    [],
+  );
+
+  // Função para carregar dados do atleta
+  const loadAthleteData = useCallback(
+    async (athleteId: number) => {
+      try {
+        setLoading(true);
+        const athleteData = await getAthleteById(athleteId);
+
+        setFormData({
+          ...athleteData,
+          // Garante que campos opcionais tenham valor padrão se forem null/undefined
+          mobile_phone: athleteData.mobile_phone || '',
+          secondary_phone: athleteData.secondary_phone || '',
+          email: athleteData.email || '',
+          number: athleteData.number || '',
+          neighborhood: athleteData.neighborhood || '',
+          zip_code: athleteData.zip_code || '',
+          state: athleteData.state || '',
+          city: athleteData.city || '',
+          mother_name: athleteData.mother_name || '',
+          father_name: athleteData.father_name || '',
+          photo_path: athleteData.photo_path || '',
+        });
+
+        const existingPhotoPath = athleteData.photo_path;
+        if (existingPhotoPath && typeof existingPhotoPath === 'string') {
+          updatePhotoPreview(normalizeImageUrl(existingPhotoPath));
+        } else {
+          updatePhotoPreview('');
+        }
+
+        setSelectedPhotoName('');
+      } catch (error) {
+        console.error('Erro ao carregar atleta:', error);
+        alert('Erro ao carregar dados do atleta!');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [normalizeImageUrl, updatePhotoPreview],
+  );
 
   useEffect(() => {
     // Verifica se veio um atleta para editar via state (navegação)
@@ -71,43 +158,68 @@ export function Athletes() {
         owner_id: localStorage
           .getItem('user_id')
           ?.toString() as unknown as number,
+        photo_path: '',
       });
+      setSelectedPhotoName('');
+      setPhotoPreviewUrl('');
     }
-  }, [id, location.state]);
-
-  // Função para carregar dados do atleta
-  async function loadAthleteData(athleteId: number) {
-    try {
-      setLoading(true);
-      const athleteData = await getAthleteById(athleteId);
-
-      setFormData({
-        ...athleteData,
-        // Garante que campos opcionais tenham valor padrão se forem null/undefined
-        mobile_phone: athleteData.mobile_phone || '',
-        secondary_phone: athleteData.secondary_phone || '',
-        email: athleteData.email || '',
-        number: athleteData.number || '',
-        neighborhood: athleteData.neighborhood || '',
-        zip_code: athleteData.zip_code || '',
-        state: athleteData.state || '',
-        city: athleteData.city || '',
-        mother_name: athleteData.mother_name || '',
-        father_name: athleteData.father_name || '',
-      });
-    } catch (error) {
-      console.error('Erro ao carregar atleta:', error);
-      alert('Erro ao carregar dados do atleta!');
-    } finally {
-      setLoading(false);
-    }
-  }
+  }, [id, location.state, loadAthleteData]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      setFormData(prev => ({ ...prev, photo_path: null }));
+      setSelectedPhotoName('');
+      updatePhotoPreview('');
+      return;
+    }
+
+    const image = new Image();
+    const imageUrl = URL.createObjectURL(file);
+
+    image.onload = () => {
+      const ratio = image.width / image.height;
+      URL.revokeObjectURL(imageUrl);
+
+      if (Math.abs(ratio - PHOTO_RATIO) > PHOTO_RATIO_TOLERANCE) {
+        modal.openError(
+          'Formato inválido',
+          'A foto deve estar no formato 3x4 (ex.: 300x400 px).',
+        );
+        setFormData(prev => ({ ...prev, photo_path: null }));
+        setSelectedPhotoName('');
+        updatePhotoPreview('');
+        e.target.value = '';
+        return;
+      }
+
+      const previewUrl = URL.createObjectURL(file);
+      setFormData(prev => ({ ...prev, photo_path: file }));
+      updatePhotoPreview(previewUrl, true);
+      setSelectedPhotoName(file.name);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(imageUrl);
+      modal.openError(
+        'Arquivo inválido',
+        'Não foi possível ler a imagem selecionada.',
+      );
+      setFormData(prev => ({ ...prev, photo_path: null }));
+      setSelectedPhotoName('');
+      updatePhotoPreview('');
+      e.target.value = '';
+    };
+
+    image.src = imageUrl;
   };
 
   async function handleSubmit(e: React.FormEvent) {
@@ -173,7 +285,10 @@ export function Athletes() {
         owner_id: localStorage
           .getItem('user_id')
           ?.toString() as unknown as number,
+        photo_path: '',
       });
+      setSelectedPhotoName('');
+      updatePhotoPreview('');
     }
   }
 
@@ -199,6 +314,42 @@ export function Athletes() {
         onSubmit={handleSubmit}
         className='bg-white shadow-lg rounded-lg p-6 w-full max-w-3xl'
       >
+        <div className='mb-6 rounded-lg border border-gray-200 p-4 bg-gray-50'>
+          <h2 className='text-sm font-semibold mb-3'>Foto do atleta (3x4)</h2>
+          <div className='flex flex-col md:flex-row gap-4 items-start'>
+            <div className='w-36 h-48 rounded-lg border border-gray-300 overflow-hidden bg-white flex items-center justify-center'>
+              {photoPreviewUrl ? (
+                <img
+                  src={photoPreviewUrl}
+                  alt='Pré-visualização da foto do atleta'
+                  className='w-full h-full object-cover'
+                />
+              ) : (
+                <span className='text-xs text-gray-400 px-2 text-center'>
+                  Sem foto selecionada
+                </span>
+              )}
+            </div>
+
+            <div className='flex-1 w-full'>
+              <input
+                type='file'
+                accept='image/*'
+                onChange={handlePhotoChange}
+                className='w-full border border-gray-300 rounded-lg px-3 py-2 bg-white'
+              />
+              <p className='text-xs text-gray-500 mt-1'>
+                Envie uma imagem com proporção 3x4 (ex.: 300x400 px).
+              </p>
+              {selectedPhotoName && (
+                <p className='text-xs text-green-600 mt-1'>
+                  Arquivo selecionado: {selectedPhotoName}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           {/* Nome completo */}
           <div>

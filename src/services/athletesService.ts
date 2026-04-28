@@ -20,6 +20,7 @@ export interface AthleteData {
   mother_name: string;
   father_name: string;
   owner_id: number;
+  photo_path?: string | File | null;
 }
 
 type GetAthletesResponse = {
@@ -31,7 +32,26 @@ type GetAthletesResponse = {
 
 export async function createAthlete(data: AthleteData) {
   try {
-    const response = await api.post('/athletes', data);
+    const payload = new FormData();
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === 'photo_path') {
+        if (value instanceof File) {
+          payload.append('photo_path', value);
+        }
+        return;
+      }
+
+      if (value !== null && value !== undefined) {
+        payload.append(key, String(value));
+      }
+    });
+
+    const response = await api.post('/athletes', payload, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     console.log(response.data);
     return response.data;
   } catch (error) {
@@ -87,7 +107,26 @@ export async function getAthletesByName(name: string) {
 
 export async function updateAthlete(id: number, data: AthleteData) {
   try {
-    const response = await api.put(`/athletes/${id}`, data);
+    const payload = new FormData();
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === 'photo_path') {
+        if (value instanceof File) {
+          payload.append('photo_path', value);
+        }
+        return;
+      }
+
+      if (value !== null && value !== undefined) {
+        payload.append(key, String(value));
+      }
+    });
+
+    const response = await api.put(`/athletes/${id}`, payload, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('Erro ao atualizar atleta:', error);

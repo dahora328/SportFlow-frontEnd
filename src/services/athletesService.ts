@@ -87,7 +87,7 @@ export async function getAthletes(params = {}): Promise<GetAthletesResponse> {
 export async function getAthleteById(id: number) {
   try {
     const response = await api.get(`/athletes/${id}`);
-    return response.data;
+    return response.data?.data ?? response.data;
   } catch (error) {
     console.error('Erro ao buscar atleta por ID:', error);
     throw error;

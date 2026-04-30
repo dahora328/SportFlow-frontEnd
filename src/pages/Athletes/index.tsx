@@ -70,6 +70,46 @@ export function Athletes() {
     return new URL(normalizedPath, apiOrigin).toString();
   }, []);
 
+  const getAthletePhotoPath = useCallback(
+    (athleteData: Record<string, unknown>): string => {
+      const readNestedString = (
+        source: Record<string, unknown>,
+        key: string,
+        nestedKey: string,
+      ): string => {
+        const nested = source[key];
+        if (typeof nested === 'object' && nested !== null) {
+          const value = (nested as Record<string, unknown>)[nestedKey];
+          if (typeof value === 'string' && value.trim().length > 0) {
+            return value;
+          }
+        }
+        return '';
+      };
+
+      const candidates = [
+        athleteData.photo_path,
+        athleteData.photo_url,
+        athleteData.photo,
+        athleteData.image,
+        athleteData.image_url,
+        athleteData.avatar,
+        athleteData.avatar_url,
+        readNestedString(athleteData, 'photo', 'path'),
+        readNestedString(athleteData, 'photo', 'url'),
+        readNestedString(athleteData, 'image', 'path'),
+        readNestedString(athleteData, 'image', 'url'),
+      ];
+
+      const firstValidPath = candidates.find(
+        candidate => typeof candidate === 'string' && candidate.trim().length > 0,
+      );
+
+      return firstValidPath || '';
+    },
+    [],
+  );
+
   const updatePhotoPreview = useCallback(
     (nextUrl: string, isObjectUrl = false) => {
       if (lastObjectUrlRef.current) {
@@ -106,10 +146,14 @@ export function Athletes() {
           city: athleteData.city || '',
           mother_name: athleteData.mother_name || '',
           father_name: athleteData.father_name || '',
-          photo_path: athleteData.photo_path || '',
+          photo_path: getAthletePhotoPath(
+            athleteData as unknown as Record<string, unknown>,
+          ),
         });
 
-        const existingPhotoPath = athleteData.photo_path;
+        const existingPhotoPath = getAthletePhotoPath(
+          athleteData as unknown as Record<string, unknown>,
+        );
         if (existingPhotoPath && typeof existingPhotoPath === 'string') {
           updatePhotoPreview(normalizeImageUrl(existingPhotoPath));
         } else {
@@ -124,7 +168,7 @@ export function Athletes() {
         setLoading(false);
       }
     },
-    [normalizeImageUrl, updatePhotoPreview],
+    [getAthletePhotoPath, normalizeImageUrl, updatePhotoPreview],
   );
 
   useEffect(() => {
@@ -134,7 +178,7 @@ export function Athletes() {
     // Verifica se tem ID na URL
     if (id || athleteFromState) {
       setIsEditing(true);
-      loadAthleteData(id || athleteFromState?.id);
+      loadAthleteData(Number(id || athleteFromState?.id));
     } else {
       // Modo cadastro - reseta o formulário
       setIsEditing(false);
@@ -230,7 +274,7 @@ export function Athletes() {
       let result;
 
       if (isEditing) {
-        const athleteId = id || location.state?.athleteToEdit?.id;
+        const athleteId = Number(id || location.state?.athleteToEdit?.id);
 
         result = await updateAthlete(athleteId, formData);
         console.log('Atualizado com sucesso:', result);

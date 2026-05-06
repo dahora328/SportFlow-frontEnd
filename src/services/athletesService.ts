@@ -109,6 +109,8 @@ export async function updateAthlete(id: number, data: AthleteData) {
   try {
     const payload = new FormData();
 
+    payload.append('_method', 'PUT');
+
     Object.entries(data).forEach(([key, value]) => {
       if (key === 'photo_path') {
         if (value instanceof File) {
@@ -122,7 +124,7 @@ export async function updateAthlete(id: number, data: AthleteData) {
       }
     });
 
-    const response = await api.put(`/athletes/${id}`, payload, {
+    const response = await api.post(`/athletes/${id}`, payload, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

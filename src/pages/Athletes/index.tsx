@@ -22,6 +22,9 @@ export function Athletes() {
   const [loading, setLoading] = useState(false);
   const [selectedPhotoName, setSelectedPhotoName] = useState('');
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState('');
+  const [photoPreviewFallbackUrls, setPhotoPreviewFallbackUrls] = useState<
+    string[]
+  >([]);
   const lastObjectUrlRef = useRef<string | null>(null);
 
   const modal = useModal();
@@ -57,17 +60,77 @@ export function Athletes() {
   }, []);
 
   const normalizeImageUrl = useCallback((imagePath: string) => {
-    if (/^https?:\/\//i.test(imagePath)) {
-      return imagePath;
+    const trimmedPath = imagePath.trim();
+    if (!trimmedPath) {
+      return '';
+    }
+
+    const normalizedSlashesPath = trimmedPath.replace(/\\/g, '/');
+
+    if (/^https?:\/\//i.test(normalizedSlashesPath)) {
+      return normalizedSlashesPath;
     }
 
     const apiBaseUrl = api.defaults.baseURL || window.location.origin;
-    const apiOrigin = apiBaseUrl.replace(/\/api\/?$/, '/');
-    const normalizedPath = imagePath.startsWith('/')
-      ? imagePath.slice(1)
-      : imagePath;
+    const apiBase = new URL(apiBaseUrl, window.location.origin);
+    const apiOrigin = apiBase.origin;
+    const normalizedPath = normalizedSlashesPath.startsWith('/')
+      ? normalizedSlashesPath.slice(1)
+      : normalizedSlashesPath;
 
     return new URL(normalizedPath, apiOrigin).toString();
+  }, []);
+
+  const buildImageUrlCandidates = useCallback((imagePath: string): string[] => {
+    const trimmedPath = imagePath.trim();
+    if (!trimmedPath) {
+      return [];
+    }
+
+    const normalizedPath = trimmedPath.replace(/\\/g, '/');
+
+    if (/^https?:\/\//i.test(normalizedPath)) {
+      return [normalizedPath];
+    }
+
+    const candidates = new Set<string>();
+    const apiBaseUrl = api.defaults.baseURL || window.location.origin;
+    const apiBase = new URL(apiBaseUrl, window.location.origin);
+    const baseWithApi = new URL('./', apiBase).toString();
+    const baseOrigin = `${apiBase.origin}/`;
+    const basename = normalizedPath.split('/').pop();
+
+    const addUrlVariants = (pathValue: string) => {
+      const cleanPath = pathValue.startsWith('/')
+        ? pathValue.slice(1)
+        : pathValue;
+      if (!cleanPath) {
+        return;
+      }
+      candidates.add(new URL(cleanPath, baseOrigin).toString());
+      candidates.add(new URL(cleanPath, baseWithApi).toString());
+    };
+
+    addUrlVariants(normalizedPath);
+
+    const segmentsToTry = ['/uploads/', '/storage/', '/public/'];
+    segmentsToTry.forEach(segment => {
+      const index = normalizedPath.toLowerCase().indexOf(segment);
+      if (index >= 0) {
+        const segmentPath = normalizedPath.slice(index);
+        addUrlVariants(segmentPath);
+        if (segment === '/public/') {
+          addUrlVariants(segmentPath.replace(/^\/public\//i, '/'));
+        }
+      }
+    });
+
+    if (/^[a-z]:\//i.test(normalizedPath) && basename) {
+      addUrlVariants(`/uploads/${basename}`);
+      addUrlVariants(`/storage/${basename}`);
+    }
+
+    return Array.from(candidates);
   }, []);
 
   const getAthletePhotoPath = useCallback(
@@ -122,6 +185,7 @@ export function Athletes() {
       }
 
       setPhotoPreviewUrl(nextUrl);
+      setPhotoPreviewFallbackUrls([]);
     },
     [],
   );
@@ -155,12 +219,22 @@ export function Athletes() {
           athleteData as unknown as Record<string, unknown>,
         );
         if (existingPhotoPath && typeof existingPhotoPath === 'string') {
-          updatePhotoPreview(normalizeImageUrl(existingPhotoPath));
+          const previewCandidates = buildImageUrlCandidates(existingPhotoPath);
+
+          if (previewCandidates.length > 0) {
+            setPhotoPreviewUrl(previewCandidates[0]);
+            setPhotoPreviewFallbackUrls(previewCandidates.slice(1));
+          } else {
+            updatePhotoPreview(normalizeImageUrl(existingPhotoPath));
+          }
+
+          const normalizedNamePath = existingPhotoPath.replace(/\\/g, '/');
+          const fileName = normalizedNamePath.split('/').pop() || '';
+          setSelectedPhotoName(fileName);
         } else {
           updatePhotoPreview('');
+          setSelectedPhotoName('');
         }
-
-        setSelectedPhotoName('');
       } catch (error) {
         console.error('Erro ao carregar atleta:', error);
         alert('Erro ao carregar dados do atleta!');
@@ -168,7 +242,12 @@ export function Athletes() {
         setLoading(false);
       }
     },
-    [getAthletePhotoPath, normalizeImageUrl, updatePhotoPreview],
+    [
+      buildImageUrlCandidates,
+      getAthletePhotoPath,
+      normalizeImageUrl,
+      updatePhotoPreview,
+    ],
   );
 
   useEffect(() => {
@@ -367,6 +446,15 @@ export function Athletes() {
                   src={photoPreviewUrl}
                   alt='Pré-visualização da foto do atleta'
                   className='w-full h-full object-cover'
+                  onError={() => {
+                    if (photoPreviewFallbackUrls.length > 0) {
+                      setPhotoPreviewUrl(photoPreviewFallbackUrls[0]);
+                      setPhotoPreviewFallbackUrls(prev => prev.slice(1));
+                      return;
+                    }
+
+                    updatePhotoPreview('');
+                  }}
                 />
               ) : (
                 <span className='text-xs text-gray-400 px-2 text-center'>

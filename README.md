@@ -1,17 +1,25 @@
 # SportFlow FrontEnd
 
-Aplicacao web para gestao esportiva com foco no fluxo de atletas, autenticacao e navegacao entre modulos principais do sistema. Este projeto foi construido com React + TypeScript e utiliza Vite para desenvolvimento e build.
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-7.x-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)](#roadmap)
 
-## Visao geral
+Aplicacao web para gestao esportiva com foco no fluxo de atletas, autenticacao e navegacao entre modulos principais do sistema.
 
-O front-end do SportFlow entrega:
+## Sobre o projeto
 
-- cadastro e edicao de atletas com upload de foto;
-- listagem e gerenciamento de atletas;
-- fluxo de autenticacao com tokens;
-- paginas auxiliares como landing page, home, relatorios e cadastro de usuario.
+O SportFlow FrontEnd foi criado para oferecer uma experiencia simples e eficiente para operacoes do dia a dia esportivo, principalmente no cadastro e gerenciamento de atletas.
 
-## Stack utilizada
+### Principais entregas
+
+- cadastro, edicao e organizacao de atletas;
+- upload de foto com validacao de proporcao 3x4;
+- autenticacao com token e refresh automatico;
+- navegação entre modulos como landing page, home, relatorios e usuario.
+
+## Stack
 
 - React 19
 - TypeScript
@@ -21,88 +29,108 @@ O front-end do SportFlow entrega:
 - Tailwind CSS
 - ESLint
 
-## Funcionalidades principais
+## Preview da interface
 
-- **Autenticacao**
-  - armazenamento de `access_token` e `refresh_token` no `localStorage`;
-  - renovacao automatica de token em respostas `401` via interceptor do Axios.
+> Adicione imagens reais do projeto nos caminhos abaixo para melhorar a apresentacao no GitHub.
 
-- **Modulo de atletas**
-  - criacao e atualizacao com `multipart/form-data`;
-  - upload de foto com validacao de proporcao 3x4;
-  - carregamento de dados para edicao por rota (`/athletes/:id`).
+![Landing Page](./docs/screenshots/landing-page.png)
+![Tela de Home](./docs/screenshots/home.png)
+![Cadastro de Atleta](./docs/screenshots/athletes-form.png)
 
-- **Navegacao**
-  - rotas com React Router;
-  - barra superior exibida de forma condicional conforme a rota.
+## Fluxo de autenticacao
+
+- tokens `access_token` e `refresh_token` sao persistidos no `localStorage`;
+- requests autenticadas recebem `Authorization: Bearer <token>` via interceptor;
+- em caso de `401`, o app tenta refresh automaticamente;
+- se o refresh falhar, os dados de sessao sao limpos.
+
+Arquivo principal: `src/services/api.ts`.
 
 ## Rotas da aplicacao
 
-- `/` - Landing Page
-- `/register` - Cadastro de usuario
-- `/home` - Pagina inicial interna
-- `/athletes` - Cadastro de atleta
-- `/athletes/:id` - Edicao de atleta
-- `/reports` - Relatorios
-- `/user` - Area de usuario
+| Rota | Descricao |
+| --- | --- |
+| `/` | Landing Page |
+| `/register` | Cadastro de usuario |
+| `/home` | Pagina inicial interna |
+| `/athletes` | Cadastro de atleta |
+| `/athletes/:id` | Edicao de atleta |
+| `/reports` | Relatorios |
+| `/user` | Area do usuario |
 
-## Requisitos
+## Como rodar localmente
 
-- Node.js 18+ (recomendado)
+### 1) Requisitos
+
+- Node.js 18+
 - npm 9+
 
-## Como executar o projeto
-
-1. Instale as dependencias:
+### 2) Instalar dependencias
 
 ```bash
 npm install
 ```
 
-2. Inicie o servidor de desenvolvimento:
+### 3) Executar em desenvolvimento
 
 ```bash
 npm run dev
 ```
 
-3. Acesse no navegador:
+A aplicacao ficara disponivel em:
 
 ```txt
 http://localhost:5173
 ```
 
-## Scripts disponiveis
+## Scripts
 
-- `npm run dev` - inicia ambiente de desenvolvimento
-- `npm run build` - gera build de producao
-- `npm run preview` - sobe o build localmente para validacao
-- `npm run lint` - executa verificacoes de lint
+```bash
+npm run dev      # ambiente de desenvolvimento
+npm run build    # build de producao
+npm run preview  # preview do build
+npm run lint     # analise de lint
+```
 
 ## Configuracao da API
 
-Atualmente, a instancia Axios esta configurada com base fixa em:
+A base atual da API esta definida como:
 
 `http://localhost:80/api/`
 
-Arquivo de referencia: `src/services/api.ts`.
+Para trocar o backend, ajuste a `baseURL` no arquivo `src/services/api.ts`.
 
-Se necessario, ajuste esse valor para o endpoint do seu backend.
-
-## Estrutura de pastas (resumo)
+## Estrutura do projeto
 
 ```txt
 src/
-  components/    # componentes reutilizaveis (menu, modal, etc.)
-  contexts/      # contexto de autenticacao e tema
+  components/    # componentes reutilizaveis (menu, modal etc.)
+  contexts/      # contextos globais (auth, tema)
   hooks/         # hooks customizados
-  pages/         # paginas da aplicacao
-  routes/        # protecao/organizacao de rotas
-  services/      # integracao com API (axios e servicos)
+  pages/         # paginas/telas
+  routes/        # protecao e fluxo de rotas
+  services/      # camada de API e servicos
   styles/        # estilos globais
-  utils/         # funcoes utilitarias
+  utils/         # utilitarios
 ```
+
+## Roadmap
+
+- [x] CRUD principal de atletas
+- [x] Upload de foto no cadastro de atletas
+- [x] Fluxo de autenticacao com refresh de token
+- [ ] Protecao de rotas por perfil de usuario
+- [ ] Testes automatizados (unitarios/integracao)
+- [ ] Pipeline CI para lint + build
+- [ ] Melhorias de UX em estados de erro e carregamento
+
+## Contribuicao
+
+1. Crie uma branch para sua feature: `git checkout -b feat/minha-feature`
+2. Faça commits descritivos
+3. Abra um Pull Request com contexto e imagens (quando houver alteracao visual)
 
 ## Observacoes
 
-- Este repositorio depende do backend para funcionalidades de autenticacao e atletas.
-- Caso o backend esteja indisponivel, requisicoes que dependem da API irao falhar.
+- Este front-end depende do backend para autenticacao e operacoes de atletas.
+- Se a API estiver indisponivel, funcionalidades dependentes de rede podem falhar.

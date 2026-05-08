@@ -133,7 +133,7 @@ export function Athletes() {
     return Array.from(candidates);
   }, []);
 
-  const getAthletePhotoPath = useCallback(
+  const getAthletePhotoUrl = useCallback(
     (athleteData: Record<string, unknown>): string => {
       const readNestedString = (
         source: Record<string, unknown>,
@@ -151,16 +151,8 @@ export function Athletes() {
       };
 
       const candidates = [
-        athleteData.photo_path,
         athleteData.photo_url,
-        athleteData.photo,
-        athleteData.image,
-        athleteData.image_url,
-        athleteData.avatar,
-        athleteData.avatar_url,
-        readNestedString(athleteData, 'photo', 'path'),
         readNestedString(athleteData, 'photo', 'url'),
-        readNestedString(athleteData, 'image', 'path'),
         readNestedString(athleteData, 'image', 'url'),
       ];
 
@@ -210,25 +202,23 @@ export function Athletes() {
           city: athleteData.city || '',
           mother_name: athleteData.mother_name || '',
           father_name: athleteData.father_name || '',
-          photo_path: getAthletePhotoPath(
-            athleteData as unknown as Record<string, unknown>,
-          ),
+          photo_path: athleteData.photo_path || '',
         });
 
-        const existingPhotoPath = getAthletePhotoPath(
+        const existingPhotoUrl = getAthletePhotoUrl(
           athleteData as unknown as Record<string, unknown>,
         );
-        if (existingPhotoPath && typeof existingPhotoPath === 'string') {
-          const previewCandidates = buildImageUrlCandidates(existingPhotoPath);
+        if (existingPhotoUrl && typeof existingPhotoUrl === 'string') {
+          const previewCandidates = buildImageUrlCandidates(existingPhotoUrl);
 
           if (previewCandidates.length > 0) {
             setPhotoPreviewUrl(previewCandidates[0]);
             setPhotoPreviewFallbackUrls(previewCandidates.slice(1));
           } else {
-            updatePhotoPreview(normalizeImageUrl(existingPhotoPath));
+            updatePhotoPreview(normalizeImageUrl(existingPhotoUrl));
           }
 
-          const normalizedNamePath = existingPhotoPath.replace(/\\/g, '/');
+          const normalizedNamePath = existingPhotoUrl.replace(/\\/g, '/');
           const fileName = normalizedNamePath.split('/').pop() || '';
           setSelectedPhotoName(fileName);
         } else {
@@ -244,7 +234,7 @@ export function Athletes() {
     },
     [
       buildImageUrlCandidates,
-      getAthletePhotoPath,
+      getAthletePhotoUrl,
       normalizeImageUrl,
       updatePhotoPreview,
     ],

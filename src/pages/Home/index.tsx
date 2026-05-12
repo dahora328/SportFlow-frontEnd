@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   deleteAthlete,
@@ -12,6 +12,9 @@ import { formatDate, formatCPF } from '../../utils/util';
 import { Edit, Trash } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
 import { ModalBase } from '../../components/Modal/ModalBase';
+import { usePrint } from '../../hooks/usePrint';
+import { PrintContainer } from '../../components/Print/PrintContainer';
+import { AthletePrintCard } from '../Athletes/AthletePrintCard';
 
 function Th({ children }: { children: React.ReactNode }) {
   return (
@@ -24,6 +27,23 @@ export function Home() {
   const [serachAthlete, setSearchAthlete] = useState('');
 
   const modal = useModal();
+
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = usePrint({
+    contentRef: printRef,
+    documentTitle: 'ficha-atleta',
+  });
+
+  const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
+
+  function handlePrintAthlete(athlete: Athlete) {
+    setSelectedAthlete(athlete);
+
+    setTimeout(() => {
+      handlePrint();
+    }, 100);
+  }
 
   async function loadAthletes() {
     try {
@@ -137,62 +157,80 @@ export function Home() {
               </tr>
             </thead>
             <tbody className='divide-y divide-gray-100'>
-              
-              {athletes.map((athlete: any) => (
-                console.log(athlete),
-                <tr key={athlete.id} className='hover:bg-gray-200'>
-                  <td className='px-4 py-3'>{athlete.full_name}</td>
-                  <td className='px-4 py-3'>
-                    {formatDate(athlete.birth_date)}
-                  </td>
-                  <td className='px-4 py-3'>{formatCPF(athlete.document)}</td>
-                  <td className='px-4 py-3'>
-                    {athlete.updated_at ? formatDate(athlete.updated_at) : '-'}
-                  </td>
-                  <td className='px-4 py-3 flex gap-4 items-center justify-center'>
-                    <Link
-                      key={athlete.id}
-                      onClick={() => {
-                        handleLoadAthleteData(athlete.id);
-                      }}
-                      to={`/athletes/${athlete.id}`}
-                      className='cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors'
-                      title='Editar Atleta'
-                    >
-                      <Edit
-                        size={16}
-                        className='cursor-pointer text-gray-700 hover:text-gray-900'
-                      />
-                    </Link>
-                    <button
-                      type='button'
-                      onClick={e => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleDeteleAthlete(athlete.id);
-                      }}
-                      title='Deletar Atleta'
-                      className='cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors'
-                    >
-                      <Trash
-                        size={16}
-                        className='text-red-500 hover:text-red-700'
-                      />
-                    </button>
-                    <ModalBase
-                      isOpen={modal.isOpen}
-                      title={modal.config.title}
-                      description={modal.config.description}
-                      variant={modal.config.variant}
-                      confirmText={modal.config.confirmText}
-                      cancelText={modal.config.cancelText}
-                      hideCancel={modal.config.hideCancel}
-                      onConfirm={modal.config.onConfirm}
-                      onClose={modal.closeModal}
-                    />
-                  </td>
-                </tr>
-              ))}
+              {athletes.map(
+                (athlete: any) => (
+                  console.log(athlete),
+                  (
+                    <tr key={athlete.id} className='hover:bg-gray-200'>
+                      <td className='px-4 py-3'>{athlete.full_name}</td>
+                      <td className='px-4 py-3'>
+                        {formatDate(athlete.birth_date)}
+                      </td>
+                      <td className='px-4 py-3'>
+                        {formatCPF(athlete.document)}
+                      </td>
+                      <td className='px-4 py-3'>
+                        {athlete.updated_at
+                          ? formatDate(athlete.updated_at)
+                          : '-'}
+                      </td>
+                      <td className='px-4 py-3 flex gap-4 items-center justify-center'>
+                        <Link
+                          key={athlete.id}
+                          onClick={() => {
+                            handleLoadAthleteData(athlete.id);
+                          }}
+                          to={`/athletes/${athlete.id}`}
+                          className='cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors'
+                          title='Editar Atleta'
+                        >
+                          <Edit
+                            size={16}
+                            className='cursor-pointer text-gray-700 hover:text-gray-900'
+                          />
+                        </Link>
+                        <button
+                          type='button'
+                          onClick={e => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDeteleAthlete(athlete.id);
+                          }}
+                          title='Deletar Atleta'
+                          className='cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors'
+                        >
+                          <Trash
+                            size={16}
+                            className='text-red-500 hover:text-red-700'
+                          />
+                        </button>
+                        <button
+                          onClick={() => handlePrintAthlete(athlete)}
+                          className='px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition'
+                        >
+                          Imprimir
+                          <PrintContainer innerRef={printRef}>
+                            {selectedAthlete && (
+                              <AthletePrintCard athlete={selectedAthlete} />
+                            )}
+                          </PrintContainer>
+                        </button>
+                        <ModalBase
+                          isOpen={modal.isOpen}
+                          title={modal.config.title}
+                          description={modal.config.description}
+                          variant={modal.config.variant}
+                          confirmText={modal.config.confirmText}
+                          cancelText={modal.config.cancelText}
+                          hideCancel={modal.config.hideCancel}
+                          onConfirm={modal.config.onConfirm}
+                          onClose={modal.closeModal}
+                        />
+                      </td>
+                    </tr>
+                  )
+                ),
+              )}
             </tbody>
           </table>
         </div>

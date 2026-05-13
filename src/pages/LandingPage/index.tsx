@@ -64,8 +64,6 @@ export function LandingPage() {
     }
   }
 
-  if (!open) return null;
-
   return (
     <div className='min-h-screen bg-gray-50 flex flex-col lg:flex-row'>
       {/* --- SEÇÃO DA ESQUERDA: Hero / Marketing (Mantive igual, pois estava ótimo) --- */}

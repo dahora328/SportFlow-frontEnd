@@ -157,7 +157,7 @@ export function Athletes() {
       ];
 
       const firstValidPath = candidates.find(
-        candidate => typeof candidate === 'string' && candidate.trim().length > 0,
+        (candidate): candidate is string => typeof candidate === 'string' && candidate.trim().length > 0,
       );
 
       return firstValidPath || '';

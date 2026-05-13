@@ -6,11 +6,14 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)](#roadmap)
 
-Aplicacao web para gestao esportiva com foco no fluxo de atletas, autenticacao e navegacao entre modulos principais do sistema.
+Aplicacao web para gestao esportiva com foco no fluxo de atletas, autenticacao e
+navegacao entre modulos principais do sistema.
 
 ## Sobre o projeto
 
-O SportFlow FrontEnd foi criado para oferecer uma experiencia simples e eficiente para operacoes do dia a dia esportivo, principalmente no cadastro e gerenciamento de atletas.
+O SportFlow FrontEnd foi criado para oferecer uma experiencia simples e
+eficiente para operacoes do dia a dia esportivo, principalmente no cadastro e
+gerenciamento de atletas.
 
 ### Principais entregas
 
@@ -31,7 +34,8 @@ O SportFlow FrontEnd foi criado para oferecer uma experiencia simples e eficient
 
 ## Preview da interface
 
-> Adicione imagens reais do projeto nos caminhos abaixo para melhorar a apresentacao no GitHub.
+> Adicione imagens reais do projeto nos caminhos abaixo para melhorar a
+> apresentacao no GitHub.
 
 ![Landing Page](./docs/screenshots/landing-page.png)
 ![Tela de Home](./docs/screenshots/home.png)
@@ -48,15 +52,15 @@ Arquivo principal: `src/services/api.ts`.
 
 ## Rotas da aplicacao
 
-| Rota | Descricao |
-| --- | --- |
-| `/` | Landing Page |
-| `/register` | Cadastro de usuario |
-| `/home` | Pagina inicial interna |
-| `/athletes` | Cadastro de atleta |
-| `/athletes/:id` | Edicao de atleta |
-| `/reports` | Relatorios |
-| `/user` | Area do usuario |
+| Rota            | Descricao              |
+| --------------- | ---------------------- |
+| `/`             | Landing Page           |
+| `/register`     | Cadastro de usuario    |
+| `/home`         | Pagina inicial interna |
+| `/athletes`     | Cadastro de atleta     |
+| `/athletes/:id` | Edicao de atleta       |
+| `/reports`      | Relatorios             |
+| `/user`         | Area do usuario        |
 
 ## Como rodar localmente
 
@@ -133,4 +137,5 @@ src/
 ## Observacoes
 
 - Este front-end depende do backend para autenticacao e operacoes de atletas.
-- Se a API estiver indisponivel, funcionalidades dependentes de rede podem falhar.
+- Se a API estiver indisponivel, funcionalidades dependentes de rede podem
+  falhar.

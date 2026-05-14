@@ -35,9 +35,9 @@ export function Home() {
     documentTitle: 'ficha-atleta',
   });
 
-  const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
+  const [selectedAthlete, setSelectedAthlete] = useState<AthleteData | null>(null);
 
-  function handlePrintAthlete(athlete: Athlete) {
+  function handlePrintAthlete(athlete: AthleteData) {
     setSelectedAthlete(athlete);
 
     setTimeout(() => {

@@ -1,4 +1,4 @@
-import { Menu, X, User, LogOut, Edit } from 'lucide-react';
+import { Menu, X, User, LogOut, Edit, Building } from 'lucide-react';
 import { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../../contexts/AuthContext';
@@ -72,6 +72,16 @@ export function TopBar() {
                     <Edit size={16} /> Editar Perfil
                   </Link>
                 </li>
+                {/* NOVA OPÇÃO EMPRESA (DESKTOP) */}
+                <li>
+                  <Link
+                    to='/enterprise'
+                    onClick={() => setPerfilOpen(false)}
+                    className='px-4 py-2 hover:bg-white hover:text-red-950 flex items-center gap-2'
+                  >
+                    <Building size={16} /> Empresa
+                  </Link>
+                </li>
                 <li>
                   <Link
                     to='/'
@@ -130,6 +140,16 @@ export function TopBar() {
                     className='px-4 py-2 hover:bg-red-800 cursor-pointer flex items-center justify-center gap-2'
                   >
                     <Edit size={16} /> Editar Perfil
+                  </Link>
+                </li>
+                {/* NOVA OPÇÃO EMPRESA (MOBILE) */}
+                <li>
+                  <Link
+                    to='/enterprise'
+                    onClick={handleCloseMenus}
+                    className='px-4 py-2 hover:bg-red-800 cursor-pointer flex items-center justify-center gap-2'
+                  >
+                    <Building size={16} /> Empresa
                   </Link>
                 </li>
                 <li>

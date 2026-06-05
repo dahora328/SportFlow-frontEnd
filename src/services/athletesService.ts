@@ -63,12 +63,13 @@ export async function createAthlete(data: AthleteData) {
 export async function getAthletes(params = {}): Promise<GetAthletesResponse> {
   try {
     const response = await api.get('/athletes', { params });
+    const resData = response.data;
 
     return {
-      athletes: response.data.data,
-      meta: response.data.meta,
-      links: response.data.links,
-      success: response.data.success,
+      athletes: Array.isArray(resData) ? resData : resData?.data || [],
+      meta: resData?.meta,
+      links: resData?.links,
+      success: resData?.success ?? true,
     };
   } catch (error: any) {
     console.error(

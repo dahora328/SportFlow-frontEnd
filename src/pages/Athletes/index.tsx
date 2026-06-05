@@ -72,13 +72,15 @@ export function Athletes() {
     }
 
     const apiBaseUrl = api.defaults.baseURL || window.location.origin;
-    const apiBase = new URL(apiBaseUrl, window.location.origin);
-    const apiOrigin = apiBase.origin;
+    const baseUrlWithSlash = apiBaseUrl.endsWith('/')
+      ? apiBaseUrl
+      : `${apiBaseUrl}/`;
+    const apiBase = new URL(baseUrlWithSlash, window.location.origin);
     const normalizedPath = normalizedSlashesPath.startsWith('/')
       ? normalizedSlashesPath.slice(1)
       : normalizedSlashesPath;
 
-    return new URL(normalizedPath, apiOrigin).toString();
+    return new URL(normalizedPath, apiBase).toString();
   }, []);
 
   const buildImageUrlCandidates = useCallback((imagePath: string): string[] => {
@@ -95,40 +97,44 @@ export function Athletes() {
 
     const candidates = new Set<string>();
     const apiBaseUrl = api.defaults.baseURL || window.location.origin;
-    const apiBase = new URL(apiBaseUrl, window.location.origin);
-    const baseWithApi = new URL('./', apiBase).toString();
+    const baseUrlWithSlash = apiBaseUrl.endsWith('/')
+      ? apiBaseUrl
+      : `${apiBaseUrl}/`;
+    const apiBase = new URL(baseUrlWithSlash, window.location.origin);
+    const baseWithApi = apiBase.toString();
     const baseOrigin = `${apiBase.origin}/`;
-    const basename = normalizedPath.split('/').pop();
 
-    const addUrlVariants = (pathValue: string) => {
-      const cleanPath = pathValue.startsWith('/')
-        ? pathValue.slice(1)
-        : pathValue;
-      if (!cleanPath) {
-        return;
-      }
-      candidates.add(new URL(cleanPath, baseOrigin).toString());
-      candidates.add(new URL(cleanPath, baseWithApi).toString());
-    };
+    const cleanPath = normalizedPath.startsWith('/')
+      ? normalizedPath.slice(1)
+      : normalizedPath;
 
-    addUrlVariants(normalizedPath);
+    const filename = cleanPath.split('/').pop() || cleanPath;
 
-    const segmentsToTry = ['/uploads/', '/storage/', '/public/'];
-    segmentsToTry.forEach(segment => {
-      const index = normalizedPath.toLowerCase().indexOf(segment);
-      if (index >= 0) {
-        const segmentPath = normalizedPath.slice(index);
-        addUrlVariants(segmentPath);
-        if (segment === '/public/') {
-          addUrlVariants(segmentPath.replace(/^\/public\//i, '/'));
-        }
-      }
-    });
+    // 1. Caminho exato na origem ou na URL da API
+    candidates.add(new URL(cleanPath, baseOrigin).toString());
+    candidates.add(new URL(cleanPath, baseWithApi).toString());
 
-    if (/^[a-z]:\//i.test(normalizedPath) && basename) {
-      addUrlVariants(`/uploads/${basename}`);
-      addUrlVariants(`/storage/${basename}`);
+    // 2. Ajustes comuns de diretório public/storage
+    if (cleanPath.includes('public/')) {
+      const withoutPublic = cleanPath.replace('public/', '');
+      candidates.add(new URL(withoutPublic, baseOrigin).toString());
+      candidates.add(
+        new URL(`storage/${withoutPublic}`, baseOrigin).toString(),
+      );
     }
+
+    if (!cleanPath.includes('storage/')) {
+      candidates.add(new URL(`storage/${cleanPath}`, baseOrigin).toString());
+    }
+
+    // 3. Tentativas usando apenas o nome do arquivo nas pastas mais comuns
+    candidates.add(new URL(`storage/${filename}`, baseOrigin).toString());
+    candidates.add(new URL(`uploads/${filename}`, baseOrigin).toString());
+    candidates.add(
+      new URL(`storage/uploads/${filename}`, baseOrigin).toString(),
+    );
+    candidates.add(new URL(`storage/${filename}`, baseWithApi).toString());
+    candidates.add(new URL(`uploads/${filename}`, baseWithApi).toString());
 
     return Array.from(candidates);
   }, []);
@@ -151,13 +157,15 @@ export function Athletes() {
       };
 
       const candidates = [
+        athleteData.photo_path,
         athleteData.photo_url,
         readNestedString(athleteData, 'photo', 'url'),
         readNestedString(athleteData, 'image', 'url'),
       ];
 
       const firstValidPath = candidates.find(
-        (candidate): candidate is string => typeof candidate === 'string' && candidate.trim().length > 0,
+        (candidate): candidate is string =>
+          typeof candidate === 'string' && candidate.trim().length > 0,
       );
 
       return firstValidPath || '';
@@ -188,6 +196,7 @@ export function Athletes() {
       try {
         setLoading(true);
         const athleteData = await getAthleteById(athleteId);
+        console.log('[DEBUG] Dados brutos do atleta recuperado:', athleteData);
 
         setFormData({
           ...athleteData,
@@ -208,20 +217,33 @@ export function Athletes() {
         const existingPhotoUrl = getAthletePhotoUrl(
           athleteData as unknown as Record<string, unknown>,
         );
+        console.log('[DEBUG] URL/Caminho da foto extraído:', existingPhotoUrl);
+
         if (existingPhotoUrl && typeof existingPhotoUrl === 'string') {
           const previewCandidates = buildImageUrlCandidates(existingPhotoUrl);
+          console.log('[DEBUG] URLs candidatas geradas:', previewCandidates);
 
           if (previewCandidates.length > 0) {
             setPhotoPreviewUrl(previewCandidates[0]);
             setPhotoPreviewFallbackUrls(previewCandidates.slice(1));
+            console.log(
+              '[DEBUG] URL de preview definida:',
+              previewCandidates[0],
+            );
           } else {
-            updatePhotoPreview(normalizeImageUrl(existingPhotoUrl));
+            const normalizedUrl = normalizeImageUrl(existingPhotoUrl);
+            updatePhotoPreview(normalizedUrl);
+            console.log(
+              '[DEBUG] URL normalizada como fallback:',
+              normalizedUrl,
+            );
           }
 
           const normalizedNamePath = existingPhotoUrl.replace(/\\/g, '/');
           const fileName = normalizedNamePath.split('/').pop() || '';
           setSelectedPhotoName(fileName);
         } else {
+          console.log('[DEBUG] Nenhuma URL de foto encontrada nos dados.');
           updatePhotoPreview('');
           setSelectedPhotoName('');
         }

@@ -1,4 +1,4 @@
-import { Menu, X, User, LogOut, Edit, Building } from 'lucide-react';
+import { Menu, X, User, LogOut, Edit, Building } from 'lucide-react'; 
 import { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../../contexts/AuthContext';

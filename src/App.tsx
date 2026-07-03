@@ -11,6 +11,7 @@ import { User } from './pages/User';
 import { Reports } from './pages/Reports';
 import { LandingPage } from './pages/LandingPage';
 import { Home } from './pages/Home';
+import { Enterprise } from './pages/Enterprise';
 // import { Login } from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
 import { Register } from './pages/User/Register';
@@ -32,6 +33,7 @@ function AppContent() {
           <Route path='/' element={<LandingPage />} />
           {/* <Route path='/login' element={<Login />} /> */}
           <Route path='/user' element={<User />} />
+          <Route path='/enterprise' element={<Enterprise />} />
           {/* Páginas principais */}
           <Route path='/reports' element={<Reports />} />
           <Route path='/home' element={<Home />} />

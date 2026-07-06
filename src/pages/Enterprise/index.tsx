@@ -6,6 +6,9 @@ import { getEnterprises, type EnterpriseData } from '../../services/enterpriseSe
 import { Link } from 'react-router-dom';
 
 export function Enterprise() {
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
   const [formData, setFormData] = useState<EnterpriseData>({
     id: undefined,
     name: '',
@@ -37,6 +40,11 @@ export function Enterprise() {
         const enterprise = data?.[0]; // Pega a primeira empresa vinculada ao usuário
         
         if (enterprise) {
+          if (enterprise.logo_path) {
+            // Ajuste a URL base se sua API estiver em outro endereço/porta
+            setLogoPreview(`http://localhost:8080/storage/${enterprise.logo_path}`);
+          }
+
           setFormData({
             id: enterprise.id,
             name: enterprise.name || '',
@@ -78,10 +86,28 @@ export function Enterprise() {
     try {
       setSaving(true);
       
+      const submitData = new FormData();
+      Object.keys(formData).forEach(key => {
+        const val = formData[key as keyof EnterpriseData];
+        if (val !== undefined && val !== null) {
+            submitData.append(key, String(val));
+        }
+      });
+
+      if (logoFile) {
+        submitData.append('logo', logoFile);
+      }
+
       if (formData.id) {
-        await api.put(`/enterprises/${formData.id}`, formData);
+        // No Laravel, envio de arquivos via PUT exige _method = PUT no FormData via POST
+        submitData.append('_method', 'PUT');
+        await api.post(`/enterprises/${formData.id}`, submitData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
       } else {
-        await api.post('/enterprises', formData); 
+        await api.post('/enterprises', submitData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        }); 
       }
       
       modal.openSuccess('Sucesso', 'Dados da empresa salvos com sucesso!');
@@ -105,6 +131,38 @@ export function Enterprise() {
         onSubmit={handleSubmit}
         className='bg-white shadow-lg rounded-lg p-6 w-full max-w-4xl'
       >
+        {/* Logo Upload Section */}
+        <div className='flex flex-col items-center mb-8'>
+          <label className='block text-sm font-semibold mb-3 text-gray-700'>Logo da Empresa</label>
+          <div 
+            className='w-32 h-32 rounded-full border-4 border-gray-200 overflow-hidden bg-gray-100 flex items-center justify-center relative cursor-pointer group hover:border-yellow-400 transition-colors'
+            onClick={() => document.getElementById('logoInput')?.click()}
+          >
+            {logoPreview ? (
+              <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-gray-400 text-sm font-medium text-center px-2">Clique para adicionar</span>
+            )}
+            <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'>
+              <span className='text-white text-xs font-semibold'>Alterar Logo</span>
+            </div>
+          </div>
+          <input 
+            type="file" 
+            id="logoInput" 
+            className="hidden" 
+            accept="image/*" 
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setLogoFile(file);
+                setLogoPreview(URL.createObjectURL(file));
+              }
+            }} 
+          />
+          <p className='text-xs text-gray-500 mt-3'>Tamanho recomendado: 256x256. Máximo: 2MB.</p>
+        </div>
+
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           {/* Nome */}
           <div>

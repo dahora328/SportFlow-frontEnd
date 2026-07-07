@@ -18,6 +18,7 @@ export interface EnterpriseData {
   zip_code?: string;
   phone?: string;
   email?: string;
+  logo_path?: string;
   active?: boolean;
 }
 

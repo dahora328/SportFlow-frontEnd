@@ -23,7 +23,7 @@ export interface EnterpriseData {
 }
 
 export async function getEnterprises(
-  params = {},
+  params: any = {},
 ): Promise<EnterpriseData[]> {
   try {
     const response = await api.get('/enterprises', { params });

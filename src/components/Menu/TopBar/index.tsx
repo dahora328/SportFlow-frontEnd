@@ -1,12 +1,37 @@
 import { Menu, X, User, LogOut, Edit, Building } from 'lucide-react'; 
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../../contexts/AuthContext';
+import { getEnterprises } from '../../../services/enterpriseService';
 
 export function TopBar() {
   const [open, setOpen] = useState(false);
   const [perfilOpen, setPerfilOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const { logout } = useContext(AuthContext);
+
+  useEffect(() => {
+    async function fetchLogo() {
+      try {
+        // Passa o timestamp para forçar o backend a enviar os dados frescos sem cache do navegador
+        const data = await getEnterprises({ t: new Date().getTime() });
+        const enterprise = data?.[0];
+        if (enterprise?.logo_path) {
+          // Adiciona timestamp para evitar cache de imagem do navegador ao atualizar logo
+          setLogoUrl(`http://localhost:8080/storage/${enterprise.logo_path}?t=${new Date().getTime()}`);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar logo da empresa no TopBar:", error);
+      }
+    }
+    fetchLogo();
+
+    // Escuta evento customizado para atualizar a logo em tempo real
+    window.addEventListener('enterpriseUpdated', fetchLogo);
+    return () => {
+      window.removeEventListener('enterpriseUpdated', fetchLogo);
+    };
+  }, []);
 
   const handleCloseMenus = () => {
     setOpen(false);
@@ -17,7 +42,13 @@ export function TopBar() {
     <nav className='bg-red-950 text-white px-6 py-4 shadow-md'>
       <div className='flex items-center justify-between'>
         {/* Logo */}
-        <h1 className='text-xl font-bold text-yellow-400'>LOGO</h1>
+        <div className="flex items-center h-10">
+          {logoUrl ? (
+            <img src={logoUrl} alt="Logo Empresa" className="h-full w-auto object-contain" />
+          ) : (
+            <h1 className='text-xl font-bold text-yellow-400'>LOGO</h1>
+          )}
+        </div>
 
         {/* Menu mobile toggle */}
         <button

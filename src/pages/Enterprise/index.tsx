@@ -36,13 +36,13 @@ export function Enterprise() {
     async function loadEnterpriseData() {
       try {
         setLoading(true);
-        const data = await getEnterprises();
+        const data = await getEnterprises({ t: new Date().getTime() });
         const enterprise = data?.[0]; // Pega a primeira empresa vinculada ao usuário
         
         if (enterprise) {
           if (enterprise.logo_path) {
-            // Ajuste a URL base se sua API estiver em outro endereço/porta
-            setLogoPreview(`http://localhost:8080/storage/${enterprise.logo_path}`);
+            // Ajuste a URL base se sua API estiver em outro endereço/porta, adicione timestamp para evitar cache visual
+            setLogoPreview(`http://localhost:8080/storage/${enterprise.logo_path}?t=${new Date().getTime()}`);
           }
 
           setFormData({
@@ -111,6 +111,11 @@ export function Enterprise() {
       }
       
       modal.openSuccess('Sucesso', 'Dados da empresa salvos com sucesso!');
+      
+      // Dispara um evento para o TopBar saber que deve recarregar a logo
+      window.dispatchEvent(new Event('enterpriseUpdated'));
+      setLogoFile(null); // Limpa o arquivo para não reenviar à toa em futuros "Salvar"
+
     } catch (error) {
       console.error('Erro ao salvar empresa:', error);
       modal.openError('Erro', 'Ocorreu um erro ao tentar salvar os dados.');
@@ -151,16 +156,22 @@ export function Enterprise() {
             type="file" 
             id="logoInput" 
             className="hidden" 
-            accept="image/*" 
+            accept="image/png, image/jpeg, image/jpg, image/webp, image/*" 
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                  modal.openError('Erro', 'A imagem selecionada é muito grande. O tamanho máximo permitido é 5MB.');
+                  e.target.value = '';
+                  return;
+                }
                 setLogoFile(file);
                 setLogoPreview(URL.createObjectURL(file));
               }
+              e.target.value = ''; // Limpa o valor para permitir selecionar a mesma imagem novamente se necessário
             }} 
           />
-          <p className='text-xs text-gray-500 mt-3'>Tamanho recomendado: 256x256. Máximo: 2MB.</p>
+          <p className='text-xs text-gray-500 mt-3'>Tamanho recomendado: 256x256. Máximo: 5MB.</p>
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>

@@ -64,7 +64,7 @@ export function Home() {
       setTimeout(() => {
         handlePrint();
         isPrintingRef.current = false;
-      }, 300); // Aguarda o DOM exibir a foto renderizada antes de tirar a cópia para o PDF
+      }, 100); // Reduzido de 300 para 100. Aguarda o DOM exibir a foto renderizada antes de tirar a cópia para o PDF
     }
   }, [isReadyToPrint, handlePrint]);
 

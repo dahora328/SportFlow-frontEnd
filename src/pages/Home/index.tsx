@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   deleteAthlete,
@@ -35,20 +35,50 @@ export function Home() {
     documentTitle: 'ficha-atleta',
   });
 
-  const [selectedAthlete, setSelectedAthlete] = useState<AthleteData | null>(null);
+  const [selectedAthlete, setSelectedAthlete] = useState<AthleteData | null>(
+    null,
+  );
+  const [isReadyToPrint, setIsReadyToPrint] = useState(false);
+  const isPrintingRef = useRef(false);
 
-  function handlePrintAthlete(athlete: AthleteData) {
-    setSelectedAthlete(athlete);
+  const handlePrintReady = useCallback(() => {
+    setIsReadyToPrint(true);
+  }, []);
 
-    setTimeout(() => {
-      handlePrint();
-    }, 100);
+  async function handlePrintAthlete(athlete: AthleteData) {
+    isPrintingRef.current = true;
+    setIsReadyToPrint(false); // Reseta o status
+    setSelectedAthlete(null); // Força a desmontagem para limpar dados antigos
+
+    try {
+      const fullAthleteData = await getAthleteById((athlete as any).id);
+      setSelectedAthlete(fullAthleteData);
+    } catch (error) {
+      console.error('Erro ao buscar dados do atleta para impressão:', error);
+      setSelectedAthlete(athlete);
+    }
   }
+
+  useEffect(() => {
+    if (isReadyToPrint && isPrintingRef.current) {
+      setTimeout(() => {
+        handlePrint();
+        isPrintingRef.current = false;
+      }, 100); // Reduzido de 300 para 100. Aguarda o DOM exibir a foto renderizada antes de tirar a cópia para o PDF
+    }
+  }, [isReadyToPrint, handlePrint]);
 
   async function loadAthletes() {
     try {
       const data = await getAthletes();
-      setAthletes(data.athletes);
+
+      // Fallback de segurança para suportar vários formatos de resposta da API
+      const athletesList =
+        data.athletes ||
+        (data as any).data ||
+        (Array.isArray(data) ? data : []);
+
+      setAthletes(athletesList);
     } catch (error) {
       console.error('Erro ao carregar atletas', error);
     }
@@ -61,7 +91,9 @@ export function Home() {
   async function handleSearchAthletes(name: string) {
     try {
       const data = await getAthletesByName(name);
-      setAthletes(data.athletes);
+      setAthletes(
+        data.athletes || data.data || (Array.isArray(data) ? data : []),
+      );
     } catch (error) {
       console.error('Erro ao buscar atletas por nome: ', error);
     }
@@ -157,84 +189,85 @@ export function Home() {
               </tr>
             </thead>
             <tbody className='divide-y divide-gray-100'>
-              {athletes.map(
-                (athlete: any) => (
-                  console.log(athlete),
-                  (
-                    <tr key={athlete.id} className='hover:bg-gray-200'>
-                      <td className='px-4 py-3'>{athlete.full_name}</td>
-                      <td className='px-4 py-3'>
-                        {formatDate(athlete.birth_date)}
-                      </td>
-                      <td className='px-4 py-3'>
-                        {formatCPF(athlete.document)}
-                      </td>
-                      <td className='px-4 py-3'>
-                        {athlete.updated_at
-                          ? formatDate(athlete.updated_at)
-                          : '-'}
-                      </td>
-                      <td className='px-4 py-3 flex gap-4 items-center justify-center'>
-                        <Link
-                          key={athlete.id}
-                          onClick={() => {
-                            handleLoadAthleteData(athlete.id);
-                          }}
-                          to={`/athletes/${athlete.id}`}
-                          className='cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors'
-                          title='Editar Atleta'
-                        >
-                          <Edit
-                            size={16}
-                            className='cursor-pointer text-gray-700 hover:text-gray-900'
-                          />
-                        </Link>
-                        <button
-                          type='button'
-                          onClick={e => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleDeteleAthlete(athlete.id);
-                          }}
-                          title='Deletar Atleta'
-                          className='cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors'
-                        >
-                          <Trash
-                            size={16}
-                            className='text-red-500 hover:text-red-700'
-                          />
-                        </button>
-                        <button
-                          onClick={() => handlePrintAthlete(athlete)}
-                          className='px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition'
-                        >
-                          Imprimir
-                          <PrintContainer innerRef={printRef}>
-                            {selectedAthlete && (
-                              <AthletePrintCard athlete={selectedAthlete} />
-                            )}
-                          </PrintContainer>
-                        </button>
-                        <ModalBase
-                          isOpen={modal.isOpen}
-                          title={modal.config.title}
-                          description={modal.config.description}
-                          variant={modal.config.variant}
-                          confirmText={modal.config.confirmText}
-                          cancelText={modal.config.cancelText}
-                          hideCancel={modal.config.hideCancel}
-                          onConfirm={modal.config.onConfirm}
-                          onClose={modal.closeModal}
+              {athletes?.map((athlete: any) => {
+                console.log(athlete);
+                return (
+                  <tr key={athlete.id} className='hover:bg-gray-200'>
+                    <td className='px-4 py-3'>{athlete.full_name}</td>
+                    <td className='px-4 py-3'>
+                      {formatDate(athlete.birth_date)}
+                    </td>
+                    <td className='px-4 py-3'>{formatCPF(athlete.document)}</td>
+                    <td className='px-4 py-3'>
+                      {athlete.updated_at
+                        ? formatDate(athlete.updated_at)
+                        : '-'}
+                    </td>
+                    <td className='px-4 py-3 flex gap-4 items-center justify-center'>
+                      <Link
+                        key={athlete.id}
+                        onClick={() => {
+                          handleLoadAthleteData(athlete.id);
+                        }}
+                        to={`/athletes/${athlete.id}`}
+                        className='cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors'
+                        title='Editar Atleta'
+                      >
+                        <Edit
+                          size={16}
+                          className='cursor-pointer text-gray-700 hover:text-gray-900'
                         />
-                      </td>
-                    </tr>
-                  )
-                ),
-              )}
+                      </Link>
+                      <button
+                        type='button'
+                        onClick={e => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDeteleAthlete(athlete.id);
+                        }}
+                        title='Deletar Atleta'
+                        className='cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors'
+                      >
+                        <Trash
+                          size={16}
+                          className='text-red-500 hover:text-red-700'
+                        />
+                      </button>
+                      <button
+                        onClick={() => handlePrintAthlete(athlete)}
+                        className='px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition'
+                      >
+                        Imprimir
+                      </button>
+                      <ModalBase
+                        isOpen={modal.isOpen}
+                        title={modal.config.title}
+                        description={modal.config.description}
+                        variant={modal.config.variant}
+                        confirmText={modal.config.confirmText}
+                        cancelText={modal.config.cancelText}
+                        hideCancel={modal.config.hideCancel}
+                        onConfirm={modal.config.onConfirm}
+                        onClose={modal.closeModal}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </section>
+
+      {/* O Container de impressão DEVE ficar fora da tabela (fora do map) */}
+      <PrintContainer innerRef={printRef}>
+        {selectedAthlete && (
+          <AthletePrintCard
+            athlete={selectedAthlete}
+            onReady={handlePrintReady}
+          />
+        )}
+      </PrintContainer>
     </div>
   );
 }

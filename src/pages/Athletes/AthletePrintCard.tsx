@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+import api from '../../services/api';
 import {
   formatDate,
   formatDocument,
@@ -23,13 +25,71 @@ interface Athlete {
   mother_name: string;
   father_name: string;
   photo_url?: string;
+  photo_path?: string | File | null;
 }
 
 interface Props {
   athlete: Athlete;
+  onReady?: () => void;
 }
 
-export function AthletePrintCard({ athlete }: Props) {
+export function AthletePrintCard({ athlete, onReady }: Props) {
+  const [imgSrc, setImgSrc] = useState<string>('');
+  const [fallbackUrls, setFallbackUrls] = useState<string[]>([]);
+
+  useEffect(() => {
+    const photo = athlete.photo_url || athlete.photo_path;
+    if (!photo || typeof photo !== 'string') {
+      if (onReady) onReady();
+      return;
+    }
+
+    const normalizedPath = photo.replace(/\\/g, '/');
+    if (/^https?:\/\//i.test(normalizedPath)) {
+      setImgSrc(normalizedPath);
+      return;
+    }
+
+    const apiBaseUrl = api.defaults.baseURL || window.location.origin;
+    const baseUrlWithSlash = apiBaseUrl.endsWith('/')
+      ? apiBaseUrl
+      : `${apiBaseUrl}/`;
+    const baseOrigin = `${new URL(baseUrlWithSlash, window.location.origin).origin}/`;
+    const cleanPath = normalizedPath.startsWith('/')
+      ? normalizedPath.slice(1)
+      : normalizedPath;
+    const filename = cleanPath.split('/').pop() || cleanPath;
+
+    const candidates = new Set<string>();
+
+    candidates.add(new URL(cleanPath, baseOrigin).toString());
+    candidates.add(new URL(cleanPath, baseUrlWithSlash).toString());
+
+    if (cleanPath.includes('public/')) {
+      const withoutPublic = cleanPath.replace('public/', '');
+      candidates.add(new URL(withoutPublic, baseOrigin).toString());
+      candidates.add(
+        new URL(`storage/${withoutPublic}`, baseOrigin).toString(),
+      );
+    }
+    if (!cleanPath.includes('storage/')) {
+      candidates.add(new URL(`storage/${cleanPath}`, baseOrigin).toString());
+    }
+
+    candidates.add(new URL(`storage/${filename}`, baseOrigin).toString());
+    candidates.add(new URL(`uploads/${filename}`, baseOrigin).toString());
+    candidates.add(
+      new URL(`storage/uploads/${filename}`, baseOrigin).toString(),
+    );
+    candidates.add(new URL(`storage/${filename}`, baseUrlWithSlash).toString());
+    candidates.add(new URL(`uploads/${filename}`, baseUrlWithSlash).toString());
+
+    const urls = Array.from(candidates);
+
+    setImgSrc(urls[0]);
+    setFallbackUrls(urls.slice(1));
+  }, [athlete, onReady]);
+
   return (
     <div
       className='
@@ -40,6 +100,10 @@ export function AthletePrintCard({ athlete }: Props) {
         p-8
         mx-auto
       '
+      style={{
+        WebkitPrintColorAdjust: 'exact',
+        printColorAdjust: 'exact',
+      }}
     >
       {/* Cabeçalho */}
       <div className='border-b pb-4 mb-6'>
@@ -62,11 +126,21 @@ export function AthletePrintCard({ athlete }: Props) {
             bg-gray-100
           '
         >
-          {athlete.photo_url ? (
+          {imgSrc ? (
             <img
-              src={athlete.photo_url}
+              src={imgSrc}
               alt={athlete.full_name}
               className='w-full h-full object-cover'
+              onLoad={() => onReady && onReady()}
+              onError={() => {
+                if (fallbackUrls.length > 0) {
+                  setImgSrc(fallbackUrls[0]);
+                  setFallbackUrls(prev => prev.slice(1));
+                } else {
+                  setImgSrc('');
+                  if (onReady) onReady();
+                }
+              }}
             />
           ) : (
             <span className='text-sm text-gray-500'>Sem foto</span>

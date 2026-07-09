@@ -39,12 +39,17 @@ export function Login() {
 
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as {
-          response?: { data?: { message?: string } };
+          response?: { status?: number; data?: { message?: string } };
         };
-        const errorMessage =
-          axiosError.response?.data?.message ||
-          'Erro ao fazer login. Tente novamente.';
-        setError(errorMessage);
+
+        if (axiosError.response?.status === 401) {
+          setError('Login ou senha inválidos. Verifique suas credenciais.');
+        } else {
+          const errorMessage =
+            axiosError.response?.data?.message ||
+            'Erro ao fazer login. Tente novamente.';
+          setError(errorMessage);
+        }
       } else {
         setError('Erro ao fazer login. Verifique suas credenciais.');
       }

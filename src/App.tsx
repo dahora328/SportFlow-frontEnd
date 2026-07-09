@@ -4,7 +4,7 @@ import {
   Routes,
   useLocation,
 } from 'react-router-dom';
-import { useContext } from 'react';
+import { useContext, type JSX } from 'react';
 import { Navigate } from 'react-router-dom';
 import { TopBar } from './components/Menu/TopBar';
 import './styles/App.css';

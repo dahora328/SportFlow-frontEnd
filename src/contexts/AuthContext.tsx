@@ -1,19 +1,38 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import api from '../services/api';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, react-refresh/only-export-components
-export const AuthContext = createContext<any>(null);
+export interface AuthUser {
+  id: number;
+  name: string;
+  email: string;
+  is_admin: boolean;
+  enterprise_id: number | null;
+}
+
+interface AuthContextType {
+  accessToken: string | null;
+  refreshToken: string | null;
+  user: AuthUser | null;
+  isAuthenticated: boolean;
+  login: (access: string, refresh: string) => Promise<void>;
+  logout: () => void;
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   /**
-   * Carrega tokens salvos ao iniciar o app
+   * Carrega tokens e dados do usuário salvos ao iniciar o app
    */
   useEffect(() => {
     const storedAccess = localStorage.getItem('access_token');
     const storedRefresh = localStorage.getItem('refresh_token');
+    const storedUser = localStorage.getItem('auth_user');
 
     if (storedAccess) {
       setAccessToken(storedAccess);
@@ -23,12 +42,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (storedRefresh) {
       setRefreshToken(storedRefresh);
     }
+
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        localStorage.removeItem('auth_user');
+      }
+    }
   }, []);
 
   /**
-   * Login — salva tokens e configura Axios
+   * Login — salva tokens, configura Axios e busca dados do usuário logado
    */
-  function login(access: string, refresh: string) {
+  async function login(access: string, refresh: string) {
     setAccessToken(access);
     setRefreshToken(refresh);
 
@@ -36,6 +63,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('refresh_token', refresh);
 
     api.defaults.headers.Authorization = `Bearer ${access}`;
+
+    // Busca os dados do usuário (is_admin, enterprise_id, etc.)
+    try {
+      const response = await api.get('/user');
+      const userData: AuthUser = response.data;
+      setUser(userData);
+      localStorage.setItem('auth_user', JSON.stringify(userData));
+    } catch {
+      // Se falhar ao buscar o usuário, o login ainda funciona — dados virão depois
+      console.warn('Não foi possível buscar dados do usuário após login.');
+    }
   }
 
   /**
@@ -44,9 +82,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   function logout() {
     setAccessToken(null);
     setRefreshToken(null);
+    setUser(null);
 
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('auth_user');
 
     api.defaults.headers.Authorization = '';
 
@@ -67,6 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         accessToken,
         refreshToken,
+        user,
         login,
         logout,
         isAuthenticated: !!accessToken,

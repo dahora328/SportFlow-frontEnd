@@ -34,14 +34,12 @@ export function LandingPage() {
       const user_id = response.user_id;
 
       if (access && refresh) {
-        login(access, refresh);
+        await login(access, refresh);
       } else {
         throw new Error('Tokens não recebidos do servidor');
       }
 
       console.log('Login realizado com sucesso:', response);
-
-      localStorage.setItem('user_id', user_id.toString());
 
       setIsLoginModalOpen(false);
 

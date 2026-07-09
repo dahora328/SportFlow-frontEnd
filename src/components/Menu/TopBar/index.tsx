@@ -6,7 +6,10 @@ import { AuthContext } from '../../../contexts/AuthContext';
 export function TopBar() {
   const [open, setOpen] = useState(false);
   const [perfilOpen, setPerfilOpen] = useState(false);
-  const { logout } = useContext(AuthContext);
+  const { logout, user } = useContext(AuthContext)!;
+
+  // Super Admin: is_admin=true e sem empresa (enterprise_id=null) — gerencia o sistema
+  const isSuperAdmin = user?.is_admin === true && user?.enterprise_id === null;
 
   const handleCloseMenus = () => {
     setOpen(false);
@@ -31,16 +34,28 @@ export function TopBar() {
         {/* Menu desktop centralizado */}
         <div className='hidden md:flex flex-1 items-center justify-center'>
           <ul className='flex gap-8 font-medium'>
-            <li className='hover:text-yellow-400 cursor-pointer'>
-              <Link to='/home'>Home</Link>
-            </li>
-            <li className='hover:text-yellow-400 cursor-pointer'>
-              <Link to='/athletes'>Atletas</Link>
-            </li>
-            <li className='hover:text-yellow-400 cursor-pointer'>
-              <Link to='/reports'>Relatórios</Link>
-            </li>
-            <li className='hover:text-yellow-400 cursor-pointer'>Contato</li>
+
+            {/* Itens visíveis para todos (exceto Super Admin que gerencia tudo pelo painel) */}
+            {!isSuperAdmin && (
+              <>
+                <li className='hover:text-yellow-400 cursor-pointer'>
+                  <Link to='/home'>Home</Link>
+                </li>
+                <li className='hover:text-yellow-400 cursor-pointer'>
+                  <Link to='/athletes'>Atletas</Link>
+                </li>
+                <li className='hover:text-yellow-400 cursor-pointer'>
+                  <Link to='/reports'>Relatórios</Link>
+                </li>
+              </>
+            )}
+
+            {/* Painel Admin — somente Super Admin */}
+            {isSuperAdmin && (
+              <li className='hover:text-yellow-400 cursor-pointer'>
+                <Link to='/admin'>Painel Admin</Link>
+              </li>
+            )}
           </ul>
         </div>
 
@@ -51,17 +66,17 @@ export function TopBar() {
           onMouseLeave={() => setPerfilOpen(false)}
         >
           <button
-            onClick={() => setPerfilOpen(!perfilOpen)} // Mantém o click como alternativa
+            onClick={() => setPerfilOpen(!perfilOpen)}
             className={`flex items-center gap-2 cursor-pointer py-2 ${
               perfilOpen ? 'text-yellow-400' : 'hover:text-yellow-400'
             }`}
           >
             <User size={18} />
-            Perfil
+            {user?.name?.split(' ')[0] ?? 'Perfil'}
           </button>
 
           {perfilOpen && (
-            <div className='absolute right-0 pt-2 w-40 z-50'>
+            <div className='absolute right-0 pt-2 w-44 z-50'>
               <ul className='bg-red-950 rounded-lg shadow-lg py-2 border border-red-900'>
                 <li>
                   <Link
@@ -93,24 +108,34 @@ export function TopBar() {
       {/* Menu mobile */}
       {open && (
         <ul className='md:hidden mt-4 flex flex-col gap-4 font-medium animate-fadeIn'>
-          <li className='hover:text-yellow-400 cursor-pointer text-center'>
-            <Link to='/home' onClick={() => setOpen(false)}>
-              Home
-            </Link>
-          </li>
-          <li className='hover:text-yellow-400 cursor-pointer text-center'>
-            <Link to='/athletes' onClick={() => setOpen(false)}>
-              Atletas
-            </Link>
-          </li>
-          <li className='hover:text-yellow-400 cursor-pointer text-center'>
-            <Link to='/reports' onClick={() => setOpen(false)}>
-              Relatórios
-            </Link>
-          </li>
-          <li className='hover:text-yellow-400 cursor-pointer text-center'>
-            Contato
-          </li>
+
+          {!isSuperAdmin && (
+            <>
+              <li className='hover:text-yellow-400 cursor-pointer text-center'>
+                <Link to='/home' onClick={() => setOpen(false)}>
+                  Home
+                </Link>
+              </li>
+              <li className='hover:text-yellow-400 cursor-pointer text-center'>
+                <Link to='/athletes' onClick={() => setOpen(false)}>
+                  Atletas
+                </Link>
+              </li>
+              <li className='hover:text-yellow-400 cursor-pointer text-center'>
+                <Link to='/reports' onClick={() => setOpen(false)}>
+                  Relatórios
+                </Link>
+              </li>
+            </>
+          )}
+
+          {isSuperAdmin && (
+            <li className='hover:text-yellow-400 cursor-pointer text-center'>
+              <Link to='/admin' onClick={() => setOpen(false)}>
+                Painel Admin
+              </Link>
+            </li>
+          )}
 
           {/* Submenu Perfil no mobile */}
           <li className='flex flex-col items-center border-t border-red-900 pt-4 mt-2'>
@@ -118,7 +143,7 @@ export function TopBar() {
               onClick={() => setPerfilOpen(!perfilOpen)}
               className='flex items-center gap-2 hover:text-yellow-400 cursor-pointer mb-2'
             >
-              <User size={18} /> Perfil
+              <User size={18} /> {user?.name?.split(' ')[0] ?? 'Perfil'}
             </button>
 
             {perfilOpen && (

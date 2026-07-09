@@ -3,32 +3,40 @@ import api from './api';
 
 export interface EnterpriseData {
   id?: number;
+  name?: string;
+  social_reason?: string;
+  fantasy_name?: string;
+  document?: string;
+  foundation_date?: string;
+  IE?: string;
+  address?: string;
+  number?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
+  phone?: string;
+  email?: string;
+  logo_path?: string;
+  active?: boolean;
 }
 
-type GetEnterpriseResponse = {
-  enterprise: EnterpriseData[];
-  meta: any;
-  links: any;
-  success: boolean;
-};
-
 export async function getEnterprises(
-  params = {},
-): Promise<GetEnterpriseResponse> {
+  params: any = {},
+): Promise<EnterpriseData[]> {
   try {
     const response = await api.get('/enterprises', { params });
 
-    return {
-      enterprise: response.data.data,
-    };
+    return response.data;
   } catch (error: any) {
     console.error(
-      'Erro ao buscar atletas:',
+      'Erro ao buscar empresas:',
       error.response?.data || error.message,
     );
 
     throw {
-      message: error.response?.data?.message || 'Erro ao buscar atletas',
+      message: error.response?.data?.message || 'Erro ao buscar empresas',
       status: error.response?.status,
       errors: error.response?.data?.errors || null,
     };

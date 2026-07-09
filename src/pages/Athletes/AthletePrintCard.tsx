@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { getEnterprises } from '../../services/enterpriseService';
 import {
   formatDate,
   formatDocument,
@@ -36,6 +37,25 @@ interface Props {
 export function AthletePrintCard({ athlete, onReady }: Props) {
   const [imgSrc, setImgSrc] = useState<string>('');
   const [fallbackUrls, setFallbackUrls] = useState<string[]>([]);
+  const [enterpriseLogo, setEnterpriseLogo] = useState<string>('');
+
+  useEffect(() => {
+    async function fetchLogo() {
+      try {
+        const enterprises = await getEnterprises({ t: new Date().getTime() });
+        if (enterprises.length > 0 && enterprises[0].logo_path) {
+          const apiBaseUrl = api.defaults.baseURL || window.location.origin;
+          const baseUrlWithSlash = apiBaseUrl.endsWith('/') ? apiBaseUrl : `${apiBaseUrl}/`;
+          const baseOrigin = `${new URL(baseUrlWithSlash, window.location.origin).origin}/`;
+          
+          setEnterpriseLogo(`${baseOrigin}storage/${enterprises[0].logo_path}?t=${new Date().getTime()}`);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar logo da empresa', error);
+      }
+    }
+    fetchLogo();
+  }, []);
 
   useEffect(() => {
     const photo = athlete.photo_url || athlete.photo_path;
@@ -99,16 +119,37 @@ export function AthletePrintCard({ athlete, onReady }: Props) {
         text-black
         p-8
         mx-auto
+        relative
       '
       style={{
         WebkitPrintColorAdjust: 'exact',
         printColorAdjust: 'exact',
       }}
     >
-      {/* Cabeçalho */}
-      <div className='border-b pb-4 mb-6'>
-        <h1 className='text-3xl font-bold'>Ficha do Atleta</h1>
-      </div>
+      {/* Marca d'água */}
+      {enterpriseLogo && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+          <img 
+            src={enterpriseLogo} 
+            alt="Marca d'água" 
+            className="w-3/4 max-w-[500px] object-contain opacity-[0.07]"
+          />
+        </div>
+      )}
+
+      {/* Conteúdo (z-10 para ficar acima da marca d'água) */}
+      <div className="relative z-10">
+        {/* Cabeçalho */}
+        <div className='border-b pb-4 mb-6 flex items-center justify-between'>
+          <h1 className='text-3xl font-bold'>Ficha do Atleta</h1>
+          {enterpriseLogo && (
+            <img 
+              src={enterpriseLogo} 
+              alt="Logo da Empresa" 
+              className="h-16 object-contain"
+            />
+          )}
+        </div>
 
       {/* Dados principais */}
       <div className='flex gap-6'>
@@ -210,6 +251,7 @@ export function AthletePrintCard({ athlete, onReady }: Props) {
             </p>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

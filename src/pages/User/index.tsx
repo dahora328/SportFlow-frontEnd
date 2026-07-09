@@ -1,6 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ModalBase } from '../../components/Modal/ModalBase';
+import { useModal } from '../../hooks/useModal';
+import api from '../../services/api';
 export function User() {
   const [formData, setFormData] = useState({
     user_name: '',
@@ -9,6 +13,33 @@ export function User() {
     gender: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const modal = useModal();
+
+  useEffect(() => {
+    async function loadUserData() {
+      try {
+        setLoading(true);
+        const response = await api.get('/user');
+        const data = response.data.user || response.data;
+        
+        setFormData({
+          user_name: data.name || data.user_name || '',
+          email: data.email || '',
+          password: '', // A senha vem em branco para edição
+          gender: data.gender || '',
+        });
+      } catch (error) {
+        console.error('Erro ao buscar dados do usuário:', error);
+        modal.openError('Erro', 'Não foi possível carregar os dados do usuário.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadUserData();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -17,11 +48,31 @@ export function User() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Dados do usuario:', formData);
-    alert('Dados do usuario alterado com sucesso!');
+    try {
+      setSaving(true);
+      
+      // Cria um payload removendo a senha se ela não foi preenchida (para não resetá-la)
+      const payload = { ...formData };
+      if (!payload.password) {
+        delete (payload as any).password;
+      }
+
+      await api.put('/user', payload);
+      modal.openSuccess('Sucesso', 'Dados do usuário alterados com sucesso!');
+    } catch (error) {
+      console.error('Erro ao atualizar usuário:', error);
+      modal.openError('Erro', 'Ocorreu um erro ao tentar salvar as alterações.');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return <div className='min-h-screen bg-gray-100 flex items-center justify-center'>Carregando dados...</div>;
+  }
+
   return (
     <div className='min-h-screen bg-gray-100 text-gray-800 flex flex-col items-center p-6'>
       <h1 className='text-2xl font-bold mb-6'>Editar Perfil</h1>
@@ -113,12 +164,25 @@ export function User() {
           </Link>
           <button
             type='submit'
-            className='bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition'
+            disabled={saving}
+            className='bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-500 transition disabled:opacity-50'
           >
-            Salvar
+            {saving ? 'Salvando...' : 'Salvar'}
           </button>
         </div>
       </form>
+
+      <ModalBase
+        isOpen={modal.isOpen}
+        title={modal.config.title}
+        description={modal.config.description}
+        variant={modal.config.variant}
+        confirmText={modal.config.confirmText}
+        cancelText={modal.config.cancelText}
+        hideCancel={modal.config.hideCancel}
+        onConfirm={modal.config.onConfirm}
+        onClose={modal.closeModal}
+      />
     </div>
   );
 }

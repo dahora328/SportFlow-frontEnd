@@ -28,6 +28,10 @@ function SuperAdminRoute({ children }: { children: JSX.Element }) {
   return children;
 }
 
+import { Enterprise } from './pages/Enterprise';
+// import { Login } from './pages/Login';
+import { AuthProvider } from './contexts/AuthContext';
+import { Register } from './pages/User/Register';
 function AppContent() {
   const location = useLocation();
   const hideTopBar =
@@ -44,6 +48,9 @@ function AppContent() {
 
           {/* Páginas autenticadas */}
           <Route path='/user' element={<User />} />
+
+          <Route path='/enterprise' element={<Enterprise />} />
+          {/* Páginas principais */}
           <Route path='/reports' element={<Reports />} />
           <Route path='/home' element={<Home />} />
 

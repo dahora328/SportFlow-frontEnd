@@ -30,7 +30,6 @@ function SuperAdminRoute({ children }: { children: JSX.Element }) {
 
 import { Enterprise } from './pages/Enterprise';
 // import { Login } from './pages/Login';
-import { AuthProvider } from './contexts/AuthContext';
 import { Register } from './pages/User/Register';
 function AppContent() {
   const location = useLocation();

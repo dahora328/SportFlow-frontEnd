@@ -1,8 +1,20 @@
 //função para formatar data
 export function formatDate(dateString: string) {
-  const date = new Date(dateString);
+  if (!dateString) return '-';
 
+  // Se a string for exatamente YYYY-MM-DD, a formatação manual evita bugs de fuso horário (UTC) do JS
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString.trim())) {
+    const [year, month, day] = dateString.trim().split('-');
+    return `${day}/${month}/${year}`;
+  }
+
+  const date = new Date(dateString);
   if (isNaN(date.getTime())) return '-';
+
+  // Se for um timestamp do banco (Laravel) em UTC marcado à meia-noite
+  if (dateString.includes('00:00:00.000000Z') || dateString.includes('00:00:00.000Z')) {
+    return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+  }
 
   return date.toLocaleDateString('pt-BR');
 }

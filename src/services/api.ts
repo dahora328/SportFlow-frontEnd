@@ -74,11 +74,15 @@ api.interceptors.response.use(
           });
 
           const newAccess = refreshResponse.data.access_token;
+          const newRefresh = refreshResponse.data.refresh_token;
 
           console.log('✅ Novo access token:', newAccess);
 
-          // Salvar novo token
+          // Salvar novos tokens
           localStorage.setItem('access_token', newAccess);
+          if (newRefresh) {
+            localStorage.setItem('refresh_token', newRefresh);
+          }
 
           // Atualizar axios padrão
           api.defaults.headers.Authorization = `Bearer ${newAccess}`;

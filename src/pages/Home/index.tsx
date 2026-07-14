@@ -8,6 +8,7 @@ import {
   getAthletesByName,
   type AthleteData,
 } from '../../services/athletesService';
+import { getEnterprises } from '../../services/enterpriseService';
 import { formatDate, formatCPF } from '../../utils/util';
 import { Edit, Trash } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
@@ -25,6 +26,7 @@ function Th({ children }: { children: React.ReactNode }) {
 export function Home() {
   const [athletes, setAthletes] = useState<AthleteData[]>([]);
   const [serachAthlete, setSearchAthlete] = useState('');
+  const [companyName, setCompanyName] = useState('Time Flow');
 
   const modal = useModal();
 
@@ -84,8 +86,21 @@ export function Home() {
     }
   }
 
+  async function loadEnterpriseName() {
+    try {
+      const enterprises = await getEnterprises();
+      if (enterprises && enterprises.length > 0) {
+        const enterprise = enterprises[0];
+        setCompanyName(enterprise.fantasy_name || enterprise.name || 'Time Flow');
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados da empresa:', error);
+    }
+  }
+
   useEffect(() => {
     loadAthletes();
+    loadEnterpriseName();
   }, []);
 
   async function handleSearchAthletes(name: string) {
@@ -138,8 +153,7 @@ export function Home() {
   return (
     <div className='p-6 space-y-6'>
       <header className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-        <h1 className='text-2xl font-semibold'>Time Flow</h1>
-        {/* Nome do time pegar do banco de dados da tabela times ou empresa*/}
+        <h1 className='text-2xl font-semibold'>{companyName}</h1>
         <div className='flex flex-col gap-3 sm:flex-row'>
           <div className='relative'>
             <input

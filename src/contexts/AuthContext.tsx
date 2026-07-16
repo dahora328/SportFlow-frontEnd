@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 export interface AuthUser {
@@ -25,6 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
+  const navigate = useNavigate();
 
   /**
    * Carrega tokens e dados do usuário salvos ao iniciar o app
@@ -90,8 +92,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     api.defaults.headers.Authorization = '';
 
-    window.location.href = '/';
+    navigate('/');
   }
+
+  /**
+   * Escuta o evento 'auth:logout' disparado pelo Axios (api.ts)
+   * quando o refresh token falha — navega sem recarregar a página
+   */
+  useEffect(() => {
+    const handleForceLogout = () => {
+      setAccessToken(null);
+      setRefreshToken(null);
+      setUser(null);
+      api.defaults.headers.Authorization = '';
+      navigate('/');
+    };
+
+    window.addEventListener('auth:logout', handleForceLogout);
+    return () => window.removeEventListener('auth:logout', handleForceLogout);
+  }, [navigate]);
 
   /**
    * Quando accessToken mudar, sempre atualizar Axios

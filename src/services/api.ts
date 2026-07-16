@@ -45,7 +45,7 @@ api.interceptors.response.use(
     if (originalRequest?.url?.includes('/refresh')) {
       console.warn('❌ Refresh falhou → logout');
       localStorage.clear();
-      window.location.href = '/';
+      window.dispatchEvent(new Event('auth:logout'));
       return Promise.reject(error);
     }
 
@@ -60,7 +60,7 @@ api.interceptors.response.use(
       if (!refreshToken) {
         console.warn('❌ Nenhum refresh_token encontrado → logout');
         localStorage.clear();
-        window.location.href = '/';
+        window.dispatchEvent(new Event('auth:logout'));
         return Promise.reject(error);
       }
 
@@ -111,7 +111,7 @@ api.interceptors.response.use(
         failedRequestsQueue = [];
 
         localStorage.clear();
-        window.location.href = '/';
+        window.dispatchEvent(new Event('auth:logout'));
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

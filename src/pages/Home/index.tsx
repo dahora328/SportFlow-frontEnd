@@ -10,7 +10,7 @@ import {
 } from '../../services/athletesService';
 import { getEnterprises } from '../../services/enterpriseService';
 import { formatDate, formatCPF } from '../../utils/util';
-import { Edit, Trash } from 'lucide-react';
+import { Edit, Trash, Printer } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
 import { ModalBase } from '../../components/Modal/ModalBase';
 import { usePrint } from '../../hooks/usePrint';
@@ -224,7 +224,7 @@ export function Home() {
                           handleLoadAthleteData(athlete.id);
                         }}
                         to={`/athletes/${athlete.id}`}
-                        className='cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors'
+                        className='cursor-pointer p-1  rounded-full transition-colors'
                         title='Editar Atleta'
                       >
                         <Edit
@@ -240,7 +240,7 @@ export function Home() {
                           handleDeteleAthlete(athlete.id);
                         }}
                         title='Deletar Atleta'
-                        className='cursor-pointer p-1 hover:bg-gray-100 rounded-full transition-colors'
+                        className='cursor-pointer p-1  rounded-full transition-colors'
                       >
                         <Trash
                           size={16}
@@ -249,9 +249,11 @@ export function Home() {
                       </button>
                       <button
                         onClick={() => handlePrintAthlete(athlete)}
-                        className='px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition'
+                        className='cursor-pointer p-1 rounded-full transition-colors'
+                        title='Imprimir Ficha'
                       >
-                        Imprimir
+                        <Printer size={16} 
+                        className='text-black'/>
                       </button>
                       <ModalBase
                         isOpen={modal.isOpen}

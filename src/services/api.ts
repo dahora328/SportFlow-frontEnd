@@ -64,58 +64,67 @@ api.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      try {
-        if (!isRefreshing) {
-          isRefreshing = true;
-          console.log('🔄 Atualizando token...');
+      // --- Caminho 1: é a primeira requisição a detectar o token expirado ---
+      // Ela assume a responsabilidade de fazer o refresh.
+      if (!isRefreshing) {
+        isRefreshing = true;
+        console.log('🔄 Atualizando token...');
 
-          const refreshResponse = await api.post('/refresh', {
-            refresh_token: refreshToken,
-          });
-
-          const newAccess = refreshResponse.data.access_token;
-          const newRefresh = refreshResponse.data.refresh_token;
-
-          console.log('✅ Novo access token:', newAccess);
-
-          // Salvar novos tokens
-          localStorage.setItem('access_token', newAccess);
-          if (newRefresh) {
-            localStorage.setItem('refresh_token', newRefresh);
-          }
-
-          // Atualizar axios padrão
-          api.defaults.headers.Authorization = `Bearer ${newAccess}`;
-
-          // Enviar respostas às requisições esperando
-          failedRequestsQueue.forEach(req => req.resolve(newAccess));
-          failedRequestsQueue = [];
-        }
-
-        // Aguarda novo token e refaz requisição original
         return new Promise((resolve, reject) => {
-          failedRequestsQueue.push({
-            resolve: token => {
+          api
+            .post('/refresh', { refresh_token: refreshToken })
+            .then(refreshResponse => {
+              const newAccess = refreshResponse.data.access_token;
+              const newRefresh = refreshResponse.data.refresh_token;
+
+              console.log('✅ Novo access token:', newAccess);
+
+              // Salvar novos tokens
+              localStorage.setItem('access_token', newAccess);
+              if (newRefresh) {
+                localStorage.setItem('refresh_token', newRefresh);
+              }
+
+              // Atualizar axios padrão
+              api.defaults.headers.Authorization = `Bearer ${newAccess}`;
+
+              // Resolver a fila de requisições que estavam esperando
+              failedRequestsQueue.forEach(req => req.resolve(newAccess));
+              failedRequestsQueue = [];
+
+              // Refazer a própria requisição original que iniciou o refresh
               if (originalRequest.headers) {
-                originalRequest.headers.Authorization = `Bearer ${token}`;
+                originalRequest.headers.Authorization = `Bearer ${newAccess}`;
               }
               resolve(api(originalRequest));
-            },
-            reject,
-          });
+            })
+            .catch(err => {
+              console.error('❌ Erro no refresh:', err);
+              failedRequestsQueue.forEach(req => req.reject(err as AxiosError));
+              failedRequestsQueue = [];
+              localStorage.clear();
+              window.dispatchEvent(new Event('auth:logout'));
+              reject(err);
+            })
+            .finally(() => {
+              isRefreshing = false;
+            });
         });
-      } catch (err) {
-        console.error('❌ Erro no refresh:', err);
-
-        failedRequestsQueue.forEach(req => req.reject(err as AxiosError));
-        failedRequestsQueue = [];
-
-        localStorage.clear();
-        window.dispatchEvent(new Event('auth:logout'));
-        return Promise.reject(err);
-      } finally {
-        isRefreshing = false;
       }
+
+      // --- Caminho 2: refresh já está em andamento por outra requisição ---
+      // Esta requisição entra na fila e aguarda o resultado.
+      return new Promise((resolve, reject) => {
+        failedRequestsQueue.push({
+          resolve: token => {
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            resolve(api(originalRequest));
+          },
+          reject,
+        });
+      });
     }
 
     return Promise.reject(error);

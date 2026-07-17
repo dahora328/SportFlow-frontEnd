@@ -95,10 +95,9 @@ export async function getAthleteById(id: number) {
   }
 }
 
-// implementar busca por nome na api ainda
 export async function getAthletesByName(name: string) {
   try {
-    const response = await api.get(`/athletes/search`, { params: { name } });
+    const response = await api.get(`/athletes`, { params: { search: name } });
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar atletas por nome:', error);

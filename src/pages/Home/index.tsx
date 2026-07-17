@@ -25,7 +25,7 @@ function Th({ children }: { children: React.ReactNode }) {
 
 export function Home() {
   const [athletes, setAthletes] = useState<AthleteData[]>([]);
-  const [serachAthlete, setSearchAthlete] = useState('');
+  const [searchAthlete, setSearchAthlete] = useState('');
   const [companyName, setCompanyName] = useState('Time Flow');
 
   const modal = useModal();
@@ -160,7 +160,7 @@ export function Home() {
               type='search'
               placeholder='Buscar atleta...'
               className='w-64 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500'
-              value={serachAthlete}
+              value={searchAthlete}
               onChange={e => {
                 const value = e.target.value;
                 setSearchAthlete(value);

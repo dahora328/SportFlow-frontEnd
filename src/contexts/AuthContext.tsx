@@ -2,12 +2,28 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
+/** Papéis possíveis no sistema */
+export type UserRole = 'superadmin' | 'gestor' | 'funcionario';
+
 export interface AuthUser {
   id: number;
   name: string;
   email: string;
   is_admin: boolean;
   enterprise_id: number | null;
+}
+
+/**
+ * Deriva o papel do usuário a partir dos campos is_admin e enterprise_id.
+ * - superadmin: is_admin=true e sem empresa (dono do SportFlow)
+ * - gestor:     is_admin=true com empresa (dono/gestor da empresa cliente)
+ * - funcionario: is_admin=false com empresa (equipe da empresa)
+ */
+export function getUserRole(user: AuthUser | null): UserRole {
+  if (!user) return 'funcionario';
+  if (user.is_admin && user.enterprise_id === null) return 'superadmin';
+  if (user.is_admin && user.enterprise_id !== null) return 'gestor';
+  return 'funcionario';
 }
 
 interface AuthContextType {

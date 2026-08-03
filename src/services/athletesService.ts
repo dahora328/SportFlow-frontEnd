@@ -7,6 +7,7 @@ export interface AthleteData {
   birth_date: string;
   marital_status: string;
   gender: string;
+  position?: string;
   document: string;
   address: string;
   number: string;
@@ -21,6 +22,7 @@ export interface AthleteData {
   father_name: string;
   owner_id: number;
   photo_path?: string | File | null;
+  observations?: string;
 }
 
 type GetAthletesResponse = {

@@ -35,6 +35,7 @@ export function Athletes() {
     birth_date: '',
     marital_status: '',
     gender: '',
+    position: '',
     document: '',
     address: '',
     number: '',
@@ -49,6 +50,7 @@ export function Athletes() {
     father_name: '',
     owner_id: localStorage.getItem('user_id')?.toString() as unknown as number,
     photo_path: '',
+    observations: '',
   });
 
   useEffect(() => {
@@ -201,6 +203,7 @@ export function Athletes() {
         setFormData({
           ...athleteData,
           // Garante que campos opcionais tenham valor padrão se forem null/undefined
+          position: athleteData.position || '',
           mobile_phone: athleteData.mobile_phone || '',
           secondary_phone: athleteData.secondary_phone || '',
           email: athleteData.email || '',
@@ -212,6 +215,7 @@ export function Athletes() {
           mother_name: athleteData.mother_name || '',
           father_name: athleteData.father_name || '',
           photo_path: athleteData.photo_path || '',
+          observations: athleteData.observations || '',
         });
 
         const existingPhotoUrl = getAthletePhotoUrl(
@@ -278,6 +282,7 @@ export function Athletes() {
         birth_date: '',
         marital_status: '',
         gender: '',
+        position: '',
         document: '',
         address: '',
         number: '',
@@ -294,6 +299,7 @@ export function Athletes() {
           .getItem('user_id')
           ?.toString() as unknown as number,
         photo_path: '',
+        observations: '',
       });
       setSelectedPhotoName('');
       setPhotoPreviewUrl('');
@@ -301,7 +307,7 @@ export function Athletes() {
   }, [id, location.state, loadAthleteData]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -405,6 +411,7 @@ export function Athletes() {
         birth_date: '',
         marital_status: '',
         gender: '',
+        position: '',
         document: '',
         address: '',
         number: '',
@@ -421,6 +428,7 @@ export function Athletes() {
           .getItem('user_id')
           ?.toString() as unknown as number,
         photo_path: '',
+        observations: '',
       });
       setSelectedPhotoName('');
       updatePhotoPreview('');
@@ -558,6 +566,26 @@ export function Athletes() {
               <option value='masculino'>Masculino</option>
               <option value='feminino'>Feminino</option>
               <option value='outro'>Outro</option>
+            </select>
+          </div>
+
+          {/* Posição */}
+          <div>
+            <label className='block text-sm font-semibold mb-1'>Posição</label>
+            <select
+              name='position'
+              value={formData.position}
+              onChange={handleChange}
+              className='w-full border border-gray-300 rounded-lg px-3 py-2'
+            >
+              <option value=''>Selecione</option>
+              <option value='Goleiro'>Goleiro</option>
+              <option value='Zagueiro'>Zagueiro</option>
+              <option value='Lateral'>Lateral</option>
+              <option value='Volante'>Volante</option>
+              <option value='Meia'>Meia</option>
+              <option value='Atacante'>Atacante</option>
+              <option value='Outro'>Outro</option>
             </select>
           </div>
 
@@ -750,6 +778,18 @@ export function Athletes() {
               value={formData.father_name}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
+            />
+          </div>
+
+          {/* Observações */}
+          <div className='md:col-span-2'>
+            <label className='block text-sm font-semibold mb-1'>Observações</label>
+            <textarea
+              name='observations'
+              value={formData.observations}
+              onChange={handleChange}
+              className='w-full border border-gray-300 rounded-lg px-3 py-2 h-24 resize-y'
+              placeholder='Informações adicionais, histórico, etc.'
             />
           </div>
         </div>

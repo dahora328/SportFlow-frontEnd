@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import {
   Trophy,
   Users,
@@ -31,7 +31,6 @@ export function LandingPage() {
       const response = await loginUser(data);
       const access = response.access_token;
       const refresh = response.refresh_token;
-      const user_id = response.user_id;
 
       if (access && refresh) {
         await login(access, refresh);

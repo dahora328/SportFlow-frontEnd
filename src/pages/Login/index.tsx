@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { loginUser } from '../../services/userService';
 import { LoginModal } from '../../components/Modal/LoginModal';
 
@@ -9,7 +9,7 @@ export function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const { login } = useAuth();
 
   const handleLogin = async (data: { email: string; password: string }) => {
     setLoading(true);
@@ -33,7 +33,17 @@ export function Login() {
       localStorage.setItem('user_id', user_id.toString());
       setOpen(false);
 
-      navigate('/home');
+      const storedUser = localStorage.getItem('auth_user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        if (userData.is_admin === true && userData.enterprise_id === null) {
+          navigate('/admin');
+        } else {
+          navigate('/home');
+        }
+      } else {
+        navigate('/home');
+      }
     } catch (err: unknown) {
       console.error('Erro no login:', err);
 

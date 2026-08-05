@@ -27,6 +27,8 @@ interface Athlete {
   father_name: string;
   photo_url?: string;
   photo_path?: string | File | null;
+  position?: string;
+  observations?: string;
 }
 
 interface Props {
@@ -215,6 +217,18 @@ export function AthletePrintCard({ athlete, onReady }: Props) {
           </div>
 
           <div>
+            <p className='text-sm text-gray-500'>Posição</p>
+
+            <p className='font-semibold'>{athlete.position}</p>
+          </div>
+
+          <div>
+            <p className='text-sm text-gray-500'>Posição</p>
+
+            <p className='font-semibold'>{athlete.position}</p>
+          </div>
+
+          <div>
             <p className='text-sm text-gray-500'>Estado civil</p>
 
             <p className='font-semibold'>{athlete.marital_status}</p>
@@ -249,6 +263,12 @@ export function AthletePrintCard({ athlete, onReady }: Props) {
             <p className='font-semibold'>
               Mãe: {athlete.mother_name} - Pai: {athlete.father_name}
             </p>
+          </div>
+
+          <div className='col-span-2'>
+            <p className='text-sm text-gray-500'>Observações</p>
+
+            <p className='font-semibold'>{athlete.observations}</p>
           </div>
         </div>
       </div>

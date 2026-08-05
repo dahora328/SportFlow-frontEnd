@@ -10,7 +10,7 @@ import {
   LogIn,
 } from 'lucide-react';
 
-import { AuthContext } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { LoginModal } from '../../components/Modal/LoginModal';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../../services/userService';
@@ -18,7 +18,7 @@ import { loginUser } from '../../services/userService';
 export function LandingPage() {
   const navigate = useNavigate();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const { login } = useContext(AuthContext);
+  const { login } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const openLogin = () => setIsLoginModalOpen(true);
   const closeLogin = () => setIsLoginModalOpen(false);
@@ -43,7 +43,17 @@ export function LandingPage() {
 
       setIsLoginModalOpen(false);
 
-      navigate('/home');
+      const storedUser = localStorage.getItem('auth_user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        if (userData.is_admin === true && userData.enterprise_id === null) {
+          navigate('/admin');
+        } else {
+          navigate('/home');
+        }
+      } else {
+        navigate('/home');
+      }
     } catch (error: any) {
       console.error('Erro no login:', error);
       if (error && typeof error === 'object' && 'response' in error) {

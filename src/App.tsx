@@ -15,6 +15,7 @@ import { LandingPage } from './pages/LandingPage';
 import { Home } from './pages/Home';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { AdminPanel } from './pages/AdminPanel';
+import { ProtectedRoute } from './routes/ProtectedRoute';
 
 // Guard: somente Super Admin (is_admin=true, enterprise_id=null) acessa /admin
 function SuperAdminRoute({ children }: { children: JSX.Element }) {
@@ -30,7 +31,6 @@ function SuperAdminRoute({ children }: { children: JSX.Element }) {
 
 import { Enterprise } from './pages/Enterprise';
 // import { Login } from './pages/Login';
-import { Register } from './pages/User/Register';
 function AppContent() {
   const location = useLocation();
   const hideTopBar =
@@ -46,16 +46,16 @@ function AppContent() {
           <Route path='/' element={<LandingPage />} />
 
           {/* Páginas autenticadas */}
-          <Route path='/user' element={<User />} />
+          <Route path='/user' element={<ProtectedRoute><User /></ProtectedRoute>} />
 
-          <Route path='/enterprise' element={<Enterprise />} />
+          <Route path='/enterprise' element={<ProtectedRoute><Enterprise /></ProtectedRoute>} />
           {/* Páginas principais */}
-          <Route path='/reports' element={<Reports />} />
-          <Route path='/home' element={<Home />} />
+          <Route path='/reports' element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+          <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>} />
 
           {/* Rotas de atletas */}
-          <Route path='/athletes' element={<Athletes />} />
-          <Route path='/athletes/:id' element={<Athletes />} />
+          <Route path='/athletes' element={<ProtectedRoute><Athletes /></ProtectedRoute>} />
+          <Route path='/athletes/:id' element={<ProtectedRoute><Athletes /></ProtectedRoute>} />
 
           {/* Painel Admin — somente Super Admin */}
           <Route

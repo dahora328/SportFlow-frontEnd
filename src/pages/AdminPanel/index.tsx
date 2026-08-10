@@ -16,6 +16,7 @@ interface Enterprise {
 function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => void }) {
   const modal = useModal();
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [formData, setFormData] = useState({
     name: '',
     social_reason: '',
@@ -41,6 +42,7 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setErrors({});
     try {
       const response = await api.post('/enterprises', formData);
       modal.openSuccess('Sucesso!', 'Empresa cadastrada com sucesso!');
@@ -51,8 +53,12 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
         number: '', neighborhood: '', city: '', state: '', zip_code: '', owner_name: '',
       });
     } catch (error: any) {
-      const msg = error?.response?.data?.error || 'Erro ao cadastrar empresa.';
-      modal.openError('Erro', msg);
+      if (error?.response?.status === 422) {
+        setErrors(error.response.data.errors || {});
+      } else {
+        const msg = error?.response?.data?.error || 'Erro ao cadastrar empresa.';
+        modal.openError('Erro', msg);
+      }
     } finally {
       setSaving(false);
     }
@@ -129,6 +135,7 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
                   className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none'
                 />
               )}
+              {errors[field.name] && <p className='text-red-500 text-xs mt-1'>{errors[field.name][0]}</p>}
             </div>
           ))}
         </div>
@@ -159,7 +166,18 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
 }
 
 // ─── Formulário de Usuário ────────────────────────────────────────────────────
-function UserForm({ enterprises }: { enterprises: Enterprise[] }) {
+function UserForm() {
+  const [allEnterprises, setAllEnterprises] = useState<Enterprise[]>([]);
+  
+  useEffect(() => {
+    async function loadAll() {
+      try {
+        const response = await api.get('/enterprises?all=true');
+        setAllEnterprises(response.data);
+      } catch (err) {}
+    }
+    loadAll();
+  }, []);
   const modal = useModal();
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -214,13 +232,11 @@ function UserForm({ enterprises }: { enterprises: Enterprise[] }) {
             value={formData.enterprise_id}
             onChange={handleChange}
             required
-            className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-900 outline-none'
+            className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white'
           >
-            <option value=''>Selecione a empresa</option>
-            {enterprises.map(e => (
-              <option key={e.id} value={e.id}>
-                {e.fantasy_name || e.name}
-              </option>
+            <option value=''>Selecione uma empresa...</option>
+            {allEnterprises.map(e => (
+              <option key={e.id} value={e.id}>{e.fantasy_name || e.name}</option>
             ))}
           </select>
         </div>
@@ -282,13 +298,19 @@ export function AdminPanel() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'enterprise' | 'user'>('enterprise');
   const [enterprises, setEnterprises] = useState<Enterprise[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [loadingEnterprises, setLoadingEnterprises] = useState(true);
 
   useEffect(() => {
     async function loadEnterprises() {
+      setLoadingEnterprises(true);
       try {
-        const response = await api.get('/enterprises');
-        setEnterprises(response.data);
+        const response = await api.get(`/enterprises?page=${page}`);
+        setEnterprises(response.data.data);
+        setTotalPages(response.data.last_page);
+        setTotalItems(response.data.total);
       } catch {
         setEnterprises([]);
       } finally {
@@ -296,7 +318,7 @@ export function AdminPanel() {
       }
     }
     loadEnterprises();
-  }, []);
+  }, [page]);
 
   // Quando uma nova empresa é criada, adiciona à lista local (sem precisar recarregar)
   function handleEnterpriseCreated(newEnterprise: Enterprise) {
@@ -323,7 +345,7 @@ export function AdminPanel() {
         {/* Empresas cadastradas */}
         <div className='bg-white rounded-lg shadow-sm p-4 mb-6'>
           <h2 className='text-sm font-semibold text-gray-600 uppercase mb-3'>
-            Empresas cadastradas ({enterprises.length})
+            Empresas cadastradas ({totalItems})
           </h2>
           {loadingEnterprises ? (
             <p className='text-sm text-gray-400'>Carregando...</p>
@@ -340,6 +362,28 @@ export function AdminPanel() {
                   <span className='text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium'>Ativa</span>
                 </div>
               ))}
+            </div>
+          )}
+          
+          {totalPages > 1 && (
+            <div className='mt-4 flex justify-between items-center border-t pt-3'>
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className='text-sm text-red-950 font-medium disabled:text-gray-300'
+              >
+                Anterior
+              </button>
+              <span className='text-xs text-gray-500'>
+                Página {page} de {totalPages}
+              </span>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className='text-sm text-red-950 font-medium disabled:text-gray-300'
+              >
+                Próxima
+              </button>
             </div>
           )}
         </div>
@@ -375,7 +419,7 @@ export function AdminPanel() {
             {activeTab === 'enterprise' ? (
               <EnterpriseForm onSuccess={handleEnterpriseCreated} />
             ) : (
-              <UserForm enterprises={enterprises} />
+              <UserForm />
             )}
           </div>
         </div>

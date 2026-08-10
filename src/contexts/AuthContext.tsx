@@ -39,34 +39,27 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(() => localStorage.getItem('access_token'));
+  const [refreshToken, setRefreshToken] = useState<string | null>(() => localStorage.getItem('refresh_token'));
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    const storedUser = localStorage.getItem('auth_user');
+    if (storedUser) {
+      try {
+        return JSON.parse(storedUser);
+      } catch {
+        localStorage.removeItem('auth_user');
+      }
+    }
+    return null;
+  });
   const navigate = useNavigate();
 
   /**
    * Carrega tokens e dados do usuário salvos ao iniciar o app
    */
   useEffect(() => {
-    const storedAccess = localStorage.getItem('access_token');
-    const storedRefresh = localStorage.getItem('refresh_token');
-    const storedUser = localStorage.getItem('auth_user');
-
-    if (storedAccess) {
-      setAccessToken(storedAccess);
-      api.defaults.headers.Authorization = `Bearer ${storedAccess}`;
-    }
-
-    if (storedRefresh) {
-      setRefreshToken(storedRefresh);
-    }
-
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        localStorage.removeItem('auth_user');
-      }
+    if (accessToken) {
+      api.defaults.headers.Authorization = `Bearer ${accessToken}`;
     }
   }, []);
 

@@ -28,6 +28,10 @@ export async function getEnterprises(
   try {
     const response = await api.get('/enterprises', { params });
 
+    if (response.data && !Array.isArray(response.data) && Array.isArray(response.data.data)) {
+      return response.data.data;
+    }
+
     return response.data;
   } catch (error: any) {
     console.error(

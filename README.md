@@ -1,141 +1,247 @@
-# SportFlow FrontEnd
+# SportFlow — Front-end
 
-[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-7.x-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)](#roadmap)
+Interface web do sistema SportFlow, desenvolvida com **React 19 + TypeScript + Vite 7 + Tailwind CSS v4**, para gestão de atletas e empresas esportivas.
 
-Aplicacao web para gestao esportiva com foco no fluxo de atletas, autenticacao e
-navegacao entre modulos principais do sistema.
+---
 
-## Sobre o projeto
+## 🛠️ Stack
 
-O SportFlow FrontEnd foi criado para oferecer uma experiencia simples e
-eficiente para operacoes do dia a dia esportivo, principalmente no cadastro e
-gerenciamento de atletas.
+| Tecnologia | Versão | Uso |
+|---|---|---|
+| React | ^19.1 | UI Framework |
+| TypeScript | ~5.9 | Tipagem estática |
+| Vite | ^7.1 | Build tool / Dev server |
+| Tailwind CSS | ^4.1 | Estilização utilitária |
+| React Router DOM | ^7.9 | Roteamento SPA |
+| Axios | ^1.13 | Cliente HTTP |
+| Lucide React | ^0.552 | Ícones |
+| react-to-print | ^3.3 | Impressão de fichas de atleta |
+| ESLint | ^9.36 | Linting |
+| Prettier | — | Formatação |
 
-### Principais entregas
+---
 
-- cadastro, edicao e organizacao de atletas;
-- upload de foto com validacao de proporcao 3x4;
-- autenticacao com token e refresh automatico;
-- navegação entre modulos como landing page, home, relatorios e usuario.
+## 📁 Estrutura de Pastas
 
-## Stack
+```
+SportFlow-frontEnd/
+├── src/
+│   ├── App.tsx                    # Roteador principal + guards de rota
+│   ├── main.tsx                   # Entry point
+│   ├── assets/                    # Imagens e recursos estáticos
+│   ├── components/
+│   │   ├── Footer/                # Rodapé
+│   │   ├── Menu/
+│   │   │   └── TopBar.tsx         # Barra de navegação superior
+│   │   ├── Modal/
+│   │   │   └── ModalBase.tsx      # Modal genérico reutilizável
+│   │   ├── Print/
+│   │   │   └── PrintContainer.tsx # Container oculto para impressão
+│   │   └── ProtectedRoute/        # HOC de rota protegida
+│   ├── contexts/
+│   │   ├── AuthContext.tsx        # Contexto de autenticação global
+│   │   └── ThemeContext.tsx       # Contexto de tema
+│   ├── hooks/
+│   │   ├── useModal.tsx           # Hook para controle de modais
+│   │   └── usePrint.ts            # Hook para impressão de fichas
+│   ├── pages/
+│   │   ├── LandingPage/           # Página inicial pública (login incluso)
+│   │   ├── Home/                  # Lista de atletas com busca, edição e impressão
+│   │   ├── Athletes/              # Formulário de cadastro/edição de atleta
+│   │   │   └── AthletePrintCard.tsx # Cartão de impressão da ficha do atleta
+│   │   ├── Enterprise/            # Detalhes/edição da empresa
+│   │   ├── User/                  # Perfil do usuário logado
+│   │   ├── Reports/               # Página de relatórios
+│   │   └── AdminPanel/            # Painel exclusivo do Super Admin
+│   ├── routes/
+│   │   └── ProtectedRoute.tsx     # Componente de rota com guard de autenticação
+│   ├── services/
+│   │   ├── api.ts                 # Instância Axios + interceptors JWT/refresh
+│   │   ├── athletesService.ts     # CRUD de atletas
+│   │   ├── enterpriseService.ts   # Busca de empresas
+│   │   └── userService.ts         # Perfil do usuário
+│   ├── styles/
+│   │   └── App.css                # Estilos globais
+│   └── utils/
+│       └── util.ts                # Formatadores (CPF, telefone, CEP, data)
+├── public/
+├── index.html
+├── vite.config.ts
+├── tailwind.config.*
+├── tsconfig.json
+└── package.json
+```
 
-- React 19
-- TypeScript
-- Vite
-- React Router DOM
-- Axios
-- Tailwind CSS
-- ESLint
+---
 
-## Preview da interface
+## 🔐 Autenticação & Perfis de Usuário
 
-> Adicione imagens reais do projeto nos caminhos abaixo para melhorar a
-> apresentacao no GitHub.
+O contexto de autenticação ([`AuthContext.tsx`](src/contexts/AuthContext.tsx)) gerencia tokens JWT e dados do usuário via `localStorage`.
 
-![Landing Page](./docs/screenshots/landing-page.png)
-![Tela de Home](./docs/screenshots/home.png)
-![Cadastro de Atleta](./docs/screenshots/athletes-form.png)
+### Perfis (`UserRole`)
 
-## Fluxo de autenticacao
+| Role | `is_admin` | `enterprise_id` | Acesso |
+|---|---|---|---|
+| `superadmin` | `true` | `null` | Painel Admin (`/admin`), tudo |
+| `gestor` | `true` | `!= null` | Área da empresa + atletas |
+| `funcionario` | `false` | `!= null` | Área de atletas |
 
-- tokens `access_token` e `refresh_token` sao persistidos no `localStorage`;
-- requests autenticadas recebem `Authorization: Bearer <token>` via interceptor;
-- em caso de `401`, o app tenta refresh automaticamente;
-- se o refresh falhar, os dados de sessao sao limpos.
+### Fluxo de Tokens
+1. Login → `access_token` + `refresh_token` salvos no `localStorage`
+2. Axios intercepta toda requisição e injeta o `Bearer token`
+3. Em caso de `401`, o interceptor tenta renovar o token via `POST /api/refresh`
+4. Múltiplas requisições simultâneas aguardam o refresh em uma fila (`failedRequestsQueue`)
+5. Se o refresh falhar → evento global `auth:logout` redireciona para a LandingPage
 
-Arquivo principal: `src/services/api.ts`.
+---
 
-## Rotas da aplicacao
+## 🗺️ Rotas do Front-end
 
-| Rota            | Descricao              |
-| --------------- | ---------------------- |
-| `/`             | Landing Page           |
-| `/register`     | Cadastro de usuario    |
-| `/home`         | Pagina inicial interna |
-| `/athletes`     | Cadastro de atleta     |
-| `/athletes/:id` | Edicao de atleta       |
-| `/reports`      | Relatorios             |
-| `/user`         | Area do usuario        |
+| Rota | Página | Proteção |
+|---|---|---|
+| `/` | `LandingPage` | Pública |
+| `/home` | `Home` | Autenticado |
+| `/athletes` | `Athletes` (cadastro) | Autenticado |
+| `/athletes/:id` | `Athletes` (edição) | Autenticado |
+| `/enterprise` | `Enterprise` | Autenticado |
+| `/user` | `User` | Autenticado |
+| `/reports` | `Reports` | Autenticado |
+| `/admin` | `AdminPanel` | Apenas **Super Admin** |
 
-## Como rodar localmente
+> O guard `SuperAdminRoute` verifica `is_admin === true && enterprise_id === null`. Se não for Super Admin, redireciona para `/home`.
 
-### 1) Requisitos
+---
 
-- Node.js 18+
-- npm 9+
+## 📄 Páginas & Funcionalidades
 
-### 2) Instalar dependencias
+### 🏠 Home (`/home`)
+- Listagem paginada de atletas da empresa
+- **Busca em tempo real** por nome do atleta
+- Ações por atleta: **Editar**, **Excluir**, **Imprimir ficha**
+- Impressão via `react-to-print` com layout formatado (`AthletePrintCard`)
+- Integração com `enterpriseService` para exibir o nome da empresa
+
+### 🏃 Athletes (`/athletes` e `/athletes/:id`)
+- Formulário completo de **cadastro e edição** de atleta
+- Campos: nome, nascimento, gênero, estado civil, posição, CPF, endereço completo, telefones, e-mail, nome dos pais, observações
+- **Upload de foto** com validação de proporção 3:4 (tolerância de 2%)
+- Preview da foto no formulário
+- Máscara automática de CPF, telefone e CEP (via `utils/util.ts`)
+- Ao editar via URL `/athletes/:id`, carrega dados do atleta automaticamente
+- Usa `FormData` com `multipart/form-data` para envio de fotos
+- Para update usa `_method: PUT` (Laravel method spoofing)
+
+### 🏢 Enterprise (`/enterprise`)
+- Exibe e edita os dados da empresa do usuário logado
+- Upload de logo da empresa
+- Campos completos: razão social, nome fantasia, CNPJ, IE, endereço, contato
+
+### 👤 User (`/user`)
+- Perfil do usuário logado
+- Atualização de nome e e-mail
+
+### 📊 Reports (`/reports`)
+- Página de relatórios (em desenvolvimento)
+
+### 🛡️ AdminPanel (`/admin`)
+- **Exclusivo para Super Admin**
+- Listagem de todas as empresas cadastradas
+- Criação de novas empresas (formulário completo com campos de endereço)
+- Criação de usuários vinculados a empresas específicas
+- Navegação entre empresas com `ChevronRight`
+
+---
+
+## ⚙️ Serviços de API (`src/services/`)
+
+### `api.ts`
+- Instância global do Axios com `baseURL: http://localhost:8080/api/`
+- Interceptor de **request**: injeta `Authorization: Bearer <token>`
+- Interceptor de **response**: refresh automático de token em `401`
+- Fila de requisições para evitar múltiplos refreshes simultâneos
+
+### `athletesService.ts`
+| Função | Método | Endpoint |
+|---|---|---|
+| `createAthlete(data)` | `POST` | `/athletes` |
+| `getAthletes(params)` | `GET` | `/athletes` |
+| `getAthleteById(id)` | `GET` | `/athletes/:id` |
+| `getAthletesByName(name)` | `GET` | `/athletes?search=` |
+| `updateAthlete(id, data)` | `POST` + `_method=PUT` | `/athletes/:id` |
+| `deleteAthlete(id)` | `DELETE` | `/athletes/:id` |
+
+### `enterpriseService.ts`
+| Função | Método | Endpoint |
+|---|---|---|
+| `getEnterprises(params)` | `GET` | `/enterprises` |
+
+### `userService.ts`
+| Função | Método | Endpoint |
+|---|---|---|
+| Atualização de perfil | `PUT` | `/user` |
+
+---
+
+## 🧩 Hooks Customizados
+
+### `useModal`
+Controla o estado de modais de confirmação, sucesso e erro.  
+Expõe: `openConfirm`, `openSuccess`, `openError`, `close`, `modalState`.
+
+### `usePrint`
+Wrapper sobre `react-to-print` para impressão de fichas de atleta.  
+Recebe `contentRef` e `documentTitle`.
+
+---
+
+## 🚀 Instalação e Execução Local
 
 ```bash
+# 1. Instalar dependências
 npm install
-```
 
-### 3) Executar em desenvolvimento
-
-```bash
+# 2. Iniciar servidor de desenvolvimento
 npm run dev
+
+# A aplicação estará disponível em:
+# http://localhost:5173
 ```
 
-A aplicacao ficara disponivel em:
+> **Atenção:** O back-end deve estar rodando em `http://localhost:8080` para que a API funcione corretamente. Configure o endereço em `src/services/api.ts` se necessário.
 
-```txt
-http://localhost:5173
-```
+---
 
-## Scripts
+## 🐳 Executar via Docker
+
+Na **raiz do monorepo** (`/SportFlow`):
 
 ```bash
-npm run dev      # ambiente de desenvolvimento
-npm run build    # build de producao
-npm run preview  # preview do build
-npm run lint     # analise de lint
+docker-compose up -d
 ```
 
-## Configuracao da API
+O container do front-end (`react_app`) executa `npm install && npm run dev --host --port 5173` automaticamente.
 
-A base atual da API esta definida como:
+Acesse: [`http://localhost:5173`](http://localhost:5173)
 
-`http://localhost:80/api/`
+---
 
-Para trocar o backend, ajuste a `baseURL` no arquivo `src/services/api.ts`.
+## 🔧 Scripts Disponíveis
 
-## Estrutura do projeto
+| Comando | Descrição |
+|---|---|
+| `npm run dev` | Servidor de desenvolvimento (Vite HMR) |
+| `npm run build` | Build de produção (TypeScript + Vite) |
+| `npm run lint` | Executa ESLint |
+| `npm run preview` | Preview local do build de produção |
 
-```txt
-src/
-  components/    # componentes reutilizaveis (menu, modal etc.)
-  contexts/      # contextos globais (auth, tema)
-  hooks/         # hooks customizados
-  pages/         # paginas/telas
-  routes/        # protecao e fluxo de rotas
-  services/      # camada de API e servicos
-  styles/        # estilos globais
-  utils/         # utilitarios
-```
+---
 
-## Roadmap
+## 🗂️ Utilitários (`src/utils/util.ts`)
 
-- [x] CRUD principal de atletas
-- [x] Upload de foto no cadastro de atletas
-- [x] Fluxo de autenticacao com refresh de token
-- [ ] Protecao de rotas por perfil de usuario
-- [ ] Testes automatizados (unitarios/integracao)
-- [ ] Pipeline CI para lint + build
-- [ ] Melhorias de UX em estados de erro e carregamento
-
-## Contribuicao
-
-1. Crie uma branch para sua feature: `git checkout -b feat/minha-feature`
-2. Faça commits descritivos
-3. Abra um Pull Request com contexto e imagens (quando houver alteracao visual)
-
-## Observacoes
-
-- Este front-end depende do backend para autenticacao e operacoes de atletas.
-- Se a API estiver indisponivel, funcionalidades dependentes de rede podem
-  falhar.
+| Função | Descrição |
+|---|---|
+| `formatDocument(value)` | Máscara CPF ou CNPJ |
+| `formatPhone(value)` | Máscara de telefone/celular |
+| `formatZipCode(value)` | Máscara de CEP |
+| `formatDate(value)` | Formatação de data para exibição |
+| `formatCPF(value)` | Máscara específica de CPF |

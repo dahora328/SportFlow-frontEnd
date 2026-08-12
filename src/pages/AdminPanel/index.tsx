@@ -32,6 +32,8 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
     state: '',
     zip_code: '',
     owner_name: '',
+    IE: '',
+    complement: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -51,6 +53,7 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
         name: '', social_reason: '', fantasy_name: '', document: '',
         foundation_date: '', email: '', phone: '', address: '',
         number: '', neighborhood: '', city: '', state: '', zip_code: '', owner_name: '',
+        IE: '', complement: '',
       });
     } catch (error: any) {
       if (error?.response?.status === 422) {
@@ -77,12 +80,14 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
             { label: 'Email *', name: 'email', required: true, type: 'email' },
             { label: 'Telefone', name: 'phone', required: false },
             { label: 'Nome do Responsável', name: 'owner_name', required: false },
+            { label: 'Inscrição Estadual', name: 'IE', required: false },
             { label: 'CEP', name: 'zip_code', required: false },
             { label: 'Estado (UF)', name: 'state', required: false },
             { label: 'Cidade', name: 'city', required: false },
             { label: 'Bairro', name: 'neighborhood', required: false },
             { label: 'Endereço', name: 'address', required: false },
             { label: 'Número', name: 'number', required: false },
+            { label: 'Complemento', name: 'complement', required: false },
           ].map(field => (
             <div key={field.name}>
               <label className='block text-xs font-semibold text-gray-600 uppercase mb-1'>

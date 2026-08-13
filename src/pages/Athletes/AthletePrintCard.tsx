@@ -40,20 +40,39 @@ export function AthletePrintCard({ athlete, onReady }: Props) {
   const [imgSrc, setImgSrc] = useState<string>('');
   const [fallbackUrls, setFallbackUrls] = useState<string[]>([]);
   const [enterpriseLogo, setEnterpriseLogo] = useState<string>('');
+  const [enterpriseName, setEnterpriseName] = useState<string>('');
+  
+  const [logoReady, setLogoReady] = useState(false);
+  const [photoReady, setPhotoReady] = useState(false);
+
+  useEffect(() => {
+    if (logoReady && photoReady && onReady) {
+      onReady();
+    }
+  }, [logoReady, photoReady, onReady]);
 
   useEffect(() => {
     async function fetchLogo() {
       try {
         const enterprises = await getEnterprises({ t: new Date().getTime() });
-        if (enterprises.length > 0 && enterprises[0].logo_path) {
-          const apiBaseUrl = api.defaults.baseURL || window.location.origin;
-          const baseUrlWithSlash = apiBaseUrl.endsWith('/') ? apiBaseUrl : `${apiBaseUrl}/`;
-          const baseOrigin = `${new URL(baseUrlWithSlash, window.location.origin).origin}/`;
-          
-          setEnterpriseLogo(`${baseOrigin}storage/${enterprises[0].logo_path}?t=${new Date().getTime()}`);
+        if (enterprises.length > 0) {
+          const ent = enterprises[0];
+          setEnterpriseName(ent.fantasy_name || ent.name || '');
+          if (ent.logo_path) {
+            const apiBaseUrl = api.defaults.baseURL || window.location.origin;
+            const baseUrlWithSlash = apiBaseUrl.endsWith('/') ? apiBaseUrl : `${apiBaseUrl}/`;
+            const baseOrigin = `${new URL(baseUrlWithSlash, window.location.origin).origin}/`;
+            
+            setEnterpriseLogo(`${baseOrigin}storage/${ent.logo_path}?t=${new Date().getTime()}`);
+          } else {
+            setLogoReady(true);
+          }
+        } else {
+          setLogoReady(true);
         }
       } catch (error) {
         console.error('Erro ao buscar logo da empresa', error);
+        setLogoReady(true);
       }
     }
     fetchLogo();
@@ -62,7 +81,7 @@ export function AthletePrintCard({ athlete, onReady }: Props) {
   useEffect(() => {
     const photo = athlete.photo_url || athlete.photo_path;
     if (!photo || typeof photo !== 'string') {
-      if (onReady) onReady();
+      setPhotoReady(true);
       return;
     }
 
@@ -110,7 +129,7 @@ export function AthletePrintCard({ athlete, onReady }: Props) {
 
     setImgSrc(urls[0]);
     setFallbackUrls(urls.slice(1));
-  }, [athlete, onReady]);
+  }, [athlete]);
 
   return (
     <div
@@ -135,12 +154,22 @@ export function AthletePrintCard({ athlete, onReady }: Props) {
             src={enterpriseLogo} 
             alt="Marca d'água" 
             className="w-3/4 max-w-[500px] object-contain opacity-[0.07]"
+            onLoad={() => setLogoReady(true)}
+            onError={() => setLogoReady(true)}
           />
         </div>
       )}
 
       {/* Conteúdo (z-10 para ficar acima da marca d'água) */}
       <div className="relative z-10">
+        
+        {/* Nome da Empresa Centralizado */}
+        {enterpriseName && (
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold uppercase tracking-wide text-gray-800">{enterpriseName}</h2>
+          </div>
+        )}
+
         {/* Cabeçalho */}
         <div className='border-b pb-4 mb-6 flex items-center justify-between'>
           <h1 className='text-3xl font-bold'>Ficha do Atleta</h1>
@@ -174,14 +203,14 @@ export function AthletePrintCard({ athlete, onReady }: Props) {
               src={imgSrc}
               alt={athlete.full_name}
               className='w-full h-full object-cover'
-              onLoad={() => onReady && onReady()}
+              onLoad={() => setPhotoReady(true)}
               onError={() => {
                 if (fallbackUrls.length > 0) {
                   setImgSrc(fallbackUrls[0]);
                   setFallbackUrls(prev => prev.slice(1));
                 } else {
                   setImgSrc('');
-                  if (onReady) onReady();
+                  setPhotoReady(true);
                 }
               }}
             />

@@ -11,6 +11,8 @@ import './styles/App.css';
 import { Athletes } from './pages/Athletes';
 import { User } from './pages/User';
 import { Reports } from './pages/Reports';
+import { UsersList } from './pages/UsersList';
+import { UserForm } from './pages/UserForm';
 import { LandingPage } from './pages/LandingPage';
 import { Home } from './pages/Home';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
@@ -47,6 +49,9 @@ function AppContent() {
 
           {/* Páginas autenticadas */}
           <Route path='/user' element={<ProtectedRoute><User /></ProtectedRoute>} />
+          <Route path='/users' element={<ProtectedRoute><UsersList /></ProtectedRoute>} />
+          <Route path='/users/new' element={<ProtectedRoute><UserForm /></ProtectedRoute>} />
+          <Route path='/users/:id' element={<ProtectedRoute><UserForm /></ProtectedRoute>} />
 
           <Route path='/enterprise' element={<ProtectedRoute><Enterprise /></ProtectedRoute>} />
           {/* Páginas principais */}

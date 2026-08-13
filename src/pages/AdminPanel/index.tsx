@@ -10,6 +10,7 @@ interface Enterprise {
   name: string;
   fantasy_name?: string;
   document?: string;
+  active?: boolean;
 }
 
 // ─── Formulário de Empresa ────────────────────────────────────────────────────
@@ -359,12 +360,30 @@ export function AdminPanel() {
           ) : (
             <div className='space-y-2'>
               {enterprises.map(e => (
-                <div key={e.id} className='flex items-center justify-between bg-gray-50 rounded-lg px-4 py-2'>
+                <div key={e.id} className='flex items-center justify-between bg-gray-50 rounded-lg px-4 py-2' title={e.active !== false ? 'Desativar empresa' : 'Ativar empresa'} >
                   <div>
                     <p className='font-semibold text-gray-800 text-sm'>{e.fantasy_name || e.name}</p>
                     {e.document && <p className='text-xs text-gray-400'>CNPJ: {e.document}</p>}
                   </div>
-                  <span className='text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium'>Ativa</span>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const newStatus = !e.active;
+                        await api.put(`/enterprises/${e.id}`, { active: newStatus });
+                        setEnterprises(prev => prev.map(ent => ent.id === e.id ? { ...ent, active: newStatus } : ent));
+                      } catch (error) {
+                        console.error('Erro ao alterar status', error);
+                        alert('Erro ao alterar o status da empresa.');
+                      }
+                    }}
+                    className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${
+                      e.active !== false
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                        : 'bg-red-100 text-red-700 hover:bg-red-200'
+                    }`}
+                  >
+                    {e.active !== false ? 'Ativa' : 'Inativa'}
+                  </button>
                 </div>
               ))}
             </div>

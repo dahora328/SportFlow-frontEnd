@@ -26,7 +26,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Relatórios',  path: '/reports',  roles: ['gestor', 'funcionario'] },
 
   // Exclusivo para o Gestor da empresa
-  { label: 'Usuários',    path: '/user',     icon: <Users size={14} />, roles: ['gestor'] },
+  { label: 'Usuários',    path: '/users',    icon: <Users size={14} />, roles: ['gestor'] },
 ];
 
 // ---------------------------------------------------------------------------
@@ -44,8 +44,8 @@ export function TopBar() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    // Super Admin não exibe logo de empresa — pula o fetch
-    if (role === 'superadmin') return;
+    // Super Admin não exibe logo de empresa, e se o usuário estiver deslogado, não busca
+    if (role === 'superadmin' || !user) return;
 
     async function fetchLogo() {
       try {
@@ -66,7 +66,7 @@ export function TopBar() {
     return () => {
       window.removeEventListener('enterpriseUpdated', fetchLogo);
     };
-  }, [role]);
+  }, [role, user]);
 
   const handleCloseMenus = () => {
     setOpen(false);
@@ -155,8 +155,8 @@ export function TopBar() {
                   </Link>
                 </li>
 
-                {/* Empresa — apenas gestor e funcionário (não Super Admin) */}
-                {role !== 'superadmin' && (
+                {/* Empresa — apenas gestor */}
+                {role === 'gestor' && (
                   <li>
                     <Link
                       to='/enterprise'
@@ -221,7 +221,7 @@ export function TopBar() {
                   </Link>
                 </li>
 
-                {role !== 'superadmin' && (
+                {role === 'gestor' && (
                   <li>
                     <Link
                       to='/enterprise'

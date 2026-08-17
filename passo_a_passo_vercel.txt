@@ -1,0 +1,66 @@
+Passo a Passo para Deploy do Frontend no Vercel
+
+Analisando o seu projeto atual, faltam algumas configurações importantes para que o deploy funcione corretamente no Vercel, especialmente em relação à comunicação com o backend e o roteamento das páginas.
+
+Aqui está o que você precisa ajustar:
+
+==================================================
+PASSO 1: Corrigir a URL da API (Variáveis de Ambiente)
+==================================================
+Atualmente, no arquivo `src/services/api.ts`, a `baseURL` está fixa como `http://localhost:8080/api/`. Quando o site estiver no ar, ele não pode tentar acessar o localhost.
+
+O que fazer:
+1. Abra o arquivo `src/services/api.ts`.
+2. Altere a configuração do axios para usar uma variável de ambiente, com fallback para localhost:
+
+```typescript
+export const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api/',
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
+});
+```
+
+==================================================
+PASSO 2: Criar o arquivo de configuração do Vercel (vercel.json)
+==================================================
+Como você usa o `react-router-dom`, o Vercel precisa saber que todas as rotas (ex: /users, /admin) devem ser redirecionadas para o `index.html`. Caso contrário, se o usuário recarregar a página `/users`, o Vercel vai retornar um erro 404.
+
+O que fazer:
+1. Na pasta raiz do frontend (onde está o package.json), crie um arquivo chamado `vercel.json`.
+2. Adicione o seguinte conteúdo nele:
+
+```json
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+```
+
+==================================================
+PASSO 3: Commit e Push
+==================================================
+1. Salve as alterações nos arquivos `api.ts` e o novo `vercel.json`.
+2. Faça o commit e o push dessas alterações para o seu repositório no GitHub (a branch main que você está importando).
+
+==================================================
+PASSO 4: Configuração Final no Painel do Vercel
+==================================================
+No painel do Vercel (como mostrado nas suas capturas de tela):
+
+1. Framework Preset: Deixe como Vite (ele já identificou corretamente).
+2. Build Command e Output Directory: Pode deixar os padrões (`npm run build` ou `vite build` e `dist`).
+3. Environment Variables (IMPORTANTE):
+   - Abra a seção "Environment Variables".
+   - No campo "Key", digite: `VITE_API_URL`
+   - No campo "Value", digite a URL de produção da sua API (ex: `https://sua-api.com/api/`). Se o backend ainda não estiver em produção, você precisará fazer o deploy dele primeiro ou não conseguirá fazer login pelo Vercel.
+   - Clique em "Add".
+4. Clique em "Deploy".
+
+Com essas alterações, seu frontend estará pronto para ser hospedado no Vercel!

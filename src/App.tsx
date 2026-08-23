@@ -15,6 +15,7 @@ import { UsersList } from './pages/UsersList';
 import { UserForm } from './pages/UserForm';
 import { LandingPage } from './pages/LandingPage';
 import { Home } from './pages/Home';
+import { Register } from './pages/Register';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { AdminPanel } from './pages/AdminPanel';
 import { ProtectedRoute } from './routes/ProtectedRoute';
@@ -37,7 +38,8 @@ function AppContent() {
   const location = useLocation();
   const hideTopBar =
     location.pathname === '/' ||
-    location.pathname === '/login';
+    location.pathname === '/login' ||
+    location.pathname === '/register';
 
   return (
     <>
@@ -46,6 +48,7 @@ function AppContent() {
         <Routes>
           {/* Páginas públicas */}
           <Route path='/' element={<LandingPage />} />
+          <Route path='/register' element={<Register />} />
 
           {/* Páginas autenticadas */}
           <Route path='/user' element={<ProtectedRoute><User /></ProtectedRoute>} />

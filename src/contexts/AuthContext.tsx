@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { supabase } from '../services/supabase';
 
-/** Papéis possíveis no sistema */
 export type UserRole = 'superadmin' | 'gestor' | 'funcionario';
 
 export interface AuthUser {
@@ -13,12 +13,7 @@ export interface AuthUser {
   enterprise_id: number | null;
 }
 
-/**
- * Deriva o papel do usuário a partir dos campos is_admin e enterprise_id.
- * - superadmin: is_admin=true e sem empresa (dono do SportFlow)
- * - gestor:     is_admin=true com empresa (dono/gestor da empresa cliente)
- * - funcionario: is_admin=false com empresa (equipe da empresa)
- */
+// eslint-disable-next-line react-refresh/only-export-components
 export function getUserRole(user: AuthUser | null): UserRole {
   if (!user) return 'funcionario';
   if (user.is_admin && user.enterprise_id === null) return 'superadmin';
@@ -28,113 +23,85 @@ export function getUserRole(user: AuthUser | null): UserRole {
 
 interface AuthContextType {
   accessToken: string | null;
-  refreshToken: string | null;
   user: AuthUser | null;
   isAuthenticated: boolean;
-  login: (access: string, refresh: string) => Promise<void>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<AuthUser | null>;
+  logout: () => Promise<void>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [accessToken, setAccessToken] = useState<string | null>(() => localStorage.getItem('access_token'));
-  const [refreshToken, setRefreshToken] = useState<string | null>(() => localStorage.getItem('refresh_token'));
-  const [user, setUser] = useState<AuthUser | null>(() => {
-    const storedUser = localStorage.getItem('auth_user');
-    if (storedUser) {
-      try {
-        return JSON.parse(storedUser);
-      } catch {
-        localStorage.removeItem('auth_user');
-      }
-    }
-    return null;
-  });
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  /**
-   * Carrega tokens e dados do usuário salvos ao iniciar o app
-   */
-  useEffect(() => {
-    if (accessToken) {
-      api.defaults.headers.Authorization = `Bearer ${accessToken}`;
-    }
-  }, []);
-
-  /**
-   * Login — salva tokens, configura Axios e busca dados do usuário logado
-   */
-  async function login(access: string, refresh: string) {
-    setAccessToken(access);
-    setRefreshToken(refresh);
-
-    localStorage.setItem('access_token', access);
-    localStorage.setItem('refresh_token', refresh);
-
-    api.defaults.headers.Authorization = `Bearer ${access}`;
-
-    // Busca os dados do usuário (is_admin, enterprise_id, etc.)
+  const fetchUserData = async (token: string): Promise<AuthUser | null> => {
     try {
+      api.defaults.headers.Authorization = `Bearer ${token}`;
       const response = await api.get('/user');
       const userData: AuthUser = response.data;
       setUser(userData);
       localStorage.setItem('auth_user', JSON.stringify(userData));
-    } catch {
-      // Se falhar ao buscar o usuário, o login ainda funciona — dados virão depois
-      console.warn('Não foi possível buscar dados do usuário após login.');
+      return userData;
+    } catch (error) {
+      console.warn('Não foi possível buscar dados adicionais do usuário.', error);
+      return null;
     }
+  };
+
+  useEffect(() => {
+    // Escuta as mudanças de estado de autenticação do Supabase
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        setAccessToken(session.access_token);
+        // Só busca os dados se o usuário não estiver em state (evitar requests extras logo após o login manual)
+        if (!user) {
+          await fetchUserData(session.access_token);
+        }
+      } else {
+        setAccessToken(null);
+        setUser(null);
+        api.defaults.headers.Authorization = '';
+        localStorage.removeItem('auth_user');
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function login(email: string, password: string): Promise<AuthUser | null> {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      throw error;
+    }
+    
+    if (data.session) {
+      setAccessToken(data.session.access_token);
+      return await fetchUserData(data.session.access_token);
+    }
+    return null;
   }
 
-  /**
-   * Logout — remove tudo
-   */
-  function logout() {
-    setAccessToken(null);
-    setRefreshToken(null);
-    setUser(null);
-
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('auth_user');
-
-    api.defaults.headers.Authorization = '';
-
+  async function logout() {
+    await supabase.auth.signOut();
     navigate('/');
   }
 
-  /**
-   * Escuta o evento 'auth:logout' disparado pelo Axios (api.ts)
-   * quando o refresh token falha — navega sem recarregar a página
-   */
-  useEffect(() => {
-    const handleForceLogout = () => {
-      setAccessToken(null);
-      setRefreshToken(null);
-      setUser(null);
-      api.defaults.headers.Authorization = '';
-      navigate('/');
-    };
-
-    window.addEventListener('auth:logout', handleForceLogout);
-    return () => window.removeEventListener('auth:logout', handleForceLogout);
-  }, [navigate]);
-
-  /**
-   * Quando accessToken mudar, sempre atualizar Axios
-   */
-  useEffect(() => {
-    if (accessToken) {
-      api.defaults.headers.Authorization = `Bearer ${accessToken}`;
-    }
-  }, [accessToken]);
+  if (loading) {
+    return <div className="h-screen flex justify-center items-center">Carregando...</div>;
+  }
 
   return (
     <AuthContext.Provider
       value={{
         accessToken,
-        refreshToken,
         user,
         login,
         logout,

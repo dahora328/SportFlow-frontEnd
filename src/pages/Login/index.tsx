@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { loginUser } from '../../services/userService';
 import { LoginModal } from '../../components/Modal/LoginModal';
 
 export function Login() {
@@ -16,26 +15,12 @@ export function Login() {
     setError(null);
 
     try {
-      const response = await loginUser(data);
+      const userData = await login(data.email, data.password);
+      console.log('Login realizado com sucesso:', userData);
 
-      const access = response.access_token;
-      const refresh = response.refresh_token;
-      const user_id = response.user_id;
-
-      if (access && refresh) {
-        login(access, refresh);
-      } else {
-        throw new Error('Tokens não recebidos do servidor');
-      }
-
-      console.log('Login realizado com sucesso:', response);
-
-      localStorage.setItem('user_id', user_id.toString());
       setOpen(false);
 
-      const storedUser = localStorage.getItem('auth_user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
+      if (userData) {
         if (userData.is_admin === true && userData.enterprise_id === null) {
           navigate('/admin');
         } else {
@@ -46,23 +31,7 @@ export function Login() {
       }
     } catch (err: unknown) {
       console.error('Erro no login:', err);
-
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as {
-          response?: { status?: number; data?: { message?: string } };
-        };
-
-        if (axiosError.response?.status === 401) {
-          setError('Login ou senha inválidos. Verifique suas credenciais.');
-        } else {
-          const errorMessage =
-            axiosError.response?.data?.message ||
-            'Erro ao fazer login. Tente novamente.';
-          setError(errorMessage);
-        }
-      } else {
-        setError('Erro ao fazer login. Verifique suas credenciais.');
-      }
+      setError('Login ou senha inválidos. Verifique suas credenciais.');
     } finally {
       setLoading(false);
     }

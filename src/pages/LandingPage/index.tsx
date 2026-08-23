@@ -13,7 +13,6 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { LoginModal } from '../../components/Modal/LoginModal';
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../../services/userService';
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -28,23 +27,12 @@ export function LandingPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await loginUser(data);
-      const access = response.access_token;
-      const refresh = response.refresh_token;
-
-      if (access && refresh) {
-        await login(access, refresh);
-      } else {
-        throw new Error('Tokens não recebidos do servidor');
-      }
-
-      console.log('Login realizado com sucesso:', response);
-
+      const userData = await login(data.email, data.password);
+      console.log('Login realizado com sucesso:', userData);
+      
       setIsLoginModalOpen(false);
 
-      const storedUser = localStorage.getItem('auth_user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
+      if (userData) {
         if (userData.is_admin === true && userData.enterprise_id === null) {
           navigate('/admin');
         } else {
@@ -55,22 +43,7 @@ export function LandingPage() {
       }
     } catch (error: any) {
       console.error('Erro no login:', error);
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as {
-          response?: { status?: number; data?: { message?: string } };
-        };
-
-        if (axiosError.response?.status === 401) {
-          setError('Login ou senha inválidos. Verifique suas credenciais.');
-        } else {
-          const errorMessage =
-            axiosError.response?.data?.message ||
-            'Erro ao fazer login. Tente novamente.';
-          setError(errorMessage);
-        }
-      } else {
-        setError('Erro ao fazer login. Verifique suas credenciais.');
-      }
+      setError('Login ou senha inválidos. Verifique suas credenciais.');
     } finally {
       setLoading(false);
     }

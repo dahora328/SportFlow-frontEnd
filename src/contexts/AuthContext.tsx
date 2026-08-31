@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { supabase } from '../services/supabase';
 
 export type UserRole = 'superadmin' | 'gestor' | 'funcionario';
 
@@ -53,45 +52,75 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Escuta as mudanças de estado de autenticação do Supabase
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
-        setAccessToken(session.access_token);
-        // Só busca os dados se o usuário não estiver em state (evitar requests extras logo após o login manual)
-        if (!user) {
-          await fetchUserData(session.access_token);
-        }
-      } else {
-        setAccessToken(null);
-        setUser(null);
-        api.defaults.headers.Authorization = '';
-        localStorage.removeItem('auth_user');
-      }
+    // Ao iniciar o app, verifica se já existe token no localStorage
+    const storedToken = localStorage.getItem('access_token');
+    
+    if (storedToken) {
+      setAccessToken(storedToken);
+      api.defaults.headers.Authorization = `Bearer ${storedToken}`;
+      // Busca os dados do usuário para garantir que o token ainda é válido
+      fetchUserData(storedToken).finally(() => setLoading(false));
+    } else {
       setLoading(false);
-    });
+    }
+
+    // Listener para o evento customizado de logout disparado pelo interceptor do Axios
+    const handleLogout = () => {
+      setAccessToken(null);
+      setUser(null);
+      api.defaults.headers.Authorization = '';
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      navigate('/');
+    };
+
+    window.addEventListener('auth:logout', handleLogout);
 
     return () => {
-      subscription.unsubscribe();
+      window.removeEventListener('auth:logout', handleLogout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function login(email: string, password: string): Promise<AuthUser | null> {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      throw error;
+    // Chama a API do Laravel em vez do Supabase
+    const response = await api.post('/login', { email, password });
+    
+    if (response.data && response.data.access_token) {
+      const { access_token, refresh_token } = response.data;
+      
+      // Salva os tokens no localStorage (necessário para o api.ts interceptor)
+      localStorage.setItem('access_token', access_token);
+      if (refresh_token) {
+        localStorage.setItem('refresh_token', refresh_token);
+      }
+      
+      setAccessToken(access_token);
+      return await fetchUserData(access_token);
     }
     
-    if (data.session) {
-      setAccessToken(data.session.access_token);
-      return await fetchUserData(data.session.access_token);
-    }
     return null;
   }
 
   async function logout() {
-    await supabase.auth.signOut();
-    navigate('/');
+    try {
+      // Opcional: bate na rota de logout da API para invalidar o token
+      if (accessToken) {
+        await api.post('/logout');
+      }
+    } catch (error) {
+      console.error('Erro ao fazer logout na API', error);
+    } finally {
+      // Limpa os dados locais
+      setAccessToken(null);
+      setUser(null);
+      api.defaults.headers.Authorization = '';
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      navigate('/');
+    }
   }
 
   if (loading) {
@@ -120,4 +149,4 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
-};
+};;

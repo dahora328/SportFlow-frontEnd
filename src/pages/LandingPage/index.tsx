@@ -3,7 +3,7 @@ import { LogIn } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoginModal } from '../../components/Modal/LoginModal';
 import { useNavigate } from 'react-router-dom';
-import logoImg from '../../assets/images/SportFlow/Logo sem fundo1.png';
+import logoImg from '../../assets/images/SportFlow/Logo completa png.png';
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -53,20 +53,20 @@ export function LandingPage() {
       <main className="flex-1 flex flex-col items-center justify-center w-full max-w-3xl px-6 z-10 text-center">
         
         {/* LOGO */}
-        <div className="mb-8 flex items-center justify-center">
+        <div className="flex items-center justify-center">
           <img 
-            src={logoImg} 
+            src={logoImg}
             alt="SportFlow Logo" 
-            className="h-20 md:h-28 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] object-contain"
+            className="h-32 md:h-48 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] object-contain"
           />
         </div>
 
         {/* BREVE EXPLICAÇÃO */}
         <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-          Gestão Esportiva <br/> de Alta Performance.
+          Gestão de Atletas <br/> Simplificada.
         </h2>
         <p className="text-slate-400 text-lg md:text-xl mb-12 max-w-2xl leading-relaxed">
-          Tome o controle das suas operações, acompanhe desempenhos e gerencie eventos esportivos de forma eficiente em uma única plataforma.
+          Centralize as informações, mantenha o cadastro dos seus atletas sempre atualizado e organize sua base com facilidade e segurança.
         </p>
 
         {/* BOTÃO DE ENTRAR NO SISTEMA */}

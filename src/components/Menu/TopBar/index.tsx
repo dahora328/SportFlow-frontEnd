@@ -76,11 +76,11 @@ export function TopBar() {
   // Classes reutilizáveis para NavLink (ativo vs. inativo)
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `flex items-center gap-1 transition-colors duration-150 ${
-      isActive ? 'text-yellow-400 font-semibold' : 'hover:text-yellow-400'
+      isActive ? 'text-blue-400 font-semibold' : 'hover:text-blue-400'
     }`;
 
   return (
-    <nav className='bg-red-950 text-white px-6 py-4 shadow-md'>
+    <nav className='bg-slate-950 text-white px-6 py-4 shadow-md border-b border-slate-800/50'>
       <div className='flex items-center justify-between'>
 
         {/* Logo — SportFlow para Super Admin, logo da empresa para os demais */}
@@ -88,17 +88,17 @@ export function TopBar() {
           {role === 'superadmin' ? (
             // Badge do sistema — substitua por <img> quando tiver a logo oficial
             <div className='flex items-center gap-2'>
-              <span className='text-yellow-400 font-black text-xl tracking-tight leading-none'>
+              <span className='text-blue-400 font-black text-xl tracking-tight leading-none'>
                 Sport
               </span>
-              <span className='bg-yellow-400 text-red-950 font-black text-xs px-2 py-0.5 rounded-full tracking-widest uppercase'>
+              <span className='bg-gradient-to-r from-blue-600 to-green-500 text-white font-black text-xs px-2 py-0.5 rounded-full tracking-widest uppercase'>
                 Flow
               </span>
             </div>
           ) : logoUrl ? (
             <img src={logoUrl} alt='Logo Empresa' className='h-full w-auto object-contain' />
           ) : (
-            <h1 className='text-xl font-bold text-yellow-400'>LOGO</h1>
+            <h1 className='text-xl font-bold text-blue-400'>LOGO</h1>
           )}
         </div>
 
@@ -134,7 +134,7 @@ export function TopBar() {
           <button
             onClick={() => setPerfilOpen(!perfilOpen)}
             className={`flex items-center gap-2 cursor-pointer py-2 ${
-              perfilOpen ? 'text-yellow-400' : 'hover:text-yellow-400'
+              perfilOpen ? 'text-blue-400' : 'hover:text-blue-400'
             }`}
           >
             <User size={18} />
@@ -143,13 +143,13 @@ export function TopBar() {
 
           {perfilOpen && (
             <div className='absolute right-0 pt-2 w-48 z-50'>
-              <ul className='bg-red-950 rounded-lg shadow-lg py-2 border border-red-900'>
+              <ul className='bg-slate-900 rounded-lg shadow-lg py-2 border border-slate-700/50'>
                 {/* Editar Perfil — todos os papéis */}
                 <li>
                   <Link
                     to='/user'
                     onClick={() => setPerfilOpen(false)}
-                    className='px-4 py-2 hover:bg-white hover:text-red-950 flex items-center gap-2'
+                    className='px-4 py-2 hover:bg-slate-800 hover:text-white flex items-center gap-2'
                   >
                     <Edit size={16} /> Editar Perfil
                   </Link>
@@ -161,7 +161,7 @@ export function TopBar() {
                     <Link
                       to='/enterprise'
                       onClick={() => setPerfilOpen(false)}
-                      className='px-4 py-2 hover:bg-white hover:text-red-950 flex items-center gap-2'
+                      className='px-4 py-2 hover:bg-slate-800 hover:text-white flex items-center gap-2'
                     >
                       <Building size={16} /> Empresa
                     </Link>
@@ -175,7 +175,7 @@ export function TopBar() {
                       logout();
                       setPerfilOpen(false);
                     }}
-                    className='px-4 py-2 hover:bg-white text-red-300 hover:text-red-950 flex items-center gap-2'
+                    className='px-4 py-2 hover:bg-slate-800 text-red-400 hover:text-red-500 flex items-center gap-2'
                   >
                     <LogOut size={16} /> Sair
                   </Link>
@@ -201,10 +201,10 @@ export function TopBar() {
           ))}
 
           {/* Submenu Perfil mobile */}
-          <li className='flex flex-col items-center border-t border-red-900 pt-4 mt-2'>
+          <li className='flex flex-col items-center border-t border-slate-800/50 pt-4 mt-2'>
             <button
               onClick={() => setPerfilOpen(!perfilOpen)}
-              className='flex items-center gap-2 hover:text-yellow-400 cursor-pointer mb-2'
+              className='flex items-center gap-2 hover:text-blue-400 cursor-pointer mb-2'
             >
               <User size={18} /> {user?.name?.split(' ')[0] ?? 'Perfil'}
             </button>
@@ -215,7 +215,7 @@ export function TopBar() {
                   <Link
                     to='/user'
                     onClick={handleCloseMenus}
-                    className='px-4 py-2 hover:bg-red-800 cursor-pointer flex items-center justify-center gap-2'
+                    className='px-4 py-2 hover:bg-slate-800 cursor-pointer flex items-center justify-center gap-2'
                   >
                     <Edit size={16} /> Editar Perfil
                   </Link>
@@ -226,7 +226,7 @@ export function TopBar() {
                     <Link
                       to='/enterprise'
                       onClick={handleCloseMenus}
-                      className='px-4 py-2 hover:bg-red-800 cursor-pointer flex items-center justify-center gap-2'
+                      className='px-4 py-2 hover:bg-slate-800 cursor-pointer flex items-center justify-center gap-2'
                     >
                       <Building size={16} /> Empresa
                     </Link>
@@ -240,7 +240,7 @@ export function TopBar() {
                       logout();
                       handleCloseMenus();
                     }}
-                    className='px-4 py-2 hover:bg-red-800 cursor-pointer flex items-center justify-center gap-2 text-red-200'
+                    className='px-4 py-2 hover:bg-slate-800 cursor-pointer flex items-center justify-center gap-2 text-red-400'
                   >
                     <LogOut size={16} /> Sair
                   </Link>

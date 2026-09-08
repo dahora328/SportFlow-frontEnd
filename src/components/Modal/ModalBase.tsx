@@ -61,7 +61,9 @@ export const ModalBase: React.FC<ModalBaseProps> = ({
               </h2>
             )}
             {description && (
-              <p className='mt-1 text-sm text-gray-600'>{description}</p>
+              <p className='mt-1 text-sm text-gray-600 whitespace-pre-line'>
+                {description}
+              </p>
             )}
           </div>
 

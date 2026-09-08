@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { LoginModal } from '../../components/Modal/LoginModal';
 import { useNavigate } from 'react-router-dom';
 import logoImg from '../../assets/images/SportFlow/Logo completa png.png';
+import { logger } from '../../utils/logger';
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export function LandingPage() {
     setError(null);
     try {
       const userData = await login(data.email, data.password);
-      console.log('Login realizado com sucesso:', userData);
+      logger.log('Login realizado com sucesso:', userData);
       
       setIsLoginModalOpen(false);
 
@@ -34,7 +35,7 @@ export function LandingPage() {
       } else {
         navigate('/home');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro no login:', error);
       setError('Login ou senha inválidos. Verifique suas credenciais.');
     } finally {

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { logger } from '../utils/logger';
 
 export type UserRole = 'superadmin' | 'gestor' | 'funcionario';
 
@@ -46,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('auth_user', JSON.stringify(userData));
       return userData;
     } catch (error) {
-      console.warn('Não foi possível buscar dados adicionais do usuário.', error);
+      logger.warn('Não foi possível buscar dados adicionais do usuário.', error);
       return null;
     }
   };

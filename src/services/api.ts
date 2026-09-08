@@ -1,5 +1,6 @@
 // src/services/api.ts
 import axios, { AxiosError, type AxiosRequestConfig } from 'axios';
+import { logger } from '../utils/logger';
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api/',
@@ -42,7 +43,7 @@ api.interceptors.response.use(
 
     // Se chegou 401 no refresh → desloga imediatamente
     if (originalRequest?.url?.includes('/refresh')) {
-      console.warn('❌ Refresh falhou → logout');
+      logger.warn('❌ Refresh falhou → logout');
       localStorage.clear();
       window.dispatchEvent(new Event('auth:logout'));
       return Promise.reject(error);
@@ -54,10 +55,10 @@ api.interceptors.response.use(
 
       const refreshToken = localStorage.getItem('refresh_token');
 
-      console.log('🔍 Refresh token:', refreshToken);
+      logger.log('🔍 Refresh token:', refreshToken);
 
       if (!refreshToken) {
-        console.warn('❌ Nenhum refresh_token encontrado → logout');
+        logger.warn('❌ Nenhum refresh_token encontrado → logout');
         localStorage.clear();
         window.dispatchEvent(new Event('auth:logout'));
         return Promise.reject(error);
@@ -67,7 +68,7 @@ api.interceptors.response.use(
       // Ela assume a responsabilidade de fazer o refresh.
       if (!isRefreshing) {
         isRefreshing = true;
-        console.log('🔄 Atualizando token...');
+        logger.log('🔄 Atualizando token...');
 
         return new Promise((resolve, reject) => {
           api
@@ -76,7 +77,7 @@ api.interceptors.response.use(
               const newAccess = refreshResponse.data.access_token;
               const newRefresh = refreshResponse.data.refresh_token;
 
-              console.log('✅ Novo access token:', newAccess);
+              logger.log('✅ Novo access token:', newAccess);
 
               // Salvar novos tokens
               localStorage.setItem('access_token', newAccess);

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import api from './api';
+import { logger } from '../utils/logger';
 
 export interface AthleteData {
   id?: number;
@@ -54,11 +55,18 @@ export async function createAthlete(data: AthleteData) {
         'Content-Type': 'multipart/form-data',
       },
     });
-    console.log(response.data);
+    logger.log(response.data);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao criar atleta:', error);
-    throw error;
+    if (error.response?.status === 422) {
+      throw {
+        status: 422,
+        message: error.response.data.message || 'Dados inválidos',
+        errors: error.response.data.errors || {},
+      };
+    }
+    throw { status: error.response?.status || 500, message: 'Erro interno no servidor' };
   }
 }
 
@@ -132,9 +140,16 @@ export async function updateAthlete(id: number, data: AthleteData) {
       },
     });
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao atualizar atleta:', error);
-    throw error;
+    if (error.response?.status === 422) {
+      throw {
+        status: 422,
+        message: error.response.data.message || 'Dados inválidos',
+        errors: error.response.data.errors || {},
+      };
+    }
+    throw { status: error.response?.status || 500, message: 'Erro interno no servidor' };
   }
 }
 

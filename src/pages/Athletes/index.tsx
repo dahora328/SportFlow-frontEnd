@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -10,6 +11,7 @@ import api from '../../services/api';
 import { formatDocument, formatPhone, formatZipCode } from '../../utils/util';
 import { ModalBase } from '../../components/Modal/ModalBase';
 import { useModal } from '../../hooks/useModal';
+import { logger } from '../../utils/logger';
 
 export function Athletes() {
   const PHOTO_RATIO = 3 / 4;
@@ -198,7 +200,7 @@ export function Athletes() {
       try {
         setLoading(true);
         const athleteData = await getAthleteById(athleteId);
-        console.log('[DEBUG] Dados brutos do atleta recuperado:', athleteData);
+        logger.log('[DEBUG] Dados brutos do atleta recuperado:', athleteData);
 
         setFormData({
           ...athleteData,
@@ -221,23 +223,23 @@ export function Athletes() {
         const existingPhotoUrl = getAthletePhotoUrl(
           athleteData as unknown as Record<string, unknown>,
         );
-        console.log('[DEBUG] URL/Caminho da foto extraído:', existingPhotoUrl);
+        logger.log('[DEBUG] URL/Caminho da foto extraído:', existingPhotoUrl);
 
         if (existingPhotoUrl && typeof existingPhotoUrl === 'string') {
           const previewCandidates = buildImageUrlCandidates(existingPhotoUrl);
-          console.log('[DEBUG] URLs candidatas geradas:', previewCandidates);
+          logger.log('[DEBUG] URLs candidatas geradas:', previewCandidates);
 
           if (previewCandidates.length > 0) {
             setPhotoPreviewUrl(previewCandidates[0]);
             setPhotoPreviewFallbackUrls(previewCandidates.slice(1));
-            console.log(
+            logger.log(
               '[DEBUG] URL de preview definida:',
               previewCandidates[0],
             );
           } else {
             const normalizedUrl = normalizeImageUrl(existingPhotoUrl);
             updatePhotoPreview(normalizedUrl);
-            console.log(
+            logger.log(
               '[DEBUG] URL normalizada como fallback:',
               normalizedUrl,
             );
@@ -247,7 +249,7 @@ export function Athletes() {
           const fileName = normalizedNamePath.split('/').pop() || '';
           setSelectedPhotoName(fileName);
         } else {
-          console.log('[DEBUG] Nenhuma URL de foto encontrada nos dados.');
+          logger.log('[DEBUG] Nenhuma URL de foto encontrada nos dados.');
           updatePhotoPreview('');
           setSelectedPhotoName('');
         }
@@ -374,7 +376,7 @@ export function Athletes() {
         const athleteId = Number(id || location.state?.athleteToEdit?.id);
 
         result = await updateAthlete(athleteId, formData);
-        console.log('Atualizado com sucesso:', result);
+        logger.log('Atualizado com sucesso:', result);
         modal.openSuccess(
           'Atleta atualizado!',
           'Os dados foram atualizados com sucesso.',
@@ -382,7 +384,7 @@ export function Athletes() {
         );
       } else {
         result = await createAthlete(formData);
-        console.log('Cadastrado com sucesso:', result);
+        logger.log('Cadastrado com sucesso:', result);
         modal.openSuccess(
           'Atleta cadastrado!',
           'O atleta foi cadastrado com sucesso.',
@@ -390,13 +392,18 @@ export function Athletes() {
         );
         // window.location.href = '/home';
       }
-    } catch (error) {
-      modal.openError(
-        'Erro' + error,
-        'Não foi possível ' +
-          (isEditing ? 'atualizar' : 'salvar') +
-          ' o atleta. Tente novamente.',
-      );
+    } catch (error: any) {
+      if (error.status === 422 && error.errors) {
+        const fieldErrors = Object.values(error.errors).flat().join('\n• ');
+        modal.openError('Campos inválidos', `• ${fieldErrors}`);
+      } else {
+        modal.openError(
+          'Erro',
+          'Não foi possível ' +
+            (isEditing ? 'atualizar' : 'salvar') +
+            ' o atleta. Tente novamente.',
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -544,6 +551,7 @@ export function Athletes() {
               value={formData.marital_status}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
+              required
             >
               <option value=''>Selecione</option>
               <option value='solteiro'>Solteiro(a)</option>
@@ -561,6 +569,7 @@ export function Athletes() {
               value={formData.gender}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
+              required
             >
               <option value=''>Selecione</option>
               <option value='masculino'>Masculino</option>
@@ -602,6 +611,7 @@ export function Athletes() {
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
               placeholder='Digite o número do documento'
+              required
             />
           </div>
 
@@ -618,6 +628,7 @@ export function Athletes() {
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
               placeholder='(DD) 99999-9999'
+              required
             />
           </div>
 
@@ -660,6 +671,7 @@ export function Athletes() {
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
               placeholder='Rua, avenida, etc.'
+              required
             />
           </div>
 
@@ -672,6 +684,7 @@ export function Athletes() {
               value={formData.number}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
+              required
             />
           </div>
 
@@ -684,6 +697,7 @@ export function Athletes() {
               value={formData.neighborhood}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
+              required
             />
           </div>
 
@@ -698,6 +712,7 @@ export function Athletes() {
               maxLength={8}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
               placeholder='00000-000'
+              required
             />
           </div>
 
@@ -709,6 +724,7 @@ export function Athletes() {
               value={formData.state}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2 bg-white'
+              required
             >
               <option value=''>Selecione o estado</option>
               <option value='AC'>Acre</option>
@@ -750,6 +766,7 @@ export function Athletes() {
               value={formData.city}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
+              required
             />
           </div>
 

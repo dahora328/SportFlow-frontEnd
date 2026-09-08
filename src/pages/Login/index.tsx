@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoginModal } from '../../components/Modal/LoginModal';
+import { logger } from '../../utils/logger';
 
 export function Login() {
   const [open, setOpen] = useState(false);
@@ -16,7 +17,7 @@ export function Login() {
 
     try {
       const userData = await login(data.email, data.password);
-      console.log('Login realizado com sucesso:', userData);
+      logger.log('Login realizado com sucesso:', userData);
 
       setOpen(false);
 

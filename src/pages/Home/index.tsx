@@ -16,6 +16,7 @@ import { ModalBase } from '../../components/Modal/ModalBase';
 import { usePrint } from '../../hooks/usePrint';
 import { PrintContainer } from '../../components/Print/PrintContainer';
 import { AthletePrintCard } from '../Athletes/AthletePrintCard';
+import { logger } from '../../utils/logger';
 
 function Th({ children }: { children: React.ReactNode }) {
   return (
@@ -118,7 +119,7 @@ export function Home() {
     try {
       const result = await getAthleteById(athleteId);
 
-      console.log('Dados do atleta:', result);
+      logger.log('Dados do atleta:', result);
       //window.location.href = '/home';
     } catch (error) {
       console.error('Erro ao recuperar atleta:', error);
@@ -204,7 +205,7 @@ export function Home() {
             </thead>
             <tbody className='divide-y divide-gray-100'>
               {athletes?.map((athlete: any) => {
-                console.log(athlete);
+                logger.log(athlete);
                 return (
                   <tr key={athlete.id} className='hover:bg-gray-200'>
                     <td className='px-4 py-3'>{athlete.full_name}</td>

@@ -70,7 +70,9 @@ export async function createAthlete(data: AthleteData) {
   }
 }
 
-export async function getAthletes(params = {}): Promise<GetAthletesResponse> {
+export async function getAthletes(
+  params: Record<string, unknown> = {},
+): Promise<GetAthletesResponse> {
   try {
     const response = await api.get('/athletes', { params });
     const resData = response.data;

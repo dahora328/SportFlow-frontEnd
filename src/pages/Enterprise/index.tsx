@@ -3,6 +3,7 @@ import { ModalBase } from '../../components/Modal/ModalBase';
 import { useModal } from '../../hooks/useModal';
 import api from '../../services/api';
 import { getEnterprises, type EnterpriseData } from '../../services/enterpriseService';
+import { MaskedInput } from '../../components/Form/MaskedInput';
 import { Link } from 'react-router-dom';
 
 export function Enterprise() {
@@ -238,8 +239,8 @@ export function Enterprise() {
             <label className='block text-sm font-semibold mb-1'>
               CNPJ / Documento
             </label>
-            <input
-              type='text'
+            <MaskedInput
+              mask='document'
               name='document'
               value={formData.document}
               onChange={handleChange}
@@ -297,8 +298,8 @@ export function Enterprise() {
           {/* Telefone */}
           <div>
             <label className='block text-sm font-semibold mb-1'>Telefone</label>
-            <input
-              type='text'
+            <MaskedInput
+              mask='phone'
               name='phone'
               value={formData.phone}
               onChange={handleChange}
@@ -311,8 +312,8 @@ export function Enterprise() {
           {/* CEP */}
           <div>
             <label className='block text-sm font-semibold mb-1'>CEP</label>
-            <input
-              type='text'
+            <MaskedInput
+              mask='cep'
               name='zip_code'
               value={formData.zip_code}
               onChange={handleChange}

@@ -8,7 +8,7 @@ import {
   type AthleteData,
 } from '../../services/athletesService';
 import api from '../../services/api';
-import { formatDocument, formatPhone, formatZipCode } from '../../utils/util';
+import { MaskedInput } from '../../components/Form/MaskedInput';
 import { ModalBase } from '../../components/Modal/ModalBase';
 import { useModal } from '../../hooks/useModal';
 import { logger } from '../../utils/logger';
@@ -603,11 +603,10 @@ export function Athletes() {
             <label className='block text-sm font-semibold mb-1'>
               Documento (CPF)
             </label>
-            <input
-              type='text'
+            <MaskedInput
+              mask='cpf'
               name='document'
-              value={formatDocument(formData.document)}
-              maxLength={11}
+              value={formData.document}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
               placeholder='Digite o número do documento'
@@ -620,10 +619,9 @@ export function Athletes() {
             <label className='block text-sm font-semibold mb-1'>
               Telefone principal
             </label>
-            <input
-              type='text'
+            <MaskedInput
+              mask='phone'
               name='mobile_phone'
-              maxLength={11}
               value={formData.mobile_phone}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
@@ -637,11 +635,10 @@ export function Athletes() {
             <label className='block text-sm font-semibold mb-1'>
               Telefone secundário
             </label>
-            <input
-              type='text'
+            <MaskedInput
+              mask='phone'
               name='secondary_phone'
-              value={formatPhone(formData.secondary_phone)}
-              maxLength={11}
+              value={formData.secondary_phone}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
               placeholder='(DD) 99999-9999'
@@ -704,12 +701,11 @@ export function Athletes() {
           {/* CEP */}
           <div>
             <label className='block text-sm font-semibold mb-1'>CEP</label>
-            <input
-              type='text'
+            <MaskedInput
+              mask='cep'
               name='zip_code'
-              value={formatZipCode(formData.zip_code)}
+              value={formData.zip_code}
               onChange={handleChange}
-              maxLength={8}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
               placeholder='00000-000'
               required

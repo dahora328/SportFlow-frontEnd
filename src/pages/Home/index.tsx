@@ -5,7 +5,6 @@ import {
   deleteAthlete,
   getAthleteById,
   getAthletes,
-  getAthletesByName,
   type AthleteData,
 } from '../../services/athletesService';
 import { getEnterprises } from '../../services/enterpriseService';
@@ -44,6 +43,11 @@ export function Home() {
   const [isReadyToPrint, setIsReadyToPrint] = useState(false);
   const isPrintingRef = useRef(false);
 
+  // Sequência para descartar respostas obsoletas (busca fora de ordem)
+  const searchSeqRef = useRef(0);
+  // Evita disparar a busca com debounce logo na montagem
+  const didMountRef = useRef(false);
+
   const handlePrintReady = useCallback(() => {
     setIsReadyToPrint(true);
   }, []);
@@ -71,9 +75,14 @@ export function Home() {
     }
   }, [isReadyToPrint, handlePrint]);
 
-  async function loadAthletes() {
+  const loadAthletes = useCallback(async (term = '') => {
+    const seq = ++searchSeqRef.current;
     try {
-      const data = await getAthletes();
+      const trimmed = term.trim();
+      const data = await getAthletes(trimmed ? { search: trimmed } : {});
+
+      // Ignora respostas que chegaram fora de ordem (busca antiga)
+      if (seq !== searchSeqRef.current) return;
 
       // Fallback de segurança para suportar vários formatos de resposta da API
       const athletesList =
@@ -83,9 +92,10 @@ export function Home() {
 
       setAthletes(athletesList);
     } catch (error) {
+      if (seq !== searchSeqRef.current) return;
       console.error('Erro ao carregar atletas', error);
     }
-  }
+  }, []);
 
   async function loadEnterpriseName() {
     try {
@@ -102,18 +112,23 @@ export function Home() {
   useEffect(() => {
     loadAthletes();
     loadEnterpriseName();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleSearchAthletes(name: string) {
-    try {
-      const data = await getAthletesByName(name);
-      setAthletes(
-        data.athletes || data.data || (Array.isArray(data) ? data : []),
-      );
-    } catch (error) {
-      console.error('Erro ao buscar atletas por nome: ', error);
+  // Busca com debounce: aguarda o usuário parar de digitar antes de chamar a API
+  useEffect(() => {
+    // Pula a primeira execução — a lista já foi carregada na montagem
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
     }
-  }
+
+    const handler = setTimeout(() => {
+      loadAthletes(searchAthlete);
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [searchAthlete, loadAthletes]);
 
   async function handleLoadAthleteData(athleteId: number) {
     try {
@@ -162,15 +177,7 @@ export function Home() {
               placeholder='Buscar atleta...'
               className='w-64 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500'
               value={searchAthlete}
-              onChange={e => {
-                const value = e.target.value;
-                setSearchAthlete(value);
-                if (value.trim().length === 0) {
-                  loadAthletes();
-                } else {
-                  handleSearchAthletes(value);
-                }
-              }}
+              onChange={e => setSearchAthlete(e.target.value)}
             />
           </div>
           <div className='flex gap-2 justify-center'>

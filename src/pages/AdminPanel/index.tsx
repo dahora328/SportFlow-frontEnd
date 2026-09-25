@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Building2, UserPlus, ChevronRight } from 'lucide-react';
 import api from '../../services/api';
 import { ModalBase } from '../../components/Modal/ModalBase';
+import { MaskedInput, type MaskType } from '../../components/Form/MaskedInput';
 import { useModal } from '../../hooks/useModal';
 
 interface Enterprise {
@@ -72,29 +73,38 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
     <>
       <form onSubmit={handleSubmit} className='space-y-3'>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          {[
+          {([
             { label: 'Nome *', name: 'name', required: true },
             { label: 'Razão Social *', name: 'social_reason', required: true },
             { label: 'Nome Fantasia', name: 'fantasy_name', required: false },
-            { label: 'CNPJ *', name: 'document', required: true },
+            { label: 'CNPJ *', name: 'document', required: true, mask: 'document' },
             { label: 'Data de Fundação', name: 'foundation_date', required: false, type: 'date' },
             { label: 'Email *', name: 'email', required: true, type: 'email' },
-            { label: 'Telefone', name: 'phone', required: false },
+            { label: 'Telefone', name: 'phone', required: false, mask: 'phone' },
             { label: 'Nome do Responsável', name: 'owner_name', required: false },
             { label: 'Inscrição Estadual', name: 'IE', required: false },
-            { label: 'CEP', name: 'zip_code', required: false },
+            { label: 'CEP', name: 'zip_code', required: false, mask: 'cep' },
             { label: 'Estado (UF)', name: 'state', required: false },
             { label: 'Cidade', name: 'city', required: false },
             { label: 'Bairro', name: 'neighborhood', required: false },
             { label: 'Endereço', name: 'address', required: false },
             { label: 'Número', name: 'number', required: false },
             { label: 'Complemento', name: 'complement', required: false },
-          ].map(field => (
+          ] as { label: string; name: string; required: boolean; type?: string; mask?: MaskType }[]).map(field => (
             <div key={field.name}>
               <label className='block text-xs font-semibold text-gray-600 uppercase mb-1'>
                 {field.label}
               </label>
-              {field.name === 'state' ? (
+              {field.mask ? (
+                <MaskedInput
+                  mask={field.mask}
+                  name={field.name}
+                  value={formData[field.name as keyof typeof formData]}
+                  onChange={handleChange}
+                  required={field.required}
+                  className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none'
+                />
+              ) : field.name === 'state' ? (
                 <select
                   name={field.name}
                   value={formData[field.name as keyof typeof formData]}

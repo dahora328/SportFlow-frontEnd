@@ -35,7 +35,7 @@ export function Register() {
         password: formData.password
       });
       // Após o sucesso do cadastro, navega para a página inicial
-      navigate('/', { state: { message: 'Conta criada com sucesso! Faça seu login.' } });
+      navigate('/login', { state: { message: 'Conta criada com sucesso! Faça seu login.' } });
     } catch (err: any) {
       console.error('Erro ao registrar:', err);
       setError(err.response?.data?.error || err.response?.data?.message || 'Erro ao criar a conta. Verifique os dados informados.');
@@ -57,7 +57,7 @@ export function Register() {
         </h2>
         <p className='mt-2 text-center text-sm text-gray-600'>
           Ou{' '}
-          <Link to='/' className='font-medium text-blue-600 hover:text-blue-500'>
+          <Link to='/login' className='font-medium text-blue-600 hover:text-blue-500'>
             já tem uma conta? Faça login
           </Link>
         </p>

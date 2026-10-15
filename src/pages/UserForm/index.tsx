@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { logger } from '../../utils/logger';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getUserById, createUser, updateUser, type UserData } from '../../services/usersService';
 import { useModal } from '../../hooks/useModal';
@@ -33,8 +35,8 @@ export function UserForm() {
             password: '',
             is_admin: user.is_admin || false,
           });
-        } catch (error: any) {
-          console.error('Erro ao buscar usuário', error);
+        } catch (error: unknown) {
+          logger.error('Erro ao buscar usuário', error);
           modal.openError('Erro', 'Não foi possível carregar os dados do usuário.');
         } finally {
           setLoading(false);
@@ -76,8 +78,8 @@ export function UserForm() {
           navigate('/users');
         });
       }
-    } catch (error: any) {
-      modal.openError('Erro', error.response?.data?.error || 'Ocorreu um erro ao salvar o usuário.');
+    } catch (error: unknown) {
+      modal.openError('Erro', getErrorMessage(error, 'Ocorreu um erro ao salvar o usuário.'));
     } finally {
       setSaving(false);
     }
@@ -133,9 +135,9 @@ export function UserForm() {
                 value={formData.password}
                 onChange={handleChange}
                 required={!isEditing}
-                minLength={6}
+                minLength={8}
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-red-900'
-                placeholder='Digite a senha'
+                placeholder='Mínimo de 8 caracteres'
               />
               <button
                 type='button'

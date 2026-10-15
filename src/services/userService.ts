@@ -1,4 +1,5 @@
 import api from './api';
+import { logger } from '../utils/logger';
 
 export interface UserData {
   name: string;
@@ -28,7 +29,7 @@ export async function createUser(data: UserData) {
     const response = await api.post('/register', data);
     return response.data;
   } catch (error) {
-    console.error('Erro ao criar usuário:', error);
+    logger.error('Erro ao criar usuário:', error);
     throw error;
   }
 }
@@ -38,7 +39,7 @@ export async function loginUser(data: LoginData): Promise<LoginResponse> {
     const response = await api.post('/login', data);
     return response.data;
   } catch (error) {
-    console.error('Erro ao fazer login:', error);
+    logger.error('Erro ao fazer login:', error);
     throw error;
   }
 }
@@ -48,7 +49,7 @@ export async function refresh(data: LoginData): Promise<LoginResponse> {
     const response = await api.post('/refresh', data);
     return response.data;
   } catch (error) {
-    console.error('Erro ao atualizar token:', error);
+    logger.error('Erro ao atualizar token:', error);
     throw error;
   }
 }
@@ -61,7 +62,7 @@ export function getUserIdFromToken(): number | null {
     const payload = JSON.parse(atob(token.split('.')[1]));
     return payload.userId || payload.sub;
   } catch (error) {
-    console.error('Erro ao decodificar token:', error);
+    logger.error('Erro ao decodificar token:', error);
     return null;
   }
 }
@@ -71,7 +72,7 @@ export async function getUserById(id: number) {
     const response = await api.get(`/user/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Erro ao buscar usuário por ID:', error);
+    logger.error('Erro ao buscar usuário por ID:', error);
     throw error;
   }
 }
@@ -81,7 +82,7 @@ export async function updateUser(id: number, data: UserData) {
     const response = await api.put(`/user/${id}`, data);
     return response.data;
   } catch (error) {
-    console.error('Erro ao atualizar usuário:', error);
+    logger.error('Erro ao atualizar usuário:', error);
     throw error;
   }
 }
@@ -91,7 +92,7 @@ export async function deleteUser(id: number) {
     const response = await api.delete(`/user/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Erro ao deletar usuário:', error);
+    logger.error('Erro ao deletar usuário:', error);
     throw error;
   }
 }
@@ -101,7 +102,7 @@ export async function logoutUser() {
     const response = await api.post('/logout');
     return response.data;
   } catch (error) {
-    console.error('Erro ao fazer logout:', error);
+    logger.error('Erro ao fazer logout:', error);
     throw error;
   }
 }

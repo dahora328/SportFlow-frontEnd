@@ -19,6 +19,7 @@ import { Register } from './pages/Register';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { AdminPanel } from './pages/AdminPanel';
 import { ProtectedRoute } from './routes/ProtectedRoute';
+import { RoleRoute } from './routes/RoleRoute';
 
 // Guard: somente Super Admin (is_admin=true, enterprise_id=null) acessa /admin
 function SuperAdminRoute({ children }: { children: JSX.Element }) {
@@ -33,7 +34,7 @@ function SuperAdminRoute({ children }: { children: JSX.Element }) {
 }
 
 import { Enterprise } from './pages/Enterprise';
-// import { Login } from './pages/Login';
+import { Login } from './pages/Login';
 function AppContent() {
   const location = useLocation();
   const hideTopBar =
@@ -48,13 +49,14 @@ function AppContent() {
         <Routes>
           {/* Páginas públicas */}
           <Route path='/' element={<LandingPage />} />
+          <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
 
           {/* Páginas autenticadas */}
           <Route path='/user' element={<ProtectedRoute><User /></ProtectedRoute>} />
-          <Route path='/users' element={<ProtectedRoute><UsersList /></ProtectedRoute>} />
-          <Route path='/users/new' element={<ProtectedRoute><UserForm /></ProtectedRoute>} />
-          <Route path='/users/:id' element={<ProtectedRoute><UserForm /></ProtectedRoute>} />
+          <Route path='/users' element={<RoleRoute roles={['gestor']}><UsersList /></RoleRoute>} />
+          <Route path='/users/new' element={<RoleRoute roles={['gestor']}><UserForm /></RoleRoute>} />
+          <Route path='/users/:id' element={<RoleRoute roles={['gestor']}><UserForm /></RoleRoute>} />
 
           <Route path='/enterprise' element={<ProtectedRoute><Enterprise /></ProtectedRoute>} />
           {/* Páginas principais */}

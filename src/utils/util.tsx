@@ -52,6 +52,18 @@ export function formatZipCode(zip: string): string {
   return numbers.replace(/(\d{5})(\d{3})/, '$1-$2');
 }
 
+export function formatCNPJ(cnpj: string): string {
+  if (!cnpj) return '';
+
+  const numbers = cnpj.replace(/\D/g, '').slice(0, 14);
+
+  return numbers
+    .replace(/(\d{2})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+}
+
 export function formatDocument(document: string): string {
   if (!document) return '';
 

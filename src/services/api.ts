@@ -55,8 +55,6 @@ api.interceptors.response.use(
 
       const refreshToken = localStorage.getItem('refresh_token');
 
-      logger.log('🔍 Refresh token:', refreshToken);
-
       if (!refreshToken) {
         logger.warn('❌ Nenhum refresh_token encontrado → logout');
         localStorage.clear();
@@ -76,8 +74,6 @@ api.interceptors.response.use(
             .then(refreshResponse => {
               const newAccess = refreshResponse.data.access_token;
               const newRefresh = refreshResponse.data.refresh_token;
-
-              logger.log('✅ Novo access token:', newAccess);
 
               // Salvar novos tokens
               localStorage.setItem('access_token', newAccess);
@@ -99,7 +95,7 @@ api.interceptors.response.use(
               resolve(api(originalRequest));
             })
             .catch(err => {
-              console.error('❌ Erro no refresh:', err);
+              logger.error('❌ Erro no refresh:', err);
               failedRequestsQueue.forEach(req => req.reject(err as AxiosError));
               failedRequestsQueue = [];
               localStorage.clear();

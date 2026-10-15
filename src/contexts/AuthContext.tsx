@@ -111,7 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await api.post('/logout');
       }
     } catch (error) {
-      console.error('Erro ao fazer logout na API', error);
+      logger.error('Erro ao fazer logout na API', error);
     } finally {
       // Limpa os dados locais
       setAccessToken(null);

@@ -1,4 +1,5 @@
 import api from './api';
+import { logger } from '../utils/logger';
 
 export interface UserData {
   id?: number;
@@ -24,7 +25,7 @@ export async function getUsers(page = 1, params: any = {}): Promise<{ data: User
     }
     return { data: [], last_page: 1, total: 0 };
   } catch (error: any) {
-    console.error('Erro ao buscar usuários:', error);
+    logger.error('Erro ao buscar usuários:', error);
     throw error;
   }
 }
@@ -34,7 +35,7 @@ export async function getUserById(id: number | string): Promise<UserData> {
     const response = await api.get(`/users/${id}`);
     return response.data;
   } catch (error: any) {
-    console.error('Erro ao buscar usuário:', error);
+    logger.error('Erro ao buscar usuário:', error);
     throw error;
   }
 }
@@ -44,7 +45,7 @@ export async function createUser(data: UserData): Promise<UserData> {
     const response = await api.post('/users', data);
     return response.data.user;
   } catch (error: any) {
-    console.error('Erro ao criar usuário:', error);
+    logger.error('Erro ao criar usuário:', error);
     throw error;
   }
 }
@@ -54,7 +55,7 @@ export async function updateUser(id: number, data: Partial<UserData>): Promise<U
     const response = await api.put(`/users/${id}`, data);
     return response.data.user;
   } catch (error: any) {
-    console.error('Erro ao atualizar usuário:', error);
+    logger.error('Erro ao atualizar usuário:', error);
     throw error;
   }
 }
@@ -63,7 +64,7 @@ export async function deleteUser(id: number): Promise<void> {
   try {
     await api.delete(`/users/${id}`);
   } catch (error: any) {
-    console.error('Erro ao excluir usuário:', error);
+    logger.error('Erro ao excluir usuário:', error);
     throw error;
   }
 }

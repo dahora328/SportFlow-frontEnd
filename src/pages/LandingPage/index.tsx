@@ -1,47 +1,9 @@
-import { useState } from 'react';
 import { LogIn } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
-import { LoginModal } from '../../components/Modal/LoginModal';
 import { useNavigate } from 'react-router-dom';
 import logoImg from '../../assets/images/SportFlow/Logo completa png.png';
-import { logger } from '../../utils/logger';
 
 export function LandingPage() {
   const navigate = useNavigate();
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const { login } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const openLogin = () => setIsLoginModalOpen(true);
-  const closeLogin = () => setIsLoginModalOpen(false);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async function handleLoginSubmit(data: { email: string; password: string }) {
-    setLoading(true);
-    setError(null);
-    try {
-      const userData = await login(data.email, data.password);
-      logger.log('Login realizado com sucesso:', userData);
-      
-      setIsLoginModalOpen(false);
-
-      if (userData) {
-        if (userData.is_admin === true && userData.enterprise_id === null) {
-          navigate('/admin');
-        } else {
-          navigate('/home');
-        }
-      } else {
-        navigate('/home');
-      }
-    } catch (error: unknown) {
-      console.error('Erro no login:', error);
-      setError('Login ou senha inválidos. Verifique suas credenciais.');
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden font-sans">
@@ -72,7 +34,7 @@ export function LandingPage() {
 
         {/* BOTÃO DE ENTRAR NO SISTEMA */}
         <button 
-          onClick={openLogin}
+          onClick={() => navigate('/login')}
           className="group relative px-1 py-1 bg-transparent border-none rounded-full cursor-pointer transition-transform hover:scale-105 active:scale-95"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-green-500 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-200"></div>
@@ -81,15 +43,6 @@ export function LandingPage() {
             Entrar no Sistema
           </div>
         </button>
-
-        {/* Modal de Login (mantém a lógica existente do sistema) */}
-        <LoginModal
-          open={isLoginModalOpen}
-          onClose={closeLogin}
-          onSubmit={handleLoginSubmit}
-          loading={loading}
-          error={error}
-        />
       </main>
 
       {/* RODAPÉ (COPYRIGHT) */}

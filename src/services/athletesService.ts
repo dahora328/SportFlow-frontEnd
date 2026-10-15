@@ -58,7 +58,7 @@ export async function createAthlete(data: AthleteData) {
     logger.log(response.data);
     return response.data;
   } catch (error: any) {
-    console.error('Erro ao criar atleta:', error);
+    logger.error('Erro ao criar atleta:', error);
     if (error.response?.status === 422) {
       throw {
         status: 422,
@@ -70,7 +70,9 @@ export async function createAthlete(data: AthleteData) {
   }
 }
 
-export async function getAthletes(params = {}): Promise<GetAthletesResponse> {
+export async function getAthletes(
+  params: Record<string, unknown> = {},
+): Promise<GetAthletesResponse> {
   try {
     const response = await api.get('/athletes', { params });
     const resData = response.data;
@@ -82,7 +84,7 @@ export async function getAthletes(params = {}): Promise<GetAthletesResponse> {
       success: resData?.success ?? true,
     };
   } catch (error: any) {
-    console.error(
+    logger.error(
       'Erro ao buscar atletas:',
       error.response?.data || error.message,
     );
@@ -100,7 +102,7 @@ export async function getAthleteById(id: number) {
     const response = await api.get(`/athletes/${id}`);
     return response.data?.data ?? response.data;
   } catch (error) {
-    console.error('Erro ao buscar atleta por ID:', error);
+    logger.error('Erro ao buscar atleta por ID:', error);
     throw error;
   }
 }
@@ -110,7 +112,7 @@ export async function getAthletesByName(name: string) {
     const response = await api.get(`/athletes`, { params: { search: name } });
     return response.data;
   } catch (error) {
-    console.error('Erro ao buscar atletas por nome:', error);
+    logger.error('Erro ao buscar atletas por nome:', error);
     throw error;
   }
 }
@@ -141,7 +143,7 @@ export async function updateAthlete(id: number, data: AthleteData) {
     });
     return response.data;
   } catch (error: any) {
-    console.error('Erro ao atualizar atleta:', error);
+    logger.error('Erro ao atualizar atleta:', error);
     if (error.response?.status === 422) {
       throw {
         status: 422,
@@ -158,7 +160,7 @@ export async function deleteAthlete(id: number) {
     const response = await api.delete(`/athletes/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Erro ao deletar atleta:', error);
+    logger.error('Erro ao deletar atleta:', error);
     throw error;
   }
 }

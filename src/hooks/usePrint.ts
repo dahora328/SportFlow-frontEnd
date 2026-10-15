@@ -1,4 +1,4 @@
-import { RefObject } from 'react';
+import { type RefObject } from 'react';
 import { useReactToPrint } from 'react-to-print';
 
 interface UsePrintProps {

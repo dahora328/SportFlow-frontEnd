@@ -1,5 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
+import { logger } from '../../utils/logger';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import { useNavigate, Link } from 'react-router-dom';
 import { createUser } from '../../services/userService';
 import { Trophy, ArrowLeft, Eye, EyeOff } from 'lucide-react';
@@ -35,10 +36,10 @@ export function Register() {
         password: formData.password
       });
       // Após o sucesso do cadastro, navega para a página inicial
-      navigate('/', { state: { message: 'Conta criada com sucesso! Faça seu login.' } });
-    } catch (err: any) {
-      console.error('Erro ao registrar:', err);
-      setError(err.response?.data?.error || err.response?.data?.message || 'Erro ao criar a conta. Verifique os dados informados.');
+      navigate('/login', { state: { message: 'Conta criada com sucesso! Faça seu login.' } });
+    } catch (err: unknown) {
+      logger.error('Erro ao registrar:', err);
+      setError(getErrorMessage(err, 'Erro ao criar a conta. Verifique os dados informados.'));
     } finally {
       setLoading(false);
     }
@@ -57,7 +58,7 @@ export function Register() {
         </h2>
         <p className='mt-2 text-center text-sm text-gray-600'>
           Ou{' '}
-          <Link to='/' className='font-medium text-blue-600 hover:text-blue-500'>
+          <Link to='/login' className='font-medium text-blue-600 hover:text-blue-500'>
             já tem uma conta? Faça login
           </Link>
         </p>
@@ -115,11 +116,11 @@ export function Register() {
                   name='password'
                   type={showPassword ? 'text' : 'password'}
                   required
-                  minLength={6}
+                  minLength={8}
                   value={formData.password}
                   onChange={handleChange}
                   className='appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
-                  placeholder='Mínimo de 6 caracteres'
+                  placeholder='Mínimo de 8 caracteres'
                 />
                 <button
                   type='button'

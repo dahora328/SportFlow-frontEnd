@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import api from './api';
+import { logger } from '../utils/logger';
 
 export interface EnterpriseData {
   id?: number;
@@ -34,7 +35,7 @@ export async function getEnterprises(
 
     return response.data;
   } catch (error: any) {
-    console.error(
+    logger.error(
       'Erro ao buscar empresas:',
       error.response?.data || error.message,
     );

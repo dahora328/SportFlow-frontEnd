@@ -254,7 +254,7 @@ export function Athletes() {
           setSelectedPhotoName('');
         }
       } catch (error) {
-        console.error('Erro ao carregar atleta:', error);
+        logger.error('Erro ao carregar atleta:', error);
         alert('Erro ao carregar dados do atleta!');
       } finally {
         setLoading(false);

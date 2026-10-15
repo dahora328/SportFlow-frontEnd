@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
+import { logger } from '../../../utils/logger';
 import { useNavigate } from 'react-router-dom';
 import { UserPlus, Mail, Lock } from 'lucide-react';
 import { createUser } from '../../../services/userService';
@@ -34,7 +35,7 @@ export function Register() {
       alert('Usuário cadastrado com sucesso! Faça login.'); //usar modal para da alerta que conseguiu cadastrar
       //navigate('/');
     } catch (err: any) {
-      console.error(err); //usar o modal para mostrar o erro
+      logger.error(err); //usar o modal para mostrar o erro
 
       modal.openModal({
         title: 'Erro',

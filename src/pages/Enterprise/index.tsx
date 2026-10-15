@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { logger } from '../../utils/logger';
 import { ModalBase } from '../../components/Modal/ModalBase';
 import { useModal } from '../../hooks/useModal';
 import api from '../../services/api';
 import { getEnterprises, type EnterpriseData } from '../../services/enterpriseService';
 import { MaskedInput } from '../../components/Form/MaskedInput';
 import { Link } from 'react-router-dom';
+import { storageUrl } from '../../utils/storage';
 
 export function Enterprise() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -43,8 +45,7 @@ export function Enterprise() {
         
         if (enterprise) {
           if (enterprise.logo_path) {
-            // Ajuste a URL base se sua API estiver em outro endereço/porta, adicione timestamp para evitar cache visual
-            setLogoPreview(`http://localhost:8080/storage/${enterprise.logo_path}?t=${new Date().getTime()}`);
+            setLogoPreview(storageUrl(enterprise.logo_path));
           }
 
           setFormData({
@@ -67,7 +68,7 @@ export function Enterprise() {
           });
         }
       } catch (error) {
-        console.error('Erro ao buscar dados da empresa:', error);
+        logger.error('Erro ao buscar dados da empresa:', error);
         modal.openError('Erro', 'Não foi possível carregar os dados da empresa.');
       } finally {
         setLoading(false);
@@ -120,7 +121,7 @@ export function Enterprise() {
       setLogoFile(null); // Limpa o arquivo para não reenviar à toa em futuros "Salvar"
 
     } catch (error: any) {
-      console.error('Erro ao salvar empresa:', error);
+      logger.error('Erro ao salvar empresa:', error);
       if (error?.response?.status === 422) {
         setErrors(error.response.data.errors || {});
         modal.openError('Atenção', 'Verifique os campos em destaque e tente novamente.');

@@ -61,7 +61,7 @@ export function Home() {
       const fullAthleteData = await getAthleteById((athlete as any).id);
       setSelectedAthlete(fullAthleteData);
     } catch (error) {
-      console.error('Erro ao buscar dados do atleta para impressão:', error);
+      logger.error('Erro ao buscar dados do atleta para impressão:', error);
       setSelectedAthlete(athlete);
     }
   }
@@ -93,7 +93,7 @@ export function Home() {
       setAthletes(athletesList);
     } catch (error) {
       if (seq !== searchSeqRef.current) return;
-      console.error('Erro ao carregar atletas', error);
+      logger.error('Erro ao carregar atletas', error);
     }
   }, []);
 
@@ -105,7 +105,7 @@ export function Home() {
         setCompanyName(enterprise.fantasy_name || enterprise.name || 'Time Flow');
       }
     } catch (error) {
-      console.error('Erro ao carregar dados da empresa:', error);
+      logger.error('Erro ao carregar dados da empresa:', error);
     }
   }
 
@@ -137,7 +137,7 @@ export function Home() {
       logger.log('Dados do atleta:', result);
       //window.location.href = '/home';
     } catch (error) {
-      console.error('Erro ao recuperar atleta:', error);
+      logger.error('Erro ao recuperar atleta:', error);
       alert('Erro ao recuperar atleta!');
     }
   }
@@ -154,7 +154,7 @@ export function Home() {
           );
           modal.openSuccess('Sucesso', 'O atleta foi excluído corretamente.');
         } catch (error) {
-          console.error('Erro ao deletar:', error);
+          logger.error('Erro ao deletar:', error);
           modal.openError(
             'Erro' + error,
             'Não foi possível excluir o atleta. Tente novamente.',

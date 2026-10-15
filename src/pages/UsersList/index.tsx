@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { logger } from '../../utils/logger';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import { getUsers, deleteUser, type UserData } from '../../services/usersService';
 import { Edit, Trash, Plus } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
@@ -22,7 +24,7 @@ export function UsersList() {
       const data = await getUsers(1, { all: true });
       setUsers(data.data || []);
     } catch (error) {
-      console.error('Erro ao carregar usuários:', error);
+      logger.error('Erro ao carregar usuários:', error);
     } finally {
       setLoading(false);
     }
@@ -41,9 +43,9 @@ export function UsersList() {
           await deleteUser(id);
           setUsers(prev => prev.filter(u => u.id !== id));
           modal.openSuccess('Sucesso', 'O usuário foi excluído com sucesso.');
-        } catch (error: any) {
-          console.error('Erro ao deletar:', error);
-          modal.openError('Erro', error.response?.data?.error || 'Não foi possível excluir o usuário.');
+        } catch (error: unknown) {
+          logger.error('Erro ao deletar:', error);
+          modal.openError('Erro', getErrorMessage(error, 'Não foi possível excluir o usuário.'));
         }
       },
       'Excluir',

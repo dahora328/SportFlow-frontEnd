@@ -39,7 +39,7 @@ export function Login() {
         navigate('/home', { replace: true });
       }
     } catch (err: unknown) {
-      console.error('Erro no login:', err);
+      logger.error('Erro no login:', err);
       setError('Login ou senha inválidos. Verifique suas credenciais.');
       setLoading(false);
     }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { logger } from '../../utils/logger';
 import { useNavigate } from 'react-router-dom';
 import { Building2, UserPlus, ChevronRight } from 'lucide-react';
 import api from '../../services/api';
@@ -272,8 +273,8 @@ function UserForm() {
               value={formData[field.name as keyof typeof formData] as string}
               onChange={handleChange}
               required={field.required}
-              minLength={field.name === 'password' ? 6 : undefined}
-              placeholder={field.name === 'password' ? 'Mínimo 6 caracteres' : ''}
+              minLength={field.name === 'password' ? 8 : undefined}
+              placeholder={field.name === 'password' ? 'Mínimo 8 caracteres' : ''}
               className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none'
             />
           </div>
@@ -382,7 +383,7 @@ export function AdminPanel() {
                         await api.put(`/enterprises/${e.id}`, { active: newStatus });
                         setEnterprises(prev => prev.map(ent => ent.id === e.id ? { ...ent, active: newStatus } : ent));
                       } catch (error) {
-                        console.error('Erro ao alterar status', error);
+                        logger.error('Erro ao alterar status', error);
                         alert('Erro ao alterar o status da empresa.');
                       }
                     }}

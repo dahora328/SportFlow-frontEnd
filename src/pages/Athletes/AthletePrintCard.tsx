@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '../../utils/logger';
 import api from '../../services/api';
 import { getEnterprises } from '../../services/enterpriseService';
 import {
@@ -71,7 +72,7 @@ export function AthletePrintCard({ athlete, onReady }: Props) {
           setLogoReady(true);
         }
       } catch (error) {
-        console.error('Erro ao buscar logo da empresa', error);
+        logger.error('Erro ao buscar logo da empresa', error);
         setLogoReady(true);
       }
     }

@@ -41,6 +41,16 @@ api.interceptors.response.use(
       _retry?: boolean;
     };
 
+    // Rotas de autenticação: um 401 aqui NÃO é sessão expirada, é
+    // credencial inválida. Apenas rejeita para a tela tratar o erro,
+    // sem tentar refresh nem disparar logout/redirect.
+    if (
+      originalRequest?.url?.includes('/login') ||
+      originalRequest?.url?.includes('/register')
+    ) {
+      return Promise.reject(error);
+    }
+
     // Se chegou 401 no refresh → desloga imediatamente
     if (originalRequest?.url?.includes('/refresh')) {
       logger.warn('❌ Refresh falhou → logout');
@@ -54,8 +64,6 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       const refreshToken = localStorage.getItem('refresh_token');
-
-      logger.log('🔍 Refresh token:', refreshToken);
 
       if (!refreshToken) {
         logger.warn('❌ Nenhum refresh_token encontrado → logout');
@@ -77,8 +85,6 @@ api.interceptors.response.use(
               const newAccess = refreshResponse.data.access_token;
               const newRefresh = refreshResponse.data.refresh_token;
 
-              logger.log('✅ Novo access token:', newAccess);
-
               // Salvar novos tokens
               localStorage.setItem('access_token', newAccess);
               if (newRefresh) {
@@ -99,7 +105,7 @@ api.interceptors.response.use(
               resolve(api(originalRequest));
             })
             .catch(err => {
-              console.error('❌ Erro no refresh:', err);
+              logger.error('❌ Erro no refresh:', err);
               failedRequestsQueue.forEach(req => req.reject(err as AxiosError));
               failedRequestsQueue = [];
               localStorage.clear();

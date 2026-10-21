@@ -1,9 +1,11 @@
 import { Menu, X, User, LogOut, Edit, Building, Users } from 'lucide-react';
+import { logger } from '../../../utils/logger';
 import { useContext, useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { AuthContext } from '../../../contexts/AuthContext';
 import { getUserRole, type UserRole } from '../../../contexts/AuthContext';
 import { getEnterprises } from '../../../services/enterpriseService';
+import { storageUrl } from '../../../utils/storage';
 
 // ---------------------------------------------------------------------------
 // Configuração central de navegação
@@ -52,12 +54,10 @@ export function TopBar() {
         const data = await getEnterprises({ t: new Date().getTime() });
         const enterprise = data?.[0];
         if (enterprise?.logo_path) {
-          setLogoUrl(
-            `http://localhost:8080/storage/${enterprise.logo_path}?t=${new Date().getTime()}`
-          );
+          setLogoUrl(storageUrl(enterprise.logo_path));
         }
       } catch (error) {
-        console.error('Erro ao carregar logo da empresa no TopBar:', error);
+        logger.error('Erro ao carregar logo da empresa no TopBar:', error);
       }
     }
     fetchLogo();

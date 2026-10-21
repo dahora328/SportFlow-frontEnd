@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Eye, EyeOff } from 'lucide-react';
+import { logger } from '../../utils/logger';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ModalBase } from '../../components/Modal/ModalBase';
@@ -32,7 +33,7 @@ export function User() {
           gender: data.gender || '',
         });
       } catch (error) {
-        console.error('Erro ao buscar dados do usuário:', error);
+        logger.error('Erro ao buscar dados do usuário:', error);
         modal.openError('Erro', 'Não foi possível carregar os dados do usuário.');
       } finally {
         setLoading(false);
@@ -62,7 +63,7 @@ export function User() {
       await api.put('/user', payload);
       modal.openSuccess('Sucesso', 'Dados do usuário alterados com sucesso!');
     } catch (error) {
-      console.error('Erro ao atualizar usuário:', error);
+      logger.error('Erro ao atualizar usuário:', error);
       modal.openError('Erro', 'Ocorreu um erro ao tentar salvar as alterações.');
     } finally {
       setSaving(false);

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -12,6 +11,7 @@ import { MaskedInput } from '../../components/Form/MaskedInput';
 import { ModalBase } from '../../components/Modal/ModalBase';
 import { useModal } from '../../hooks/useModal';
 import { logger } from '../../utils/logger';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 
 export function Athletes() {
   const PHOTO_RATIO = 3 / 4;
@@ -392,18 +392,16 @@ export function Athletes() {
         );
         // window.location.href = '/home';
       }
-    } catch (error: any) {
-      if (error.status === 422 && error.errors) {
-        const fieldErrors = Object.values(error.errors).flat().join('\n• ');
-        modal.openError('Campos inválidos', `• ${fieldErrors}`);
-      } else {
-        modal.openError(
-          'Erro',
-          'Não foi possível ' +
-            (isEditing ? 'atualizar' : 'salvar') +
-            ' o atleta. Tente novamente.',
-        );
-      }
+    } catch (error: unknown) {
+      // Mesmo padrão dos demais formulários: getErrorMessage agrega as
+      // mensagens de validação (uma por linha) e cai para a genérica.
+      modal.openError(
+        'Erro',
+        getErrorMessage(
+          error,
+          `Não foi possível ${isEditing ? 'atualizar' : 'salvar'} o atleta. Tente novamente.`,
+        ),
+      );
     } finally {
       setLoading(false);
     }

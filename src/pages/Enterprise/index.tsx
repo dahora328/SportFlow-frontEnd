@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { logger } from '../../utils/logger';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import { ModalBase } from '../../components/Modal/ModalBase';
 import { useModal } from '../../hooks/useModal';
 import api from '../../services/api';
@@ -11,7 +12,6 @@ import { storageUrl } from '../../utils/storage';
 export function Enterprise() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [errors, setErrors] = useState<Record<string, string[]>>({});
 
   const [formData, setFormData] = useState<EnterpriseData>({
     id: undefined,
@@ -88,8 +88,7 @@ export function Enterprise() {
     e.preventDefault();
     try {
       setSaving(true);
-      setErrors({});
-      
+
       const submitData = new FormData();
       Object.keys(formData).forEach(key => {
         const val = formData[key as keyof EnterpriseData];
@@ -120,14 +119,14 @@ export function Enterprise() {
       window.dispatchEvent(new Event('enterpriseUpdated'));
       setLogoFile(null); // Limpa o arquivo para não reenviar à toa em futuros "Salvar"
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Erro ao salvar empresa:', error);
-      if (error?.response?.status === 422) {
-        setErrors(error.response.data.errors || {});
-        modal.openError('Atenção', 'Verifique os campos em destaque e tente novamente.');
-      } else {
-        modal.openError('Erro', 'Ocorreu um erro ao tentar salvar os dados.');
-      }
+      // Mesmo padrão dos demais formulários: erros de validação no modal,
+      // um por linha, com fallback genérico.
+      modal.openError(
+        'Erro',
+        getErrorMessage(error, 'Ocorreu um erro ao tentar salvar os dados.'),
+      );
     } finally {
       setSaving(false);
     }
@@ -198,7 +197,6 @@ export function Enterprise() {
               placeholder='Digite o nome'
               required
             />
-            {errors.name && <p className='text-red-500 text-xs mt-1'>{errors.name[0]}</p>}
           </div>
           
           {/* Razão Social */}
@@ -215,7 +213,6 @@ export function Enterprise() {
               placeholder='Digite a razão social'
               required
             />
-            {errors.social_reason && <p className='text-red-500 text-xs mt-1'>{errors.social_reason[0]}</p>}
           </div>
 
           {/* Nome Fantasia */}
@@ -232,7 +229,6 @@ export function Enterprise() {
               placeholder='Digite o nome fantasia'
               required
             />
-            {errors.fantasy_name && <p className='text-red-500 text-xs mt-1'>{errors.fantasy_name[0]}</p>}
           </div>
 
           {/* CNPJ / Documento */}
@@ -249,7 +245,6 @@ export function Enterprise() {
               placeholder='Digite o documento'
               required
             />
-            {errors.document && <p className='text-red-500 text-xs mt-1'>{errors.document[0]}</p>}
           </div>
 
           {/* Inscrição Estadual (IE) */}

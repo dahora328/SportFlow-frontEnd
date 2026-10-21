@@ -98,7 +98,14 @@ export function TopBar() {
           ) : logoUrl ? (
             <img src={logoUrl} alt='Logo Empresa' className='h-full w-auto object-contain' />
           ) : (
-            <h1 className='text-xl font-bold text-blue-400'>LOGO</h1>
+            <div className='flex items-center gap-2'>
+              <span className='text-blue-400 font-black text-xl tracking-tight leading-none'>
+                Sport
+              </span>
+              <span className='bg-gradient-to-r from-blue-600 to-green-500 text-white font-black text-xs px-2 py-0.5 rounded-full tracking-widest uppercase'>
+                Flow
+              </span>
+            </div>
           )}
         </div>
 

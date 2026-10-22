@@ -4,6 +4,7 @@ import { getErrorMessage } from '../../utils/getErrorMessage';
 import { ModalBase } from '../../components/Modal/ModalBase';
 import { useModal } from '../../hooks/useModal';
 import api from '../../services/api';
+import { buscarCep } from '../../services/cepService';
 import { getEnterprises, type EnterpriseData } from '../../services/enterpriseService';
 import { MaskedInput } from '../../components/Form/MaskedInput';
 import { Link } from 'react-router-dom';
@@ -33,6 +34,7 @@ export function Enterprise() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
 
   const modal = useModal();
 
@@ -82,6 +84,30 @@ export function Enterprise() {
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  // Ao sair do campo CEP (8 dígitos), busca o endereço e sobrescreve os campos.
+  // Campos vazios no retorno preservam o que o usuário já tiver digitado.
+  // Re-digitar o CEP dispara a busca novamente.
+  const handleCepBlur = async () => {
+    const digits = (formData.zip_code ?? '').replace(/\D/g, '');
+    if (digits.length !== 8) return;
+
+    setCepLoading(true);
+    try {
+      const endereco = await buscarCep(digits);
+      if (endereco) {
+        setFormData(prev => ({
+          ...prev,
+          address: endereco.address || prev.address,
+          neighborhood: endereco.neighborhood || prev.neighborhood,
+          city: endereco.city || prev.city,
+          state: endereco.state || prev.state,
+        }));
+      }
+    } finally {
+      setCepLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -313,8 +339,81 @@ export function Enterprise() {
               name='zip_code'
               value={formData.zip_code}
               onChange={handleChange}
+              onBlur={handleCepBlur}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
               placeholder='Digite o CEP'
+              required
+            />
+            {cepLoading && (
+              <p className='text-xs text-gray-500 mt-1'>Buscando endereço…</p>
+            )}
+          </div>
+
+          {/* Endereço */}
+          <div className='md:col-span-2'>
+            <label className='block text-sm font-semibold mb-1'>Endereço</label>
+            <input
+              type='text'
+              name='address'
+              value={formData.address}
+              onChange={handleChange}
+              className='w-full border border-gray-300 rounded-lg px-3 py-2'
+              placeholder='Digite o endereço'
+              required
+            />
+          </div>
+
+          {/* Número */}
+          <div>
+            <label className='block text-sm font-semibold mb-1'>Número</label>
+            <input
+              type='text'
+              name='number'
+              value={formData.number}
+              onChange={handleChange}
+              className='w-full border border-gray-300 rounded-lg px-3 py-2'
+              placeholder='Digite o número'
+              required
+            />
+          </div>
+
+          {/* Complemento */}
+          <div>
+            <label className='block text-sm font-semibold mb-1'>Complemento</label>
+            <input
+              type='text'
+              name='complement'
+              value={formData.complement}
+              onChange={handleChange}
+              className='w-full border border-gray-300 rounded-lg px-3 py-2'
+              placeholder='Digite o complemento (Opcional)'
+            />
+          </div>
+
+          {/* Bairro */}
+          <div>
+            <label className='block text-sm font-semibold mb-1'>Bairro</label>
+            <input
+              type='text'
+              name='neighborhood'
+              value={formData.neighborhood}
+              onChange={handleChange}
+              className='w-full border border-gray-300 rounded-lg px-3 py-2'
+              placeholder='Digite o bairro'
+              required
+            />
+          </div>
+
+          {/* Cidade */}
+          <div>
+            <label className='block text-sm font-semibold mb-1'>Cidade</label>
+            <input
+              type='text'
+              name='city'
+              value={formData.city}
+              onChange={handleChange}
+              className='w-full border border-gray-300 rounded-lg px-3 py-2'
+              placeholder='Digite a cidade'
               required
             />
           </div>
@@ -357,75 +456,6 @@ export function Enterprise() {
               <option value='SE'>Sergipe</option>
               <option value='TO'>Tocantins</option>
             </select>
-          </div>
-
-          {/* Cidade */}
-          <div>
-            <label className='block text-sm font-semibold mb-1'>Cidade</label>
-            <input
-              type='text'
-              name='city'
-              value={formData.city}
-              onChange={handleChange}
-              className='w-full border border-gray-300 rounded-lg px-3 py-2'
-              placeholder='Digite a cidade'
-              required
-            />
-          </div>
-
-          {/* Bairro */}
-          <div>
-            <label className='block text-sm font-semibold mb-1'>Bairro</label>
-            <input
-              type='text'
-              name='neighborhood'
-              value={formData.neighborhood}
-              onChange={handleChange}
-              className='w-full border border-gray-300 rounded-lg px-3 py-2'
-              placeholder='Digite o bairro'
-              required
-            />
-          </div>
-
-          {/* Endereço */}
-          <div className='md:col-span-2'>
-            <label className='block text-sm font-semibold mb-1'>Endereço</label>
-            <input
-              type='text'
-              name='address'
-              value={formData.address}
-              onChange={handleChange}
-              className='w-full border border-gray-300 rounded-lg px-3 py-2'
-              placeholder='Digite o endereço'
-              required
-            />
-          </div>
-
-          {/* Número */}
-          <div>
-            <label className='block text-sm font-semibold mb-1'>Número</label>
-            <input
-              type='text'
-              name='number'
-              value={formData.number}
-              onChange={handleChange}
-              className='w-full border border-gray-300 rounded-lg px-3 py-2'
-              placeholder='Digite o número'
-              required
-            />
-          </div>
-
-          {/* Complemento */}
-          <div>
-            <label className='block text-sm font-semibold mb-1'>Complemento</label>
-            <input
-              type='text'
-              name='complement'
-              value={formData.complement}
-              onChange={handleChange}
-              className='w-full border border-gray-300 rounded-lg px-3 py-2'
-              placeholder='Digite o complemento (Opcional)'
-            />
           </div>
 
         </div>

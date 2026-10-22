@@ -7,6 +7,7 @@ import {
   type AthleteData,
 } from '../../services/athletesService';
 import api from '../../services/api';
+import { buscarCep } from '../../services/cepService';
 import { MaskedInput } from '../../components/Form/MaskedInput';
 import { ModalBase } from '../../components/Modal/ModalBase';
 import { useModal } from '../../hooks/useModal';
@@ -22,6 +23,7 @@ export function Athletes() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
   const [selectedPhotoName, setSelectedPhotoName] = useState('');
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState('');
   const [photoPreviewFallbackUrls, setPhotoPreviewFallbackUrls] = useState<
@@ -314,6 +316,30 @@ export function Athletes() {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
+
+  // Ao sair do campo CEP (8 dígitos), busca o endereço e sobrescreve os campos.
+  // Campos vazios no retorno (ex.: CEP de cidade inteira) preservam o que o
+  // usuário já tiver digitado. Re-digitar o CEP dispara a busca novamente.
+  const handleCepBlur = useCallback(async () => {
+    const digits = (formData.zip_code ?? '').replace(/\D/g, '');
+    if (digits.length !== 8) return;
+
+    setCepLoading(true);
+    try {
+      const endereco = await buscarCep(digits);
+      if (endereco) {
+        setFormData(prev => ({
+          ...prev,
+          address: endereco.address || prev.address,
+          neighborhood: endereco.neighborhood || prev.neighborhood,
+          city: endereco.city || prev.city,
+          state: endereco.state || prev.state,
+        }));
+      }
+    } finally {
+      setCepLoading(false);
+    }
+  }, [formData.zip_code]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -656,6 +682,24 @@ export function Athletes() {
             />
           </div>
 
+          {/* CEP (primeiro: ao preencher, busca e completa os demais campos) */}
+          <div>
+            <label className='block text-sm font-semibold mb-1'>CEP</label>
+            <MaskedInput
+              mask='cep'
+              name='zip_code'
+              value={formData.zip_code}
+              onChange={handleChange}
+              onBlur={handleCepBlur}
+              className='w-full border border-gray-300 rounded-lg px-3 py-2'
+              placeholder='00000-000'
+              required
+            />
+            {cepLoading && (
+              <p className='text-xs text-gray-500 mt-1'>Buscando endereço…</p>
+            )}
+          </div>
+
           {/* Endereço */}
           <div className='md:col-span-2'>
             <label className='block text-sm font-semibold mb-1'>Endereço</label>
@@ -696,16 +740,15 @@ export function Athletes() {
             />
           </div>
 
-          {/* CEP */}
+          {/* Cidade */}
           <div>
-            <label className='block text-sm font-semibold mb-1'>CEP</label>
-            <MaskedInput
-              mask='cep'
-              name='zip_code'
-              value={formData.zip_code}
+            <label className='block text-sm font-semibold mb-1'>Cidade</label>
+            <input
+              type='text'
+              name='city'
+              value={formData.city}
               onChange={handleChange}
               className='w-full border border-gray-300 rounded-lg px-3 py-2'
-              placeholder='00000-000'
               required
             />
           </div>
@@ -749,19 +792,6 @@ export function Athletes() {
               <option value='SE'>Sergipe</option>
               <option value='TO'>Tocantins</option>
             </select>
-          </div>
-
-          {/* Cidade */}
-          <div>
-            <label className='block text-sm font-semibold mb-1'>Cidade</label>
-            <input
-              type='text'
-              name='city'
-              value={formData.city}
-              onChange={handleChange}
-              className='w-full border border-gray-300 rounded-lg px-3 py-2'
-              required
-            />
           </div>
 
           {/* Nome da mãe */}

@@ -2,11 +2,9 @@ import {
   Route,
   BrowserRouter as Router,
   Routes,
-  useLocation,
+  Navigate,
 } from 'react-router-dom';
 import { useContext, type JSX } from 'react';
-import { Navigate } from 'react-router-dom';
-import { TopBar } from './components/Menu/TopBar';
 import './styles/App.css';
 import { Athletes } from './pages/Athletes';
 import { User } from './pages/User';
@@ -20,6 +18,9 @@ import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { AdminPanel } from './pages/AdminPanel';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { RoleRoute } from './routes/RoleRoute';
+import { Enterprise } from './pages/Enterprise';
+import { Login } from './pages/Login';
+import { AppLayout } from './components/Layout/AppLayout';
 
 // Guard: somente Super Admin (is_admin=true, enterprise_id=null) acessa /admin
 function SuperAdminRoute({ children }: { children: JSX.Element }) {
@@ -33,41 +34,26 @@ function SuperAdminRoute({ children }: { children: JSX.Element }) {
   return children;
 }
 
-import { Enterprise } from './pages/Enterprise';
-import { Login } from './pages/Login';
 function AppContent() {
-  const location = useLocation();
-  const hideTopBar =
-    location.pathname === '/' ||
-    location.pathname === '/login' ||
-    location.pathname === '/register';
-
   return (
-    <>
-      <AuthProvider>
-        {!hideTopBar && <TopBar />}
-        <Routes>
-          {/* Páginas públicas */}
-          <Route path='/' element={<LandingPage />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/register' element={<Register />} />
+    <AuthProvider>
+      <Routes>
+        {/* Páginas públicas (sem casca de navegação) */}
+        <Route path='/' element={<LandingPage />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/register' element={<Register />} />
 
-          {/* Páginas autenticadas */}
+        {/* Páginas autenticadas — compartilham a sidebar via AppLayout */}
+        <Route element={<AppLayout />}>
           <Route path='/user' element={<ProtectedRoute><User /></ProtectedRoute>} />
           <Route path='/users' element={<RoleRoute roles={['gestor']}><UsersList /></RoleRoute>} />
           <Route path='/users/new' element={<RoleRoute roles={['gestor']}><UserForm /></RoleRoute>} />
           <Route path='/users/:id' element={<RoleRoute roles={['gestor']}><UserForm /></RoleRoute>} />
-
           <Route path='/enterprise' element={<ProtectedRoute><Enterprise /></ProtectedRoute>} />
-          {/* Páginas principais */}
           <Route path='/reports' element={<ProtectedRoute><Reports /></ProtectedRoute>} />
           <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>} />
-
-          {/* Rotas de atletas */}
           <Route path='/athletes' element={<ProtectedRoute><Athletes /></ProtectedRoute>} />
           <Route path='/athletes/:id' element={<ProtectedRoute><Athletes /></ProtectedRoute>} />
-
-          {/* Painel Admin — somente Super Admin */}
           <Route
             path='/admin'
             element={
@@ -76,9 +62,9 @@ function AppContent() {
               </SuperAdminRoute>
             }
           />
-        </Routes>
-      </AuthProvider>
-    </>
+        </Route>
+      </Routes>
+    </AuthProvider>
   );
 }
 

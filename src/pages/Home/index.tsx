@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, type ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import {
   deleteAthlete,
@@ -20,6 +20,8 @@ import {
   Upload,
   ChevronLeft,
   ChevronRight,
+  Plus,
+  Search,
 } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
 import { ModalBase } from '../../components/Modal/ModalBase';
@@ -38,10 +40,12 @@ type PageMeta = {
   to: number | null;
 };
 
-function Th({ children }: { children: React.ReactNode }) {
-  return (
-    <th className='px-4 py-2 text-center font-medium text-white'>{children}</th>
-  );
+// Iniciais para o avatar (até 2 letras do nome).
+function getInitials(name: string): string {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  const letters = parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[parts.length - 1][0];
+  return letters.toUpperCase();
 }
 
 export function Home() {
@@ -248,7 +252,7 @@ export function Home() {
     }
   }
 
-  async function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImportFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     // Permite reimportar o mesmo arquivo em seguida, limpando o input.
     event.target.value = '';
@@ -289,119 +293,161 @@ export function Home() {
     }
   }
 
+  const actionBtn =
+    'flex h-9 w-9 items-center justify-center rounded-lg border border-[#E4E9E7] bg-white text-[#5C6A64] transition-colors hover:bg-gray-50';
+
   return (
-    <div className='p-6 space-y-6'>
-      <header className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-        <h1 className='text-2xl font-semibold'>{companyName}</h1>
-        <div className='flex flex-col gap-3 sm:flex-row'>
-          <div className='relative'>
+    <div className='flex flex-col gap-6'>
+      {/* Cabeçalho */}
+      <header className='flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between'>
+        <div>
+          <h1 className='font-display text-2xl font-semibold tracking-tight'>Atletas</h1>
+          <p className='mt-1 text-sm text-[#5C6A64]'>
+            Gerencie os atletas cadastrados na {companyName}.
+          </p>
+        </div>
+        <div className='flex flex-wrap gap-2'>
+          {canManageData && (
+            <>
+              <button
+                type='button'
+                onClick={handleExport}
+                disabled={exporting}
+                title='Exportar lista para Excel (.xlsx)'
+                className='inline-flex items-center gap-2 rounded-lg border border-[#D7DEDB] bg-white px-3.5 py-2.5 text-sm font-medium transition-colors hover:bg-gray-50 disabled:opacity-60'
+              >
+                <Download size={16} />
+                {exporting ? 'Exportando...' : 'Exportar'}
+              </button>
+              <button
+                type='button'
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importing}
+                title='Importar atletas de um arquivo .csv ou .xlsx'
+                className='inline-flex items-center gap-2 rounded-lg border border-[#D7DEDB] bg-white px-3.5 py-2.5 text-sm font-medium transition-colors hover:bg-gray-50 disabled:opacity-60'
+              >
+                <Upload size={16} />
+                {importing ? 'Importando...' : 'Importar CSV'}
+              </button>
+              <button
+                type='button'
+                onClick={handleDownloadTemplate}
+                title='Baixar o modelo de planilha para importação'
+                className='inline-flex items-center rounded-lg border border-[#D7DEDB] bg-white px-3.5 py-2.5 text-sm font-medium text-[#5C6A64] transition-colors hover:bg-gray-50'
+              >
+                Baixar modelo
+              </button>
+              <input
+                ref={fileInputRef}
+                type='file'
+                accept='.csv,.xlsx,.xls'
+                className='hidden'
+                onChange={handleImportFile}
+              />
+            </>
+          )}
+          <Link
+            to='/athletes'
+            className='inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700'
+          >
+            <Plus size={17} />
+            Cadastrar atleta
+          </Link>
+        </div>
+      </header>
+
+      {/* Indicador */}
+      <div className='grid grid-cols-1 gap-3.5 sm:grid-cols-3'>
+        <div className='rounded-xl border border-[#E4E9E7] bg-white px-4 py-4'>
+          <div className='text-xs text-[#6B7772]'>Total de atletas</div>
+          <div className='mt-2 font-display text-2xl font-semibold leading-none'>
+            {meta?.total ?? athletes.length}
+          </div>
+        </div>
+        <div className='rounded-xl border border-[#E4E9E7] bg-white px-4 py-4'>
+          <div className='text-xs text-[#6B7772]'>Resultados nesta página</div>
+          <div className='mt-2 font-display text-2xl font-semibold leading-none'>
+            {athletes.length}
+          </div>
+        </div>
+        <div className='rounded-xl border border-[#E4E9E7] bg-white px-4 py-4'>
+          <div className='text-xs text-[#6B7772]'>Página</div>
+          <div className='mt-2 font-display text-2xl font-semibold leading-none'>
+            {meta?.current_page ?? 1}
+            <span className='text-sm font-medium text-[#8A968F]'> / {meta?.last_page ?? 1}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabela */}
+      <section className='overflow-hidden rounded-2xl border border-[#E4E9E7] bg-white shadow-sm'>
+        <div className='border-b border-[#EEF2F0] p-4'>
+          <div className='relative max-w-sm'>
+            <Search
+              size={17}
+              className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#8A968F]'
+            />
             <input
               type='search'
-              placeholder='Buscar atleta...'
-              className='w-64 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500'
+              placeholder='Buscar por nome ou CPF'
+              aria-label='Buscar atleta'
+              className='w-full rounded-lg border border-[#D7DEDB] bg-white py-2.5 pl-10 pr-3 text-sm outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20'
               value={searchAthlete}
               onChange={e => setSearchAthlete(e.target.value)}
             />
           </div>
-          <div className='flex flex-wrap gap-2 justify-center'>
-            <Link
-              to='/athletes'
-              className='rounded-md border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50'
-            >
-              + Cadastrar atleta
-            </Link>
-
-            {canManageData && (
-              <>
-                <button
-                  type='button'
-                  onClick={handleExport}
-                  disabled={exporting}
-                  title='Exportar lista para Excel (.xlsx)'
-                  className='inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-60'
-                >
-                  <Download size={16} />
-                  {exporting ? 'Exportando...' : 'Exportar (Excel)'}
-                </button>
-
-                <button
-                  type='button'
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={importing}
-                  title='Importar atletas de um arquivo .csv ou .xlsx'
-                  className='inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-60'
-                >
-                  <Upload size={16} />
-                  {importing ? 'Importando...' : 'Importar'}
-                </button>
-
-                <button
-                  type='button'
-                  onClick={handleDownloadTemplate}
-                  title='Baixar o modelo de planilha para importação'
-                  className='rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50'
-                >
-                  Baixar modelo
-                </button>
-
-                <input
-                  ref={fileInputRef}
-                  type='file'
-                  accept='.csv,.xlsx,.xls'
-                  className='hidden'
-                  onChange={handleImportFile}
-                />
-              </>
-            )}
-          </div>
         </div>
-      </header>
 
-      <section className='rounded-lg border border-gray-200 bg-white'>
-        <div className='flex border-b border-gray-200 px-4 py-3 justify-center items-center'>
-          <h2 className='text-x1 font-semibold'>Atletas cadastrados</h2>
-        </div>
         <div className='overflow-x-auto'>
-          <table className='min-w-full divide-y divide-gray-200 text-sm'>
-            <thead className='bg-gray-700'>
-              <tr>
-                <Th>Nome</Th>
-                <Th>Data Nascimento</Th>
-                <Th>CPF</Th>
-                <Th>Atualizado em</Th>
-                <Th>Ações</Th>
+          <table className='min-w-full border-collapse text-sm'>
+            <thead>
+              <tr className='bg-[#FAFBFB] text-left'>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-xs font-semibold text-[#6B7772]'>Atleta</th>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-xs font-semibold text-[#6B7772]'>Data de nascimento</th>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-xs font-semibold text-[#6B7772]'>CPF</th>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-xs font-semibold text-[#6B7772]'>Atualizado em</th>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-right text-xs font-semibold text-[#6B7772]'>Ações</th>
               </tr>
             </thead>
-            <tbody className='divide-y divide-gray-100'>
-              {athletes?.map((athlete: any) => {
-                logger.log(athlete);
-                return (
-                  <tr key={athlete.id} className='hover:bg-gray-200'>
-                    <td className='px-4 py-3'>{athlete.full_name}</td>
-                    <td className='px-4 py-3'>
-                      {formatDate(athlete.birth_date)}
-                    </td>
-                    <td className='px-4 py-3'>{formatCPF(athlete.document)}</td>
-                    <td className='px-4 py-3'>
-                      {athlete.updated_at
-                        ? formatDate(athlete.updated_at)
-                        : '-'}
-                    </td>
-                    <td className='px-4 py-3 flex gap-4 items-center justify-center'>
+            <tbody>
+              {athletes?.map((athlete: any) => (
+                <tr key={athlete.id} className='transition-colors hover:bg-[#FAFBFB]'>
+                  <td className='border-b border-[#F1F4F3] px-4 py-3'>
+                    <div className='flex items-center gap-3'>
+                      <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-50 font-display text-sm font-semibold text-brand-700'>
+                        {getInitials(athlete.full_name)}
+                      </div>
+                      <span className='font-medium text-ink'>{athlete.full_name}</span>
+                    </div>
+                  </td>
+                  <td className='border-b border-[#F1F4F3] px-4 py-3 text-[#3C4742]'>
+                    {formatDate(athlete.birth_date)}
+                  </td>
+                  <td className='border-b border-[#F1F4F3] px-4 py-3 text-[#3C4742] tabular-nums'>
+                    {formatCPF(athlete.document)}
+                  </td>
+                  <td className='border-b border-[#F1F4F3] px-4 py-3 text-[#3C4742]'>
+                    {athlete.updated_at ? formatDate(athlete.updated_at) : '-'}
+                  </td>
+                  <td className='border-b border-[#F1F4F3] px-4 py-3'>
+                    <div className='flex justify-end gap-1.5'>
                       <Link
-                        key={athlete.id}
-                        onClick={() => {
-                          handleLoadAthleteData(athlete.id);
-                        }}
+                        onClick={() => handleLoadAthleteData(athlete.id)}
                         to={`/athletes/${athlete.id}`}
-                        className='cursor-pointer p-1  rounded-full transition-colors'
-                        title='Editar Atleta'
+                        className={actionBtn}
+                        title='Editar atleta'
+                        aria-label={`Editar ${athlete.full_name}`}
                       >
-                        <Edit
-                          size={16}
-                          className='cursor-pointer text-gray-700 hover:text-gray-900'
-                        />
+                        <Edit size={16} />
                       </Link>
+                      <button
+                        onClick={() => handlePrintAthlete(athlete)}
+                        className={actionBtn}
+                        title='Imprimir ficha'
+                        aria-label={`Imprimir ficha de ${athlete.full_name}`}
+                      >
+                        <Printer size={16} />
+                      </button>
                       <button
                         type='button'
                         onClick={e => {
@@ -409,33 +455,20 @@ export function Home() {
                           e.stopPropagation();
                           handleDeteleAthlete(athlete.id);
                         }}
-                        title='Deletar Atleta'
-                        className='cursor-pointer p-1  rounded-full transition-colors'
+                        title='Excluir atleta'
+                        aria-label={`Excluir ${athlete.full_name}`}
+                        className='flex h-9 w-9 items-center justify-center rounded-lg border border-[#F0DAD8] bg-white text-[#C2453D] transition-colors hover:bg-red-50'
                       >
-                        <Trash
-                          size={16}
-                          className='text-red-500 hover:text-red-700'
-                        />
+                        <Trash size={16} />
                       </button>
-                      <button
-                        onClick={() => handlePrintAthlete(athlete)}
-                        className='cursor-pointer p-1 rounded-full transition-colors'
-                        title='Imprimir Ficha'
-                      >
-                        <Printer size={16}
-                        className='text-black'/>
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+                    </div>
+                  </td>
+                </tr>
+              ))}
 
               {!loading && athletes.length === 0 && (
                 <tr>
-                  <td
-                    colSpan={5}
-                    className='px-4 py-8 text-center text-gray-500'
-                  >
+                  <td colSpan={5} className='px-4 py-10 text-center text-[#8A968F]'>
                     Nenhum atleta encontrado.
                   </td>
                 </tr>
@@ -443,10 +476,7 @@ export function Home() {
 
               {loading && (
                 <tr>
-                  <td
-                    colSpan={5}
-                    className='px-4 py-8 text-center text-gray-500'
-                  >
+                  <td colSpan={5} className='px-4 py-10 text-center text-[#8A968F]'>
                     Carregando...
                   </td>
                 </tr>
@@ -457,7 +487,7 @@ export function Home() {
 
         {/* Rodapé com paginação */}
         {meta && meta.total > 0 && (
-          <div className='flex flex-col gap-3 border-t border-gray-200 px-4 py-3 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between'>
+          <div className='flex flex-col gap-3 border-t border-[#EEF2F0] px-4 py-3 text-sm text-[#5C6A64] sm:flex-row sm:items-center sm:justify-between'>
             <span>
               Mostrando {meta.from ?? 0}–{meta.to ?? 0} de {meta.total} atleta
               {meta.total === 1 ? '' : 's'}
@@ -468,7 +498,7 @@ export function Home() {
                 type='button'
                 onClick={() => goToPage(page - 1)}
                 disabled={loading || page <= 1}
-                className='inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-3 py-1.5 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50'
+                className='inline-flex items-center gap-1 rounded-lg border border-[#E4E9E7] bg-white px-3 py-1.5 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50'
               >
                 <ChevronLeft size={16} />
                 Anterior
@@ -482,7 +512,7 @@ export function Home() {
                 type='button'
                 onClick={() => goToPage(page + 1)}
                 disabled={loading || page >= meta.last_page}
-                className='inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-3 py-1.5 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50'
+                className='inline-flex items-center gap-1 rounded-lg border border-[#E4E9E7] bg-white px-3 py-1.5 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50'
               >
                 Próxima
                 <ChevronRight size={16} />

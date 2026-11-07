@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react';
 import { logger } from '../../utils/logger';
 import { useNavigate } from 'react-router-dom';
-import { Building2, UserPlus, ChevronRight } from 'lucide-react';
+import { Building2, UserPlus, ChevronRight, ChevronLeft } from 'lucide-react';
 import api from '../../services/api';
 import { ModalBase } from '../../components/Modal/ModalBase';
 import { MaskedInput, type MaskType } from '../../components/Form/MaskedInput';
@@ -14,6 +15,10 @@ interface Enterprise {
   document?: string;
   active?: boolean;
 }
+
+const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[#6B7772]';
+const fieldClass =
+  'w-full rounded-lg border border-[#D7DEDB] bg-white px-3 py-2.5 text-sm text-ink outline-none transition-colors focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20';
 
 // ─── Formulário de Empresa ────────────────────────────────────────────────────
 function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => void }) {
@@ -72,8 +77,8 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
 
   return (
     <>
-      <form onSubmit={handleSubmit} className='space-y-3'>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+      <form onSubmit={handleSubmit} className='space-y-4'>
+        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
           {([
             { label: 'Nome *', name: 'name', required: true },
             { label: 'Razão Social *', name: 'social_reason', required: true },
@@ -93,7 +98,7 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
             { label: 'Complemento', name: 'complement', required: false },
           ] as { label: string; name: string; required: boolean; type?: string; mask?: MaskType }[]).map(field => (
             <div key={field.name}>
-              <label className='block text-xs font-semibold text-gray-600 uppercase mb-1'>
+              <label className={labelClass}>
                 {field.label}
               </label>
               {field.mask ? (
@@ -103,7 +108,7 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
                   value={formData[field.name as keyof typeof formData]}
                   onChange={handleChange}
                   required={field.required}
-                  className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none'
+                  className={fieldClass}
                 />
               ) : field.name === 'state' ? (
                 <select
@@ -111,7 +116,7 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
                   value={formData[field.name as keyof typeof formData]}
                   onChange={handleChange}
                   required={field.required}
-                  className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none bg-white'
+                  className={fieldClass}
                 >
                   <option value=''>Selecione o estado</option>
                   <option value='AC'>Acre</option>
@@ -149,10 +154,10 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
                   value={formData[field.name as keyof typeof formData]}
                   onChange={handleChange}
                   required={field.required}
-                  className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none'
+                  className={fieldClass}
                 />
               )}
-              {errors[field.name] && <p className='text-red-500 text-xs mt-1'>{errors[field.name][0]}</p>}
+              {errors[field.name] && <p className='mt-1 text-xs text-[#C2453D]'>{errors[field.name][0]}</p>}
             </div>
           ))}
         </div>
@@ -160,10 +165,10 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
         <button
           type='submit'
           disabled={saving}
-          className='w-full mt-2 bg-red-950 text-white font-semibold py-2.5 rounded-lg hover:bg-red-800 transition-colors disabled:opacity-60 flex items-center justify-center gap-2'
+          className='mt-1 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60'
         >
           <Building2 size={16} />
-          {saving ? 'Cadastrando...' : 'Cadastrar Empresa'}
+          {saving ? 'Cadastrando...' : 'Cadastrar empresa'}
         </button>
       </form>
 
@@ -185,13 +190,15 @@ function EnterpriseForm({ onSuccess }: { onSuccess: (enterprise: Enterprise) => 
 // ─── Formulário de Usuário ────────────────────────────────────────────────────
 function UserForm() {
   const [allEnterprises, setAllEnterprises] = useState<Enterprise[]>([]);
-  
+
   useEffect(() => {
     async function loadAll() {
       try {
         const response = await api.get('/enterprises?all=true');
         setAllEnterprises(response.data);
-      } catch (err) {}
+      } catch (error) {
+        logger.error('Erro ao carregar empresas:', error);
+      }
     }
     loadAll();
   }, []);
@@ -239,9 +246,9 @@ function UserForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className='space-y-3'>
+      <form onSubmit={handleSubmit} className='space-y-4'>
         <div>
-          <label className='block text-xs font-semibold text-gray-600 uppercase mb-1'>
+          <label className={labelClass}>
             Empresa *
           </label>
           <select
@@ -249,7 +256,7 @@ function UserForm() {
             value={formData.enterprise_id}
             onChange={handleChange}
             required
-            className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white'
+            className={fieldClass}
           >
             <option value=''>Selecione uma empresa...</option>
             {allEnterprises.map(e => (
@@ -264,7 +271,7 @@ function UserForm() {
           { label: 'Senha *', name: 'password', required: true, type: 'password' },
         ].map(field => (
           <div key={field.name}>
-            <label className='block text-xs font-semibold text-gray-600 uppercase mb-1'>
+            <label className={labelClass}>
               {field.label}
             </label>
             <input
@@ -275,23 +282,23 @@ function UserForm() {
               required={field.required}
               minLength={field.name === 'password' ? 8 : undefined}
               placeholder={field.name === 'password' ? 'Mínimo 8 caracteres' : ''}
-              className='w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-900 focus:border-transparent outline-none'
+              className={fieldClass}
             />
           </div>
         ))}
 
-        <p className='text-xs text-gray-500 bg-yellow-50 border border-yellow-200 rounded-md px-3 py-2'>
-          ℹ️ Este usuário será criado como <strong>Gestor</strong> da empresa selecionada.
+        <p className='rounded-lg border border-brand-600/20 bg-brand-50 px-3 py-2.5 text-xs text-brand-700'>
+          Este usuário será criado como <strong>Gestor</strong> da empresa selecionada.
           Envie o e-mail e senha para o cliente acessar o sistema.
         </p>
 
         <button
           type='submit'
           disabled={saving}
-          className='w-full mt-2 bg-red-950 text-white font-semibold py-2.5 rounded-lg hover:bg-red-800 transition-colors disabled:opacity-60 flex items-center justify-center gap-2'
+          className='mt-1 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60'
         >
           <UserPlus size={16} />
-          {saving ? 'Criando Gestor...' : 'Criar Gestor da Empresa'}
+          {saving ? 'Criando Gestor...' : 'Criar Gestor da empresa'}
         </button>
       </form>
 
@@ -342,124 +349,123 @@ export function AdminPanel() {
     setEnterprises(prev => [...prev, newEnterprise]);
   }
 
+  const tabClass = (active: boolean) =>
+    `flex flex-1 items-center justify-center gap-2 px-4 py-3 text-sm font-semibold transition-colors ${
+      active
+        ? 'border-b-2 border-brand-600 bg-brand-50 text-brand-700'
+        : 'text-[#6B7772] hover:text-ink'
+    }`;
+
   return (
-    <div className='min-h-screen bg-gray-100 p-6'>
-      <div className='max-w-4xl mx-auto'>
-
-        {/* Header */}
-        <div className='mb-8'>
-          <div className='flex items-center gap-2 text-sm text-gray-500 mb-2'>
-            <button onClick={() => navigate('/home')} className='hover:text-red-950'>Home</button>
-            <ChevronRight size={14} />
-            <span className='text-red-950 font-semibold'>Painel Admin</span>
-          </div>
-          <h1 className='text-2xl font-bold text-gray-800'>Painel do Gestor Geral</h1>
-          <p className='text-gray-500 mt-1'>
-            Cadastre novas empresas e crie os primeiros acessos para cada cliente.
-          </p>
+    <div className='mx-auto flex w-full max-w-4xl flex-col gap-6'>
+      {/* Header */}
+      <header>
+        <div className='mb-2 flex items-center gap-1.5 text-sm text-[#8A968F]'>
+          <button onClick={() => navigate('/home')} className='transition-colors hover:text-brand-700'>
+            Home
+          </button>
+          <ChevronRight size={14} />
+          <span className='font-medium text-brand-700'>Painel Admin</span>
         </div>
+        <h1 className='font-display text-2xl font-semibold tracking-tight'>
+          Painel do Gestor Geral
+        </h1>
+        <p className='mt-1 text-sm text-[#5C6A64]'>
+          Cadastre novas empresas e crie os primeiros acessos para cada cliente.
+        </p>
+      </header>
 
-        {/* Empresas cadastradas */}
-        <div className='bg-white rounded-lg shadow-sm p-4 mb-6'>
-          <h2 className='text-sm font-semibold text-gray-600 uppercase mb-3'>
-            Empresas cadastradas ({totalItems})
-          </h2>
-          {loadingEnterprises ? (
-            <p className='text-sm text-gray-400'>Carregando...</p>
-          ) : enterprises.length === 0 ? (
-            <p className='text-sm text-gray-400 italic'>Nenhuma empresa cadastrada ainda.</p>
-          ) : (
-            <div className='space-y-2'>
-              {enterprises.map(e => (
-                <div key={e.id} className='flex items-center justify-between bg-gray-50 rounded-lg px-4 py-2' title={e.active !== false ? 'Desativar empresa' : 'Ativar empresa'} >
-                  <div>
-                    <p className='font-semibold text-gray-800 text-sm'>{e.fantasy_name || e.name}</p>
-                    {e.document && <p className='text-xs text-gray-400'>CNPJ: {e.document}</p>}
-                  </div>
-                  <button
-                    onClick={async () => {
-                      try {
-                        const newStatus = !e.active;
-                        await api.put(`/enterprises/${e.id}`, { active: newStatus });
-                        setEnterprises(prev => prev.map(ent => ent.id === e.id ? { ...ent, active: newStatus } : ent));
-                      } catch (error) {
-                        logger.error('Erro ao alterar status', error);
-                        alert('Erro ao alterar o status da empresa.');
-                      }
-                    }}
-                    className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${
-                      e.active !== false
-                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                        : 'bg-red-100 text-red-700 hover:bg-red-200'
-                    }`}
-                  >
-                    {e.active !== false ? 'Ativa' : 'Inativa'}
-                  </button>
+      {/* Empresas cadastradas */}
+      <section className='rounded-2xl border border-[#E4E9E7] bg-white p-5 shadow-sm sm:p-6'>
+        <h2 className='mb-4 text-xs font-semibold uppercase tracking-wide text-[#6B7772]'>
+          Empresas cadastradas ({totalItems})
+        </h2>
+        {loadingEnterprises ? (
+          <p className='text-sm text-[#8A968F]'>Carregando...</p>
+        ) : enterprises.length === 0 ? (
+          <p className='text-sm italic text-[#8A968F]'>Nenhuma empresa cadastrada ainda.</p>
+        ) : (
+          <div className='flex flex-col gap-2'>
+            {enterprises.map(e => (
+              <div
+                key={e.id}
+                className='flex items-center justify-between gap-3 rounded-xl border border-[#EEF2F0] bg-[#FAFBFB] px-4 py-3'
+                title={e.active !== false ? 'Desativar empresa' : 'Ativar empresa'}
+              >
+                <div className='min-w-0'>
+                  <p className='truncate text-sm font-semibold text-ink'>{e.fantasy_name || e.name}</p>
+                  {e.document && <p className='text-xs text-[#8A968F]'>CNPJ: {e.document}</p>}
                 </div>
-              ))}
-            </div>
-          )}
-          
-          {totalPages > 1 && (
-            <div className='mt-4 flex justify-between items-center border-t pt-3'>
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className='text-sm text-red-950 font-medium disabled:text-gray-300'
-              >
-                Anterior
-              </button>
-              <span className='text-xs text-gray-500'>
-                Página {page} de {totalPages}
-              </span>
-              <button
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className='text-sm text-red-950 font-medium disabled:text-gray-300'
-              >
-                Próxima
-              </button>
-            </div>
-          )}
-        </div>
+                <button
+                  onClick={async () => {
+                    try {
+                      const newStatus = !e.active;
+                      await api.put(`/enterprises/${e.id}`, { active: newStatus });
+                      setEnterprises(prev => prev.map(ent => ent.id === e.id ? { ...ent, active: newStatus } : ent));
+                    } catch (error) {
+                      logger.error('Erro ao alterar status', error);
+                      alert('Erro ao alterar o status da empresa.');
+                    }
+                  }}
+                  className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                    e.active !== false
+                      ? 'bg-brand-50 text-brand-700 hover:bg-brand-600/10'
+                      : 'bg-red-50 text-[#C2453D] hover:bg-red-100'
+                  }`}
+                >
+                  {e.active !== false ? 'Ativa' : 'Inativa'}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
-        {/* Abas */}
-        <div className='bg-white rounded-lg shadow-sm overflow-hidden'>
-          <div className='flex border-b border-gray-200'>
+        {totalPages > 1 && (
+          <div className='mt-4 flex items-center justify-between border-t border-[#EEF2F0] pt-3'>
             <button
-              onClick={() => setActiveTab('enterprise')}
-              className={`flex-1 py-3 px-4 text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${
-                activeTab === 'enterprise'
-                  ? 'text-red-950 border-b-2 border-red-950 bg-red-50'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className='inline-flex items-center gap-1 text-sm font-medium text-brand-700 transition-colors hover:text-brand-600 disabled:cursor-not-allowed disabled:text-[#C3CCC8]'
             >
-              <Building2 size={16} />
-              Cadastrar Empresa
+              <ChevronLeft size={16} />
+              Anterior
             </button>
+            <span className='text-xs text-[#8A968F]'>
+              Página {page} de {totalPages}
+            </span>
             <button
-              onClick={() => setActiveTab('user')}
-              className={`flex-1 py-3 px-4 text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${
-                activeTab === 'user'
-                  ? 'text-red-950 border-b-2 border-red-950 bg-red-50'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className='inline-flex items-center gap-1 text-sm font-medium text-brand-700 transition-colors hover:text-brand-600 disabled:cursor-not-allowed disabled:text-[#C3CCC8]'
             >
-              <UserPlus size={16} />
-              Criar Gestor
+              Próxima
+              <ChevronRight size={16} />
             </button>
           </div>
+        )}
+      </section>
 
-          <div className='p-6'>
-            {activeTab === 'enterprise' ? (
-              <EnterpriseForm onSuccess={handleEnterpriseCreated} />
-            ) : (
-              <UserForm />
-            )}
-          </div>
+      {/* Abas */}
+      <section className='overflow-hidden rounded-2xl border border-[#E4E9E7] bg-white shadow-sm'>
+        <div className='flex border-b border-[#EEF2F0]'>
+          <button onClick={() => setActiveTab('enterprise')} className={tabClass(activeTab === 'enterprise')}>
+            <Building2 size={16} />
+            Cadastrar empresa
+          </button>
+          <button onClick={() => setActiveTab('user')} className={tabClass(activeTab === 'user')}>
+            <UserPlus size={16} />
+            Criar Gestor
+          </button>
         </div>
 
-      </div>
+        <div className='p-5 sm:p-6'>
+          {activeTab === 'enterprise' ? (
+            <EnterpriseForm onSuccess={handleEnterpriseCreated} />
+          ) : (
+            <UserForm />
+          )}
+        </div>
+      </section>
     </div>
   );
 }

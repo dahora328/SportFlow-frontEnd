@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { logger } from '../../utils/logger';
 import { getErrorMessage } from '../../utils/getErrorMessage';
 import { getUsers, deleteUser, type UserData } from '../../services/usersService';
@@ -7,9 +7,24 @@ import { useModal } from '../../hooks/useModal';
 import { ModalBase } from '../../components/Modal/ModalBase';
 import { Link } from 'react-router-dom';
 
-function Th({ children }: { children: React.ReactNode }) {
-  return (
-    <th className='px-4 py-2 text-center font-medium text-white'>{children}</th>
+// Iniciais para o avatar (até 2 letras do nome).
+function getInitials(name: string): string {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  const letters =
+    parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[parts.length - 1][0];
+  return letters.toUpperCase();
+}
+
+function RoleBadge({ isAdmin }: { isAdmin?: boolean }) {
+  return isAdmin ? (
+    <span className='inline-flex rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700'>
+      Gestor
+    </span>
+  ) : (
+    <span className='inline-flex rounded-full bg-[#EEF2F0] px-2.5 py-1 text-xs font-medium text-[#5C6A64]'>
+      Funcionário
+    </span>
   );
 }
 
@@ -53,80 +68,157 @@ export function UsersList() {
     );
   }
 
+  const actionBtn =
+    'flex h-9 w-9 items-center justify-center rounded-lg border border-[#E4E9E7] bg-white text-[#5C6A64] transition-colors hover:bg-gray-50';
+  const deleteBtn =
+    'flex h-9 w-9 items-center justify-center rounded-lg border border-[#F0DAD8] bg-white text-[#C2453D] transition-colors hover:bg-red-50';
+
   return (
-    <div className='p-6 space-y-6'>
-      <header className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-        <h1 className='text-2xl font-semibold'>Usuários da Empresa</h1>
-        <div className='flex gap-2 justify-center'>
-          <Link
-            to='/users/new'
-            className='rounded-md border border-gray-200 bg-white px-3 py-2 text-sm hover:bg-gray-50 flex items-center gap-2'
-          >
-            <Plus size={16} /> Novo Usuário
-          </Link>
+    <div className='flex flex-col gap-6'>
+      {/* Cabeçalho */}
+      <header className='flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between'>
+        <div>
+          <h1 className='font-display text-2xl font-semibold tracking-tight'>Usuários</h1>
+          <p className='mt-1 text-sm text-[#5C6A64]'>
+            Gerencie os usuários com acesso ao sistema.
+          </p>
         </div>
+        <Link
+          to='/users/new'
+          className='inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700'
+        >
+          <Plus size={17} />
+          Novo usuário
+        </Link>
       </header>
 
-      <section className='rounded-lg border border-gray-200 bg-white'>
-        <div className='flex border-b border-gray-200 px-4 py-3 justify-center items-center'>
-          <h2 className='text-x1 font-semibold'>Usuários cadastrados</h2>
-        </div>
-        <div className='overflow-x-auto'>
-          <table className='min-w-full divide-y divide-gray-200 text-sm'>
-            <thead className='bg-gray-700'>
-              <tr>
-                <Th>Nome</Th>
-                <Th>E-mail</Th>
-                <Th>Função</Th>
-                <Th>Ações</Th>
+      {/* Tabela / Cartões */}
+      <section className='overflow-hidden rounded-2xl border border-[#E4E9E7] bg-white shadow-sm'>
+        <div className='hidden overflow-x-auto md:block'>
+          <table className='min-w-full border-collapse text-sm'>
+            <thead>
+              <tr className='bg-[#FAFBFB] text-left'>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-xs font-semibold text-[#6B7772]'>
+                  Usuário
+                </th>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-xs font-semibold text-[#6B7772]'>
+                  E-mail
+                </th>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-xs font-semibold text-[#6B7772]'>
+                  Função
+                </th>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-right text-xs font-semibold text-[#6B7772]'>
+                  Ações
+                </th>
               </tr>
             </thead>
-            <tbody className='divide-y divide-gray-100'>
-              {loading ? (
+            <tbody>
+              {!loading &&
+                users.map(user => (
+                  <tr key={user.id} className='transition-colors hover:bg-[#FAFBFB]'>
+                    <td className='border-b border-[#F1F4F3] px-4 py-3'>
+                      <div className='flex items-center gap-3'>
+                        <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-50 font-display text-sm font-semibold text-brand-700'>
+                          {getInitials(user.name)}
+                        </div>
+                        <span className='font-medium text-ink'>{user.name}</span>
+                      </div>
+                    </td>
+                    <td className='border-b border-[#F1F4F3] px-4 py-3 text-[#3C4742]'>
+                      {user.email}
+                    </td>
+                    <td className='border-b border-[#F1F4F3] px-4 py-3'>
+                      <RoleBadge isAdmin={user.is_admin} />
+                    </td>
+                    <td className='border-b border-[#F1F4F3] px-4 py-3'>
+                      <div className='flex justify-end gap-1.5'>
+                        <Link
+                          to={`/users/${user.id}`}
+                          className={actionBtn}
+                          title='Editar usuário'
+                          aria-label={`Editar ${user.name}`}
+                        >
+                          <Edit size={16} />
+                        </Link>
+                        <button
+                          type='button'
+                          onClick={() => user.id && handleDeleteUser(user.id)}
+                          title='Excluir usuário'
+                          aria-label={`Excluir ${user.name}`}
+                          className={deleteBtn}
+                        >
+                          <Trash size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+
+              {!loading && users.length === 0 && (
                 <tr>
-                  <td colSpan={4} className='px-4 py-8 text-center text-gray-500'>
-                    Carregando usuários...
-                  </td>
-                </tr>
-              ) : users.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className='px-4 py-8 text-center text-gray-500'>
+                  <td colSpan={4} className='px-4 py-10 text-center text-[#8A968F]'>
                     Nenhum usuário encontrado.
                   </td>
                 </tr>
-              ) : (
-                users.map(user => (
-                  <tr key={user.id} className='hover:bg-gray-200'>
-                    <td className='px-4 py-3 text-center'>{user.name}</td>
-                    <td className='px-4 py-3 text-center'>{user.email}</td>
-                    <td className='px-4 py-3 text-center'>
-                      {user.is_admin ? (
-                         <span className='bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium'>Gestor</span>
-                      ) : (
-                         <span className='bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full font-medium'>Funcionário</span>
-                      )}
-                    </td>
-                    <td className='px-4 py-3 flex gap-4 items-center justify-center'>
-                      <Link
-                        to={`/users/${user.id}`}
-                        className='cursor-pointer p-1 rounded-full transition-colors'
-                        title='Editar Usuário'
-                      >
-                        <Edit size={16} className='text-gray-700 hover:text-gray-900' />
-                      </Link>
-                      <button
-                        onClick={() => user.id && handleDeleteUser(user.id)}
-                        title='Deletar Usuário'
-                        className='cursor-pointer p-1 rounded-full transition-colors'
-                      >
-                        <Trash size={16} className='text-red-500 hover:text-red-700' />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+              )}
+
+              {loading && (
+                <tr>
+                  <td colSpan={4} className='px-4 py-10 text-center text-[#8A968F]'>
+                    Carregando...
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Cartões (mobile) */}
+        <div className='divide-y divide-[#F1F4F3] md:hidden'>
+          {!loading &&
+            users.map(user => (
+              <article key={user.id} className='flex gap-3 p-4'>
+                <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-50 font-display text-sm font-semibold text-brand-700'>
+                  {getInitials(user.name)}
+                </div>
+                <div className='min-w-0 flex-1'>
+                  <div className='flex items-center gap-2'>
+                    <h3 className='truncate font-medium text-ink'>{user.name}</h3>
+                    <RoleBadge isAdmin={user.is_admin} />
+                  </div>
+                  <p className='mt-1 truncate text-sm text-[#5C6A64]'>{user.email}</p>
+                  <div className='mt-3 flex gap-2'>
+                    <Link
+                      to={`/users/${user.id}`}
+                      className='flex h-11 w-11 items-center justify-center rounded-lg border border-[#E4E9E7] bg-white text-[#5C6A64] transition-colors hover:bg-gray-50'
+                      title='Editar usuário'
+                      aria-label={`Editar ${user.name}`}
+                    >
+                      <Edit size={18} />
+                    </Link>
+                    <button
+                      type='button'
+                      onClick={() => user.id && handleDeleteUser(user.id)}
+                      title='Excluir usuário'
+                      aria-label={`Excluir ${user.name}`}
+                      className='flex h-11 w-11 items-center justify-center rounded-lg border border-[#F0DAD8] bg-white text-[#C2453D] transition-colors hover:bg-red-50'
+                    >
+                      <Trash size={18} />
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+
+          {!loading && users.length === 0 && (
+            <p className='px-4 py-10 text-center text-[#8A968F]'>
+              Nenhum usuário encontrado.
+            </p>
+          )}
+
+          {loading && (
+            <p className='px-4 py-10 text-center text-[#8A968F]'>Carregando...</p>
+          )}
         </div>
       </section>
 

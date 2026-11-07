@@ -3,7 +3,7 @@ import { logger } from '../../utils/logger';
 import { getErrorMessage } from '../../utils/getErrorMessage';
 import { useNavigate, Link } from 'react-router-dom';
 import { createUser } from '../../services/userService';
-import { Trophy, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, UserPlus } from 'lucide-react';
 
 export function Register() {
   const navigate = useNavigate();
@@ -45,126 +45,117 @@ export function Register() {
     }
   };
 
-  return (
-    <div className='min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
-      <div className='sm:mx-auto sm:w-full sm:max-w-md'>
-        <div className='flex justify-center'>
-          <div className='bg-blue-600 p-3 rounded-xl shadow-lg'>
-            <Trophy size={40} className='text-yellow-300' />
-          </div>
-        </div>
-        <h2 className='mt-6 text-center text-3xl font-extrabold text-gray-900'>
-          Crie sua conta SportFlow
-        </h2>
-        <p className='mt-2 text-center text-sm text-gray-600'>
-          Ou{' '}
-          <Link to='/login' className='font-medium text-blue-600 hover:text-blue-500'>
-            já tem uma conta? Faça login
-          </Link>
-        </p>
-      </div>
+  const labelClass = 'mb-1.5 block text-sm font-medium text-[#3C4742]';
+  // 15px no input evita o zoom automático do iOS ao focar o campo.
+  const fieldClass =
+    'w-full rounded-lg border border-[#D7DEDB] bg-white px-3 py-2.5 text-[15px] text-ink outline-none transition-colors focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20';
 
-      <div className='mt-8 sm:mx-auto sm:w-full sm:max-w-md'>
-        <div className='bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100'>
-          <form className='space-y-6' onSubmit={handleSubmit}>
+  return (
+    <div className='flex min-h-screen flex-col items-center justify-center bg-ground px-4 py-10 font-sans text-ink'>
+      <div className='w-full max-w-md'>
+        <div className='mb-6 flex flex-col items-center'>
+          <div className='flex h-14 w-14 items-center justify-center rounded-xl bg-brand-600 text-white shadow-sm'>
+            <UserPlus size={26} />
+          </div>
+          <h1 className='mt-4 text-center font-display text-2xl font-semibold tracking-tight'>
+            Crie sua conta SportFlow
+          </h1>
+          <p className='mt-1 text-center text-sm text-[#5C6A64]'>
+            Já tem uma conta?{' '}
+            <Link
+              to='/login'
+              className='font-semibold text-brand-700 transition-colors hover:text-brand-600'
+            >
+              Faça login
+            </Link>
+          </p>
+        </div>
+
+        <div className='rounded-2xl border border-[#E4E9E7] bg-white p-6 shadow-sm sm:p-8'>
+          <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
             {error && (
-              <div className='bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm text-center'>
+              <div className='rounded-lg border border-[#F0DAD8] bg-red-50 px-3 py-2 text-sm text-[#C2453D]'>
                 {error}
               </div>
             )}
-            
+
             <div>
-              <label className='block text-sm font-medium text-gray-700'>
+              <label htmlFor='name' className={labelClass}>
                 Nome completo
               </label>
-              <div className='mt-1'>
-                <input
-                  name='name'
-                  type='text'
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
-                  className='appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
-                  placeholder='João da Silva'
-                />
-              </div>
+              <input
+                id='name'
+                name='name'
+                type='text'
+                required
+                value={formData.name}
+                onChange={handleChange}
+                className={fieldClass}
+                placeholder='João da Silva'
+              />
             </div>
 
             <div>
-              <label className='block text-sm font-medium text-gray-700'>
+              <label htmlFor='email' className={labelClass}>
                 E-mail
               </label>
-              <div className='mt-1'>
-                <input
-                  name='email'
-                  type='email'
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className='appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
-                  placeholder='joao@email.com'
-                />
-              </div>
+              <input
+                id='email'
+                name='email'
+                type='email'
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className={fieldClass}
+                placeholder='joao@email.com'
+              />
             </div>
 
             <div>
-              <label className='block text-sm font-medium text-gray-700'>
+              <label htmlFor='password' className={labelClass}>
                 Senha
               </label>
-              <div className='mt-1 relative'>
+              <div className='relative'>
                 <input
+                  id='password'
                   name='password'
                   type={showPassword ? 'text' : 'password'}
                   required
                   minLength={8}
                   value={formData.password}
                   onChange={handleChange}
-                  className='appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
+                  className={`${fieldClass} pr-11`}
                   placeholder='Mínimo de 8 caracteres'
                 />
                 <button
                   type='button'
                   onClick={() => setShowPassword(!showPassword)}
-                  className='absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500'
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  className='absolute inset-y-0 right-2 flex items-center text-[#8A968F] transition-colors hover:text-[#3C4742]'
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
-            <div>
-              <button
-                type='submit'
-                disabled={loading}
-                className='w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all'
-              >
-                {loading ? 'Criando conta...' : 'Criar minha conta'}
-              </button>
-            </div>
+            <button
+              type='submit'
+              disabled={loading}
+              className='mt-1 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60'
+            >
+              {loading ? 'Criando conta...' : 'Criar minha conta'}
+            </button>
           </form>
+        </div>
 
-          <div className='mt-6'>
-            <div className='relative'>
-              <div className='absolute inset-0 flex items-center'>
-                <div className='w-full border-t border-gray-300' />
-              </div>
-              <div className='relative flex justify-center text-sm'>
-                <span className='px-2 bg-white text-gray-500'>
-                  Voltar para o início
-                </span>
-              </div>
-            </div>
-
-            <div className='mt-6'>
-              <Link
-                to='/'
-                className='w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all'
-              >
-                <ArrowLeft size={16} />
-                Página Inicial
-              </Link>
-            </div>
-          </div>
+        <div className='mt-6 flex justify-center'>
+          <Link
+            to='/'
+            className='inline-flex items-center gap-2 text-sm text-[#5C6A64] transition-colors hover:text-brand-700'
+          >
+            <ArrowLeft size={16} />
+            Voltar para a página inicial
+          </Link>
         </div>
       </div>
     </div>

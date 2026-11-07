@@ -5,7 +5,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getUserById, createUser, updateUser, type UserData } from '../../services/usersService';
 import { useModal } from '../../hooks/useModal';
 import { ModalBase } from '../../components/Modal/ModalBase';
-import { Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, UserCog } from 'lucide-react';
 
 export function UserForm() {
   const { id } = useParams();
@@ -85,96 +85,153 @@ export function UserForm() {
     }
   };
 
+  const labelClass = 'mb-1.5 block text-sm font-medium text-[#3C4742]';
+  const fieldClass =
+    'w-full rounded-lg border border-[#D7DEDB] bg-white px-3 py-2.5 text-[15px] text-ink outline-none transition-colors focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20';
+
   if (loading) {
-    return <div className='min-h-screen bg-gray-100 flex items-center justify-center'>Carregando dados...</div>;
+    return (
+      <div className='flex min-h-[60vh] items-center justify-center'>
+        <div className='text-center'>
+          <div className='mx-auto mb-4 h-11 w-11 animate-spin rounded-full border-4 border-brand-600 border-t-transparent'></div>
+          <p className='text-sm text-[#5C6A64]'>Carregando dados...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className='min-h-screen bg-gray-100 flex flex-col items-center p-6'>
-      <h1 className='text-2xl font-bold mb-6'>{isEditing ? 'Editar Usuário' : 'Novo Usuário'}</h1>
+    <div className='mx-auto flex w-full max-w-3xl flex-col gap-6'>
+      <header>
+        <Link
+          to='/users'
+          className='mb-3 inline-flex items-center gap-1.5 text-sm text-[#5C6A64] transition-colors hover:text-brand-700'
+        >
+          <ArrowLeft size={16} />
+          Voltar para usuários
+        </Link>
+        <h1 className='font-display text-2xl font-semibold tracking-tight'>
+          {isEditing ? 'Editar usuário' : 'Novo usuário'}
+        </h1>
+        <p className='mt-1 text-sm text-[#5C6A64]'>
+          {isEditing
+            ? 'Atualize os dados de acesso do usuário.'
+            : 'Preencha os dados para criar um novo usuário.'}
+        </p>
+      </header>
 
-      <form
-        onSubmit={handleSubmit}
-        className='bg-white shadow-lg rounded-lg p-6 w-full max-w-3xl'
-      >
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <label className='block text-sm font-semibold mb-1'>Nome</label>
-            <input
-              type='text'
-              name='name'
-              value={formData.name}
-              onChange={handleChange}
-              className='w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-red-900'
-              placeholder='Digite o nome do usuário'
-              required
-            />
-          </div>
-          
-          <div>
-            <label className='block text-sm font-semibold mb-1'>E-mail</label>
-            <input
-              type='email'
-              name='email'
-              value={formData.email}
-              onChange={handleChange}
-              className='w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-red-900'
-              placeholder='Digite o e-mail'
-              required
-            />
-          </div>
-
-          <div className='flex flex-col gap-2'>
-            <label className='block text-sm font-semibold mb-1'>
-              Senha {isEditing && <span className='text-gray-400 font-normal text-xs'>(deixe em branco para manter a atual)</span>}
-            </label>
-            <div className='relative'>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name='password'
-                value={formData.password}
-                onChange={handleChange}
-                required={!isEditing}
-                minLength={8}
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-red-900'
-                placeholder='Mínimo de 8 caracteres'
-              />
-              <button
-                type='button'
-                onClick={() => setShowPassword(!showPassword)}
-                className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700'
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+      <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
+        <section className='rounded-2xl border border-[#E4E9E7] bg-white p-5 shadow-sm sm:p-6'>
+          <div className='mb-5 flex items-center gap-3'>
+            <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700'>
+              <UserCog size={18} />
+            </div>
+            <div className='min-w-0'>
+              <h2 className='font-display text-[15px] font-semibold text-ink'>
+                Dados do usuário
+              </h2>
+              <p className='text-xs text-[#8A968F]'>
+                Identificação, credenciais e permissão.
+              </p>
             </div>
           </div>
 
-          <div className='flex items-center gap-2 mt-4 md:mt-8'>
-            <input
-              type='checkbox'
-              id='is_admin_checkbox'
-              name='is_admin'
-              checked={formData.is_admin}
-              onChange={handleChange}
-              className='rounded border-gray-300 text-red-900 focus:ring-red-900 w-4 h-4'
-            />
-            <label htmlFor='is_admin_checkbox' className='text-sm text-gray-700 font-medium'>
-              Este usuário é um Gestor da empresa?
-            </label>
-          </div>
-        </div>
+          <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+            <div>
+              <label htmlFor='name' className={labelClass}>
+                Nome
+              </label>
+              <input
+                id='name'
+                type='text'
+                name='name'
+                value={formData.name}
+                onChange={handleChange}
+                className={fieldClass}
+                placeholder='Digite o nome do usuário'
+                required
+              />
+            </div>
 
-        <div className='mt-6 text-center pt-4 border-t border-gray-100 flex gap-4 justify-center md:justify-end'>
+            <div>
+              <label htmlFor='email' className={labelClass}>
+                E-mail
+              </label>
+              <input
+                id='email'
+                type='email'
+                name='email'
+                value={formData.email}
+                onChange={handleChange}
+                className={fieldClass}
+                placeholder='Digite o e-mail'
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor='password' className={labelClass}>
+                Senha{' '}
+                {isEditing && (
+                  <span className='text-xs font-normal text-[#8A968F]'>
+                    (deixe em branco para manter a atual)
+                  </span>
+                )}
+              </label>
+              <div className='relative'>
+                <input
+                  id='password'
+                  type={showPassword ? 'text' : 'password'}
+                  name='password'
+                  value={formData.password}
+                  onChange={handleChange}
+                  required={!isEditing}
+                  minLength={8}
+                  className={`${fieldClass} pr-11`}
+                  placeholder='Mínimo de 8 caracteres'
+                />
+                <button
+                  type='button'
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  className='absolute right-2 top-1/2 flex -translate-y-1/2 items-center text-[#8A968F] transition-colors hover:text-[#3C4742]'
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className='flex items-center sm:pt-7'>
+              <label
+                htmlFor='is_admin_checkbox'
+                className='flex cursor-pointer items-center gap-2.5 text-sm text-[#3C4742]'
+              >
+                <input
+                  type='checkbox'
+                  id='is_admin_checkbox'
+                  name='is_admin'
+                  checked={formData.is_admin}
+                  onChange={handleChange}
+                  className='h-4 w-4 rounded border-[#D7DEDB] text-brand-600 focus:ring-brand-600/30'
+                />
+                <span className='font-medium'>Este usuário é um Gestor da empresa?</span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        {/* Barra fixa de ações */}
+        <div className='sticky bottom-0 z-10 flex items-center justify-end gap-3 rounded-xl border border-[#E4E9E7] bg-white/95 px-4 py-3.5 shadow-[0_-2px_14px_rgba(14,32,27,0.06)] backdrop-blur'>
           <Link
             to='/users'
-            className='px-6 py-2 rounded-lg font-semibold text-gray-600 hover:bg-gray-100 border border-gray-200 transition'
+            className='rounded-lg border border-[#D7DEDB] bg-white px-4 py-2.5 text-sm font-medium text-[#3C4742] transition-colors hover:bg-gray-50'
           >
             Voltar
           </Link>
           <button
             type='submit'
             disabled={saving}
-            className='bg-red-950 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-800 transition disabled:opacity-50'
+            className='inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60'
           >
             {saving ? 'Salvando...' : 'Salvar'}
           </button>

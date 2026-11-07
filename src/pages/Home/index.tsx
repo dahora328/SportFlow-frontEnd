@@ -348,7 +348,7 @@ export function Home() {
           )}
           <Link
             to='/athletes'
-            className='inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700'
+            className='hidden items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 sm:inline-flex'
           >
             <Plus size={17} />
             Cadastrar atleta
@@ -356,8 +356,30 @@ export function Home() {
         </div>
       </header>
 
-      {/* Indicador */}
-      <div className='grid grid-cols-1 gap-3.5 sm:grid-cols-3'>
+      {/* Indicadores — chips compactos no mobile */}
+      <div className='flex flex-wrap gap-2 sm:hidden'>
+        <span className='inline-flex items-center gap-1.5 rounded-full border border-[#E4E9E7] bg-white px-3 py-1.5 text-sm'>
+          <span className='text-[#6B7772]'>Total</span>
+          <span className='font-display font-semibold text-ink'>
+            {meta?.total ?? athletes.length}
+          </span>
+        </span>
+        <span className='inline-flex items-center gap-1.5 rounded-full border border-[#E4E9E7] bg-white px-3 py-1.5 text-sm'>
+          <span className='text-[#6B7772]'>Nesta página</span>
+          <span className='font-display font-semibold text-ink'>
+            {athletes.length}
+          </span>
+        </span>
+        <span className='inline-flex items-center gap-1.5 rounded-full border border-[#E4E9E7] bg-white px-3 py-1.5 text-sm'>
+          <span className='text-[#6B7772]'>Página</span>
+          <span className='font-display font-semibold text-ink'>
+            {meta?.current_page ?? 1} / {meta?.last_page ?? 1}
+          </span>
+        </span>
+      </div>
+
+      {/* Indicadores — cards no desktop */}
+      <div className='hidden gap-3.5 sm:grid sm:grid-cols-3'>
         <div className='rounded-xl border border-[#E4E9E7] bg-white px-4 py-4'>
           <div className='text-xs text-[#6B7772]'>Total de atletas</div>
           <div className='mt-2 font-display text-2xl font-semibold leading-none'>
@@ -398,7 +420,7 @@ export function Home() {
           </div>
         </div>
 
-        <div className='overflow-x-auto'>
+        <div className='hidden overflow-x-auto md:block'>
           <table className='min-w-full border-collapse text-sm'>
             <thead>
               <tr className='bg-[#FAFBFB] text-left'>
@@ -485,6 +507,87 @@ export function Home() {
           </table>
         </div>
 
+        {/* Cartões (mobile) — substituem a tabela em telas estreitas */}
+        <div className='divide-y divide-[#F1F4F3] md:hidden'>
+          {athletes?.map((athlete: any) => (
+            <article key={athlete.id} className='flex gap-3 p-4'>
+              <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-50 font-display text-sm font-semibold text-brand-700'>
+                {getInitials(athlete.full_name)}
+              </div>
+              <div className='min-w-0 flex-1'>
+                <h3 className='truncate font-medium text-ink'>
+                  {athlete.full_name}
+                </h3>
+                <dl className='mt-1.5 space-y-0.5 text-sm'>
+                  <div className='flex gap-2'>
+                    <dt className='text-[#8A968F]'>Nascimento:</dt>
+                    <dd className='text-[#3C4742]'>
+                      {formatDate(athlete.birth_date)}
+                    </dd>
+                  </div>
+                  <div className='flex gap-2'>
+                    <dt className='text-[#8A968F]'>CPF:</dt>
+                    <dd className='tabular-nums text-[#3C4742]'>
+                      {formatCPF(athlete.document)}
+                    </dd>
+                  </div>
+                  <div className='flex gap-2'>
+                    <dt className='text-[#8A968F]'>Atualizado:</dt>
+                    <dd className='text-[#3C4742]'>
+                      {athlete.updated_at ? formatDate(athlete.updated_at) : '-'}
+                    </dd>
+                  </div>
+                </dl>
+                <div className='mt-3 flex gap-2'>
+                  <Link
+                    onClick={() => handleLoadAthleteData(athlete.id)}
+                    to={`/athletes/${athlete.id}`}
+                    className='flex h-11 w-11 items-center justify-center rounded-lg border border-[#E4E9E7] bg-white text-[#5C6A64] transition-colors hover:bg-gray-50'
+                    title='Editar atleta'
+                    aria-label={`Editar ${athlete.full_name}`}
+                  >
+                    <Edit size={18} />
+                  </Link>
+                  <button
+                    type='button'
+                    onClick={() => handlePrintAthlete(athlete)}
+                    className='flex h-11 w-11 items-center justify-center rounded-lg border border-[#E4E9E7] bg-white text-[#5C6A64] transition-colors hover:bg-gray-50'
+                    title='Imprimir ficha'
+                    aria-label={`Imprimir ficha de ${athlete.full_name}`}
+                  >
+                    <Printer size={18} />
+                  </button>
+                  <button
+                    type='button'
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDeteleAthlete(athlete.id);
+                    }}
+                    title='Excluir atleta'
+                    aria-label={`Excluir ${athlete.full_name}`}
+                    className='flex h-11 w-11 items-center justify-center rounded-lg border border-[#F0DAD8] bg-white text-[#C2453D] transition-colors hover:bg-red-50'
+                  >
+                    <Trash size={18} />
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
+
+          {!loading && athletes.length === 0 && (
+            <p className='px-4 py-10 text-center text-[#8A968F]'>
+              Nenhum atleta encontrado.
+            </p>
+          )}
+
+          {loading && (
+            <p className='px-4 py-10 text-center text-[#8A968F]'>
+              Carregando...
+            </p>
+          )}
+        </div>
+
         {/* Rodapé com paginação */}
         {meta && meta.total > 0 && (
           <div className='flex flex-col gap-3 border-t border-[#EEF2F0] px-4 py-3 text-sm text-[#5C6A64] sm:flex-row sm:items-center sm:justify-between'>
@@ -521,6 +624,17 @@ export function Home() {
           </div>
         )}
       </section>
+
+      {/* Barra fixa (mobile) com a ação principal */}
+      <div className='sticky bottom-0 z-10 -mx-4 border-t border-[#E4E9E7] bg-white/95 px-4 py-3 backdrop-blur sm:hidden'>
+        <Link
+          to='/athletes'
+          className='flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700'
+        >
+          <Plus size={17} />
+          Cadastrar atleta
+        </Link>
+      </div>
 
       {/* Modal único (fora do map) — usado por exclusão, exportação e importação */}
       <ModalBase

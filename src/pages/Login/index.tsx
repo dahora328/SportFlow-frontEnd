@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Eye, EyeOff, LogIn } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import logoImg from '../../assets/images/SportFlow/Logo completa png.png';
 import { logger } from '../../utils/logger';
 
 export function Login() {
@@ -45,31 +44,33 @@ export function Login() {
     }
   };
 
-  return (
-    <div className='min-h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden font-sans px-4 py-10'>
-      {/* Efeitos de luz no fundo (mesmo estilo da landing page) */}
-      <div className='absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] pointer-events-none' />
-      <div className='absolute bottom-0 right-1/4 w-96 h-96 bg-green-500/10 rounded-full blur-[120px] pointer-events-none' />
+  const labelClass = 'mb-1.5 block text-sm font-medium text-[#3C4742]';
+  // 15px no input evita o zoom automático do iOS ao focar o campo.
+  const fieldClass =
+    'w-full rounded-lg border border-[#D7DEDB] bg-white px-3 py-2.5 text-[15px] text-ink outline-none transition-colors focus:border-brand-600 focus:ring-2 focus:ring-brand-600/20';
 
-      <div className='w-full max-w-md z-10'>
-        <div className='flex justify-center mb-6'>
-          <img
-            src={logoImg}
-            alt='SportFlow Logo'
-            className='h-24 md:h-32 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] object-contain'
-          />
+  return (
+    <div className='flex min-h-screen flex-col items-center justify-center bg-ground px-4 py-10 font-sans text-ink'>
+      <div className='w-full max-w-md'>
+        <div className='mb-6 flex items-center justify-center gap-3'>
+          <div className='flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 text-white shadow-sm'>
+            <UserPlus size={24} />
+          </div>
+          <span className='font-display text-2xl font-semibold tracking-tight text-ink'>
+            SportFlow
+          </span>
         </div>
 
-        <div className='bg-slate-900/80 backdrop-blur border border-slate-700/50 rounded-2xl shadow-2xl p-6 sm:p-8'>
-          <h1 className='text-2xl font-bold text-white text-center'>
+        <div className='rounded-2xl border border-[#E4E9E7] bg-white p-6 shadow-sm sm:p-8'>
+          <h1 className='text-center font-display text-2xl font-semibold tracking-tight'>
             Entrar no SportFlow
           </h1>
-          <p className='mt-1 mb-6 text-sm text-slate-400 text-center'>
+          <p className='mb-6 mt-1 text-center text-sm text-[#5C6A64]'>
             Acesse sua conta para continuar
           </p>
 
           {successMessage && !error && (
-            <div className='mb-4 text-sm text-green-300 bg-green-500/10 border border-green-500/30 rounded-md px-3 py-2'>
+            <div className='mb-4 rounded-lg border border-brand-600/20 bg-brand-50 px-3 py-2 text-sm text-brand-700'>
               {successMessage}
             </div>
           )}
@@ -77,18 +78,15 @@ export function Login() {
           {error && (
             <div
               role='alert'
-              className='mb-4 text-sm text-red-300 bg-red-500/10 border border-red-500/30 rounded-md px-3 py-2'
+              className='mb-4 rounded-lg border border-[#F0DAD8] bg-red-50 px-3 py-2 text-sm text-[#C2453D]'
             >
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className='space-y-4'>
+          <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
             <div>
-              <label
-                htmlFor='email'
-                className='block text-xs font-semibold text-slate-300 uppercase mb-1'
-              >
+              <label htmlFor='email' className={labelClass}>
                 E-mail
               </label>
               <input
@@ -99,16 +97,13 @@ export function Login() {
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className='w-full px-3 py-2 rounded-md bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none'
+                className={fieldClass}
                 placeholder='seu@email.com'
               />
             </div>
 
             <div>
-              <label
-                htmlFor='password'
-                className='block text-xs font-semibold text-slate-300 uppercase mb-1'
-              >
+              <label htmlFor='password' className={labelClass}>
                 Senha
               </label>
               <div className='relative'>
@@ -119,14 +114,14 @@ export function Login() {
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className='w-full px-3 py-2 pr-10 rounded-md bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none'
+                  className={`${fieldClass} pr-11`}
                   placeholder='Sua senha'
                 />
                 <button
                   type='button'
                   onClick={() => setShowPassword(v => !v)}
                   aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                  className='absolute inset-y-0 right-2 flex items-center text-slate-400 hover:text-slate-200'
+                  className='absolute inset-y-0 right-2 flex items-center text-[#8A968F] transition-colors hover:text-[#3C4742]'
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -136,18 +131,18 @@ export function Login() {
             <button
               type='submit'
               disabled={loading}
-              className='w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold py-2.5 rounded-md hover:opacity-90 transition disabled:opacity-60'
+              className='mt-1 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60'
             >
               <LogIn size={18} />
               {loading ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
 
-          <p className='mt-6 text-center text-sm text-slate-400'>
+          <p className='mt-6 text-center text-sm text-[#5C6A64]'>
             Não tem uma conta?{' '}
             <Link
               to='/register'
-              className='font-medium text-blue-400 hover:text-blue-300'
+              className='font-semibold text-brand-700 transition-colors hover:text-brand-600'
             >
               Cadastre-se
             </Link>
@@ -157,7 +152,7 @@ export function Login() {
         <div className='mt-6 flex justify-center'>
           <Link
             to='/'
-            className='inline-flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors'
+            className='inline-flex items-center gap-2 text-sm text-[#5C6A64] transition-colors hover:text-brand-700'
           >
             <ArrowLeft size={16} />
             Voltar para a página inicial

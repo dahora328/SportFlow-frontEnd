@@ -41,6 +41,16 @@ api.interceptors.response.use(
       _retry?: boolean;
     };
 
+    // Rotas de autenticação: um 401 aqui NÃO é sessão expirada, é
+    // credencial inválida. Apenas rejeita para a tela tratar o erro,
+    // sem tentar refresh nem disparar logout/redirect.
+    if (
+      originalRequest?.url?.includes('/login') ||
+      originalRequest?.url?.includes('/register')
+    ) {
+      return Promise.reject(error);
+    }
+
     // Se chegou 401 no refresh → desloga imediatamente
     if (originalRequest?.url?.includes('/refresh')) {
       logger.warn('❌ Refresh falhou → logout');

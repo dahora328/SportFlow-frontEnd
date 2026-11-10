@@ -1,1 +1,32 @@
 @import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Tema SportFlow (redesign)
+   Tokens consumidos pelo Tailwind v4: geram utilitários como `bg-pine-950`,
+   `text-brand-600`, `font-display`, `bg-ground`, etc.
+--------------------------------------------------------------------------- */
+@theme {
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Space Grotesk', ui-sans-serif, sans-serif;
+
+  --color-ground: #f4f6f5;
+  --color-ink: #16201c;
+
+  /* Verde pinheiro (sidebar) */
+  --color-pine-950: #0e201b;
+  --color-pine-900: #14261f;
+  --color-pine-400: #7f918a;
+  --color-pine-300: #aebdb7;
+
+  /* Verde esmeralda (destaque) */
+  --color-brand-50: #e6f2ec;
+  --color-brand-600: #0e7c5a;
+  --color-brand-700: #0a5e44;
+}
+
+body {
+  background: var(--color-ground);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}

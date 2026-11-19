@@ -424,11 +424,11 @@ export function Home() {
           <table className='min-w-full border-collapse text-sm'>
             <thead>
               <tr className='bg-[#FAFBFB] text-left'>
-                <th className='border-b border-[#EEF2F0] px-4 py-3 text-xs font-semibold text-[#6B7772]'>Atleta</th>
-                <th className='border-b border-[#EEF2F0] px-4 py-3 text-xs font-semibold text-[#6B7772]'>Data de nascimento</th>
-                <th className='border-b border-[#EEF2F0] px-4 py-3 text-xs font-semibold text-[#6B7772]'>CPF</th>
-                <th className='border-b border-[#EEF2F0] px-4 py-3 text-xs font-semibold text-[#6B7772]'>Atualizado em</th>
-                <th className='border-b border-[#EEF2F0] px-4 py-3 text-right text-xs font-semibold text-[#6B7772]'>Ações</th>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-center text-xs font-semibold text-[#6B7772]'>Atleta</th>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-center text-xs font-semibold text-[#6B7772]'>Data de nascimento</th>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-center text-xs font-semibold text-[#6B7772]'>CPF</th>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-center text-xs font-semibold text-[#6B7772]'>Atualizado em</th>
+                <th className='border-b border-[#EEF2F0] px-4 py-3 text-center text-xs font-semibold text-[#6B7772]'>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -442,17 +442,17 @@ export function Home() {
                       <span className='font-medium text-ink'>{athlete.full_name}</span>
                     </div>
                   </td>
-                  <td className='border-b border-[#F1F4F3] px-4 py-3 text-[#3C4742]'>
+                  <td className='border-b border-[#F1F4F3] px-4 py-3 text-center text-[#3C4742]'>
                     {formatDate(athlete.birth_date)}
                   </td>
-                  <td className='border-b border-[#F1F4F3] px-4 py-3 text-[#3C4742] tabular-nums'>
+                  <td className='border-b border-[#F1F4F3] px-4 py-3 text-center text-[#3C4742] tabular-nums'>
                     {formatCPF(athlete.document)}
                   </td>
-                  <td className='border-b border-[#F1F4F3] px-4 py-3 text-[#3C4742]'>
+                  <td className='border-b border-[#F1F4F3] px-4 py-3 text-center text-[#3C4742]'>
                     {athlete.updated_at ? formatDate(athlete.updated_at) : '-'}
                   </td>
                   <td className='border-b border-[#F1F4F3] px-4 py-3'>
-                    <div className='flex justify-end gap-1.5'>
+                    <div className='flex justify-center gap-1.5'>
                       <Link
                         onClick={() => handleLoadAthleteData(athlete.id)}
                         to={`/athletes/${athlete.id}`}
